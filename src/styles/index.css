@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-brand-bg text-brand-dark antialiased;
+    font-family: "Inter", "Quicksand", sans-serif;
+  }
+  h1 { @apply text-2xl font-bold text-brand-dark; }
+  h2 { @apply text-xl font-semibold text-brand-dark; }
+  h3 { @apply text-base font-semibold text-brand-mid; }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-brand-tealLt rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-brand-teal/40; }
+}
+
+@layer components {
+  /* ── Buttons ─────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-brand-teal text-white font-semibold text-sm
+           px-5 py-2.5 rounded-xl shadow-sm
+           hover:bg-[#4d7a70] hover:shadow-md active:scale-[0.98]
+           transition-all duration-150 ease-in-out
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2
+           border border-brand-teal/60 text-brand-teal font-semibold text-sm
+           px-5 py-2.5 rounded-xl
+           hover:bg-brand-tealLt hover:border-brand-teal
+           transition-all duration-150 ease-in-out
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           text-brand-mid font-semibold text-sm
+           px-4 py-2 rounded-xl
+           hover:bg-brand-tealLt hover:text-brand-teal
+           transition-all duration-150 ease-in-out;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2
+           bg-red-600 text-white font-semibold text-sm
+           px-5 py-2.5 rounded-xl
+           hover:bg-red-700 active:scale-[0.98]
+           transition-all duration-150;
+  }
+
+  /* ── Cards ───────────────────────────────── */
+  .card {
+    @apply bg-white rounded-2xl border border-brand-tealLt/70 shadow-card p-5;
+  }
+  .card-hover {
+    @apply card hover:border-brand-teal hover:shadow-md transition-all duration-150 cursor-pointer;
+  }
+  .card-glass {
+    @apply rounded-2xl border border-white/20 shadow-lg p-5
+           backdrop-blur-md bg-white/80;
+  }
+
+  /* ── Form inputs ─────────────────────────── */
+  .input-field {
+    @apply w-full border border-[#576e6a]/30 rounded-xl px-3.5 py-2.5
+           text-sm text-brand-dark placeholder-brand-mid/50
+           bg-white/90
+           focus:outline-none focus:ring-2 focus:ring-brand-teal/40 focus:border-brand-teal
+           transition-all duration-150;
+  }
+  .input-error {
+    @apply input-field border-red-400 focus:ring-red-300 focus:border-red-400;
+  }
+  .input-label {
+    @apply block text-xs font-semibold text-brand-dark/80 mb-1.5 tracking-wide;
+  }
+
+  /* ── Badges ──────────────────────────────── */
+  .badge-paid    { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-tealLt text-brand-teal; }
+  .badge-arrears { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700; }
+  .badge-vacant  { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-brand-mid; }
+  .badge-danger  { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700; }
+
+  /* ── Sidebar nav ─────────────────────────── */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl
+           text-sm font-semibold text-white/60
+           hover:bg-white/10 hover:text-white
+           transition-all duration-150 cursor-pointer;
+  }
+  .nav-item-active {
+    @apply nav-item text-brand-teal bg-brand-teal/15 border border-brand-teal/25;
+  }
+
+  /* ── Skeleton loader ─────────────────────── */
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-gradient-to-r from-brand-tealLt/60 via-white/80 to-brand-tealLt/60;
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease infinite;
+  }
+
+  /* ── Stat card ───────────────────────────── */
+  .stat-card {
+    @apply card flex items-start gap-3 hover:border-brand-teal/40 transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}
+
+/* ── Animations ───────────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fade-in 0.25s ease forwards; }
+.animate-slide-up { animation: slide-up 0.3s ease forwards; }

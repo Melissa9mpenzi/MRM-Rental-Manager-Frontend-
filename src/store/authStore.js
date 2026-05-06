@@ -1,0 +1,86 @@
+import { create } from "zustand";
+import { authApi } from "../api/authApi";
+
+const useAuthStore = create((set, get) => ({
+  // ── State ──────────────────────────────────────────────────────
+  user: JSON.parse(localStorage.getItem("user") || "null"),
+  isAuthenticated: !!localStorage.getItem("access_token"),
+  isLoading: false,
+  error: null,
+
+  // ── Actions ────────────────────────────────────────────────────
+
+  /**
+   * Store tokens + user after login or register.
+   */
+  _setSession: (data) => {
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    set({ user: data.user, isAuthenticated: true, error: null });
+  },
+
+  /**
+   * Register a new account.
+   */
+  register: async (formData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await authApi.register(formData);
+      get()._setSession(data);
+    } catch (err) {
+      const message =
+        err.response?.data?.detail || "Registration failed. Please try again.";
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  /**
+   * Log in with email + password.
+   */
+  login: async ({ email, password }) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await authApi.login({ email, password });
+      get()._setSession(data);
+    } catch (err) {
+      const message =
+        err.response?.data?.detail || "Login failed. Check your credentials.";
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  /**
+   * Log out — clears session locally and invalidates server-side token.
+   */
+  logout: async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Ignore server errors on logout — clear locally regardless
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+      set({ user: null, isAuthenticated: false, error: null });
+    }
+  },
+
+  /**
+   * Update the stored user profile (e.g. after profile edit).
+   */
+  updateUser: (updatedUser) => {
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    set({ user: updatedUser });
+  },
+
+  clearError: () => set({ error: null }),
+}));
+
+export default useAuthStore;
