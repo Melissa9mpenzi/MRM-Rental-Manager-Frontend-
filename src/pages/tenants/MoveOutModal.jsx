@@ -13,7 +13,7 @@ export default function MoveOutModal({ tenant, onClose }) {
     onSuccess: () => {
       toast.success(`${tenant.full_name} has been moved out.`);
       qc.invalidateQueries({ queryKey: ["tenants"] });
-      qc.invalidateQueries({ queryKey: ["tenant", String(tenant.id)] });
+      qc.invalidateQueries({ queryKey: ["tenant", tenant.id] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
       onClose();
     },
@@ -28,21 +28,21 @@ export default function MoveOutModal({ tenant, onClose }) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Dialog */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
+      <div className="relative w-full max-w-md animate-fade-in rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl">
         {/* Icon */}
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 mx-auto mb-4">
-          <AlertTriangle size={28} className="text-amber-600" />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/15 ring-1 ring-amber-500/30">
+          <AlertTriangle size={28} className="text-amber-300" />
         </div>
 
-        <h2 className="text-xl font-bold text-brand-dark text-center mb-1">Confirm Move-Out</h2>
-        <p className="text-brand-mid text-sm text-center mb-6">
+        <h2 className="mb-1 text-center text-xl font-bold text-white">Confirm move-out</h2>
+        <p className="mb-6 text-center text-sm text-white/65">
           You are about to move out{" "}
-          <strong className="text-brand-dark">{tenant.full_name}</strong> from their unit.
+          <strong className="text-white">{tenant.full_name}</strong> from their unit.
           Their status will be set to <em>inactive</em> and their unit will be marked as vacant.
         </p>
 
         {/* Warning boxes */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5 text-xs text-amber-800 space-y-1">
+        <div className="mb-5 space-y-1 rounded-lg border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-100/95">
           <p>• Payment history will be preserved</p>
           <p>• Any outstanding balance must be settled separately</p>
           <p>• This action can be reversed by re-activating the tenant</p>

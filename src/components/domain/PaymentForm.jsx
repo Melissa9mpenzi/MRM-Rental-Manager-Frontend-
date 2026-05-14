@@ -25,7 +25,7 @@ export default function PaymentForm({ tenant, onSuccess }) {
   });
 
   const mutation = useMutation({
-    mutationFn: (data) => paymentsApi.record({
+    mutationFn: (data) => paymentsApi.create({
       ...data,
       tenant_id:    tenant.id,
       amount:       parseFloat(data.amount),

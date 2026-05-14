@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { tenantsApi } from "../../api/tenantsApi";
 import { Link } from "react-router-dom";
-import { Download, AlertCircle } from "lucide-react";
+import { Download, AlertCircle, BarChart3 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import ArrearsBadge from "../../components/domain/ArrearsBadge";
+import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 function exportCSV(data) {
   const headers = ["Tenant","Phone","Property","Unit","Monthly Rent","Total Paid","Balance Due","Months in Arrears"];
@@ -20,7 +21,7 @@ function exportCSV(data) {
 }
 
 export default function ArrearsReportPage() {
-  const { data: tenants = [], isLoading } = useQuery({
+  const { data: tenants = [], isLoading, isError } = useQuery({
     queryKey: ["tenants", "", "active"],
     queryFn: () => tenantsApi.list({ status: "active" }),
   });
@@ -31,26 +32,29 @@ export default function ArrearsReportPage() {
   const totalArrears = inArrears.reduce((s,t) => s + parseFloat(t.balance_due||0), 0);
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-brand-dark">Arrears Report</h2>
-          <p className="text-brand-mid text-sm">
-            {inArrears.length} tenants in arrears ·{" "}
-            <span className="font-bold text-red-600">UGX {totalArrears.toLocaleString()} total owed</span>
-          </p>
-        </div>
+    <AppPageScaffold
+      variant="ledger"
+      icon={BarChart3}
+      title="Arrears report"
+      description={`${inArrears.length} tenants in arrears · UGX ${totalArrears.toLocaleString()} total owed`}
+      actions={
         <Button variant="outline" onClick={() => exportCSV(inArrears)}>
-          <Download size={14}/> Export CSV
+          <Download size={14} /> Export CSV
         </Button>
-      </div>
+      }
+    >
 
       {isLoading ? (
         <div className="card h-32 animate-pulse bg-brand-tealLt/30" />
+      ) : isError ? (
+        <div className="card py-14 text-center">
+          <h3 className="font-bold text-brand-dark">Could not load arrears data</h3>
+          <p className="mt-1 text-sm text-brand-mid">Try again when the API is available.</p>
+        </div>
       ) : inArrears.length === 0 ? (
         <div className="card text-center py-16">
-          <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <AlertCircle size={24} className="text-emerald-600" />
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
+            <AlertCircle size={24} className="text-emerald-300" />
           </div>
           <h3 className="font-bold text-brand-dark">All tenants are up to date!</h3>
           <p className="text-brand-mid text-sm mt-1">No outstanding balances found.</p>
@@ -69,16 +73,16 @@ export default function ArrearsReportPage() {
             </thead>
             <tbody className="divide-y divide-brand-tealLt/50">
               {inArrears.map(t => (
-                <tr key={t.id} className="hover:bg-red-50/30">
+                <tr key={t.id} className="hover:bg-red-500/10">
                   <td className="py-3">
-                    <Link to={`/tenants/${t.id}`} className="font-semibold text-brand-dark hover:text-brand-teal">
+                    <Link to={`/landlord/tenants/${t.id}`} className="font-semibold text-brand-dark hover:text-brand-teal">
                       {t.full_name}
                     </Link>
                     <div className="text-xs text-brand-mid">{t.phone}</div>
                   </td>
                   <td className="py-3 text-brand-mid">{t.property_name || "—"} · {t.unit_number || "—"}</td>
                   <td className="py-3 text-right text-brand-dark">UGX {parseFloat(t.monthly_rent).toLocaleString()}</td>
-                  <td className="py-3 text-right font-bold text-red-600">UGX {parseFloat(t.balance_due).toLocaleString()}</td>
+                  <td className="py-3 text-right font-bold text-red-400">UGX {parseFloat(t.balance_due).toLocaleString()}</td>
                   <td className="py-3 pl-4">
                     <ArrearsBadge months={t.months_in_arrears} balance={t.balance_due} />
                   </td>
@@ -97,6 +101,6 @@ export default function ArrearsReportPage() {
           </table>
         </div>
       )}
-    </div>
+    </AppPageScaffold>
   );
 }

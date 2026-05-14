@@ -6,10 +6,10 @@ export function Modal({ open, onClose, title, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-brand-dark">{title}</h3>
-          <button onClick={onClose} className="text-brand-mid hover:text-brand-dark transition-colors">
+      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl">
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-white">{title}</h3>
+          <button type="button" onClick={onClose} className="text-white/45 transition-colors hover:text-white">
             <X size={20} />
           </button>
         </div>
@@ -22,11 +22,11 @@ export function Modal({ open, onClose, title, children }) {
 // ── BADGE ─────────────────────────────────────────────────────────
 export function Badge({ children, color = "teal" }) {
   const colors = {
-    teal:   "bg-brand-tealLt text-brand-teal",
-    green:  "bg-emerald-100 text-emerald-700",
-    red:    "bg-red-100 text-red-600",
-    amber:  "bg-amber-100 text-amber-700",
-    gray:   "bg-gray-100 text-gray-600",
+    teal: "bg-brand-tealLt/50 text-brand-teal",
+    green: "bg-emerald-500/15 text-emerald-300",
+    red: "bg-red-500/15 text-red-300",
+    amber: "bg-amber-500/15 text-amber-200",
+    gray: "bg-white/10 text-white/55",
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${colors[color] || colors.teal}`}>
@@ -55,9 +55,9 @@ export function EmptyState({ icon: Icon, title, description, action }) {
 export function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
   const colors = {
     teal: "bg-brand-tealLt text-brand-teal",
-    blue: "bg-blue-50 text-blue-600",
-    red:  "bg-red-50 text-red-600",
-    gray: "bg-gray-100 text-gray-500",
+    blue: "bg-sky-500/15 text-sky-300",
+    red:  "bg-red-500/15 text-red-300",
+    gray: "bg-white/10 text-white/55",
   };
   return (
     <div className="card flex items-start gap-3">
@@ -79,24 +79,24 @@ export function ConfirmDialog({ open, title, message, confirmLabel = "Confirm", 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <div className="flex items-start gap-3 mb-4">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${variant === "danger" ? "bg-red-100" : "bg-brand-tealLt"}`}>
-            <AlertCircle size={20} className={variant === "danger" ? "text-red-500" : "text-brand-teal"} />
+      <div className="relative w-full max-w-sm rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl">
+        <div className="mb-4 flex items-start gap-3">
+          <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${variant === "danger" ? "bg-red-500/20 text-red-300" : "bg-brand-teal/15 text-brand-teal"}`}>
+            <AlertCircle size={20} className={variant === "danger" ? "text-red-300" : "text-brand-teal"} />
           </div>
           <div>
-            <h3 className="font-bold text-brand-dark">{title}</h3>
-            {message && <p className="text-brand-mid text-sm mt-1">{message}</p>}
+            <h3 className="font-bold text-white">{title}</h3>
+            {message && <p className="mt-1 text-sm text-white/60">{message}</p>}
           </div>
         </div>
         <div className="flex gap-3">
           <button onClick={onCancel}
-            className="flex-1 px-4 py-2 rounded-lg border border-brand-tealLt text-brand-mid font-semibold text-sm hover:bg-brand-tealLt transition-colors">
+            className="flex-1 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:bg-white/10">
             Cancel
           </button>
           <button onClick={onConfirm}
-            className={`flex-1 px-4 py-2 rounded-lg text-white font-semibold text-sm transition-colors
-              ${variant === "danger" ? "bg-red-500 hover:bg-red-600" : "bg-brand-teal hover:bg-brand-dark"}`}>
+            className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors
+              ${variant === "danger" ? "bg-red-600 hover:bg-red-500" : "bg-brand-teal text-[#041208] hover:brightness-110"}`}>
             {confirmLabel}
           </button>
         </div>

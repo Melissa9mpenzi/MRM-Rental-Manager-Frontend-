@@ -6,6 +6,7 @@ import {
   Filter, FileText, Upload,
 } from "lucide-react";
 import { paymentsApi } from "../../api/paymentsApi";
+import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const METHOD_LABELS = {
@@ -13,33 +14,35 @@ const METHOD_LABELS = {
   bank: "Bank", other: "Other",
 };
 const METHOD_COLORS = {
-  mtn_momo: "bg-yellow-100 text-yellow-700",
-  airtel:   "bg-red-100 text-red-700",
-  cash:     "bg-green-100 text-green-700",
-  bank:     "bg-blue-100 text-blue-700",
-  other:    "bg-gray-100 text-gray-600",
+  mtn_momo: "bg-yellow-500/15 text-yellow-200 ring-1 ring-yellow-500/25",
+  airtel:   "bg-red-500/12 text-red-200 ring-1 ring-red-500/25",
+  cash:     "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/25",
+  bank:     "bg-sky-500/15 text-sky-200 ring-1 ring-sky-500/25",
+  other:    "bg-white/10 text-white/60 ring-1 ring-white/15",
 };
 const TYPE_COLORS = {
-  rent:    "bg-brand-tealLt text-brand-teal",
-  deposit: "bg-purple-100 text-purple-700",
-  penalty: "bg-red-100 text-red-700",
-  other:   "bg-gray-100 text-gray-600",
+  rent:    "bg-brand-tealLt text-brand-teal ring-1 ring-brand-teal/30",
+  deposit: "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/25",
+  penalty: "bg-red-500/12 text-red-200 ring-1 ring-red-500/25",
+  other:   "bg-white/10 text-white/60 ring-1 ring-white/15",
 };
 
 function MethodBadge({ method }) {
-  const color = METHOD_COLORS[method] || "bg-gray-100 text-gray-600";
+  const m = typeof method === "string" ? method : method?.value ?? "";
+  const color = METHOD_COLORS[m] || "bg-white/10 text-white/60 ring-1 ring-white/15";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${color}`}>
-      {METHOD_LABELS[method] || method}
+      {METHOD_LABELS[m] || m}
     </span>
   );
 }
 
 function TypeBadge({ type }) {
-  const color = TYPE_COLORS[type] || "bg-gray-100 text-gray-600";
+  const t = typeof type === "string" ? type : type?.value ?? "";
+  const color = TYPE_COLORS[t] || "bg-white/10 text-white/60 ring-1 ring-white/15";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${color}`}>
-      {type}
+      {t}
     </span>
   );
 }
@@ -48,36 +51,35 @@ export default function PaymentsPage() {
   const [search, setSearch]       = useState("");
   const [filterMethod, setMethod] = useState("");
 
-  const { data: payments = [], isLoading } = useQuery({
+  const { data: payments = [], isLoading, isError } = useQuery({
     queryKey: ["all-payments"],
     queryFn: () => paymentsApi.list({ limit: 500 }),
   });
 
   // Client-side filter
+  const payMethod = (p) =>
+    typeof p.payment_method === "string" ? p.payment_method : p.payment_method?.value ?? "";
   const filtered = payments.filter((p) => {
     const q = search.toLowerCase();
     const matchSearch = !q || p.tenant_name?.toLowerCase().includes(q) || p.property_name?.toLowerCase().includes(q) || p.unit_number?.toLowerCase().includes(q);
-    const matchMethod = !filterMethod || p.payment_method === filterMethod;
+    const matchMethod = !filterMethod || payMethod(p) === filterMethod;
     return matchSearch && matchMethod;
   });
 
   const total = filtered.reduce((s, p) => s + parseFloat(p.amount), 0);
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-brand-dark">Payments</h2>
-          <p className="text-brand-mid text-sm mt-0.5">
-            {filtered.length} records · Total:{" "}
-            <span className="font-bold text-brand-dark">UGX {total.toLocaleString()}</span>
-          </p>
-        </div>
-        <Link to="/payments/new" className="btn-primary">
+    <AppPageScaffold
+      variant="ledger"
+      icon={CreditCard}
+      title="Payments"
+      description={`${filtered.length} records · Total UGX ${total.toLocaleString()}`}
+      actions={
+        <Link to="/landlord/payments/new" className="btn-primary">
           <Plus size={16} /> Record Payment
         </Link>
-      </div>
+      }
+    >
 
       {/* Filter bar */}
       <div className="flex gap-3 flex-wrap">
@@ -110,6 +112,11 @@ export default function PaymentsPage() {
       {/* Table */}
       {isLoading ? (
         <div className="card h-48 animate-pulse bg-brand-tealLt/30" />
+      ) : isError ? (
+        <div className="card py-12 text-center">
+          <p className="font-bold text-brand-dark">Could not load payments</p>
+          <p className="mt-1 text-sm text-brand-mid">Check your API connection and try again.</p>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="card text-center py-16 space-y-3">
           <div className="w-14 h-14 rounded-full bg-brand-tealLt flex items-center justify-center mx-auto">
@@ -120,7 +127,7 @@ export default function PaymentsPage() {
             {search || filterMethod ? "Try adjusting your filters." : "Record your first payment to get started."}
           </p>
           {!search && !filterMethod && (
-            <Link to="/payments/new" className="btn-primary mx-auto">
+            <Link to="/landlord/payments/new" className="btn-primary mx-auto">
               <Plus size={15} /> Record Payment
             </Link>
           )}
@@ -145,7 +152,7 @@ export default function PaymentsPage() {
                 <tr key={p.id} className="hover:bg-brand-tealLt/10 transition-colors group">
                   <td className="px-5 py-3">
                     <Link
-                      to={`/tenants/${p.tenant_id}`}
+                      to={`/landlord/tenants/${p.tenant_id}`}
                       className="font-semibold text-brand-dark hover:text-brand-teal transition-colors"
                     >
                       {p.tenant_name}
@@ -169,7 +176,7 @@ export default function PaymentsPage() {
                       href={paymentsApi.receiptUrl(p.id)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-brand-teal hover:text-brand-dark transition-colors"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-brand-teal transition-colors hover:text-white"
                     >
                       <Download size={13} /> PDF
                     </a>
@@ -180,6 +187,6 @@ export default function PaymentsPage() {
           </table>
         </div>
       )}
-    </div>
+    </AppPageScaffold>
   );
 }

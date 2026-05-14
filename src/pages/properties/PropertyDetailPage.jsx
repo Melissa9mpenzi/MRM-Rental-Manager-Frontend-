@@ -13,6 +13,7 @@ import EditPropertyModal from "../../components/domain/EditPropertyModal";
 import UnitCard from "../../components/domain/UnitCard";
 
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
+const API_ORIGIN = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -45,7 +46,7 @@ export default function PropertyDetailPage() {
       <div className="card text-center py-16">
         <Building2 size={40} className="text-brand-mid mx-auto mb-3" />
         <h2 className="text-brand-dark font-bold mb-1">Property not found</h2>
-        <Link to="/properties">
+        <Link to="/landlord/properties">
           <Button variant="outline"><ArrowLeft size={14} /> Back</Button>
         </Link>
       </div>
@@ -61,7 +62,7 @@ export default function PropertyDetailPage() {
     <div className="space-y-6">
       {/* Back */}
       <Link
-        to="/properties"
+        to="/landlord/properties"
         className="inline-flex items-center gap-1.5 text-sm text-brand-mid hover:text-brand-teal transition-colors"
       >
         <ArrowLeft size={14} /> All Properties
@@ -71,7 +72,7 @@ export default function PropertyDetailPage() {
       {property.photo_path ? (
         <div className="relative rounded-xl overflow-hidden h-52 w-full">
           <img
-            src={`http://localhost:8000${property.photo_path}`}
+            src={property.photo_path.startsWith("http") ? property.photo_path : `${API_ORIGIN}${property.photo_path}`}
             alt={property.name}
             className="w-full h-full object-cover"
           />
@@ -173,8 +174,8 @@ export default function PropertyDetailPage() {
                 onClick={() => setStatusFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors
                   ${statusFilter === f
-                    ? "bg-brand-teal text-white"
-                    : "bg-white text-brand-mid border border-brand-tealLt hover:border-brand-teal hover:text-brand-teal"
+                    ? "bg-brand-teal text-[#041208]"
+                    : "border border-white/12 bg-white/[0.06] text-white/70 hover:border-brand-teal/45 hover:text-brand-teal"
                   }`}
               >
                 {f === "all"

@@ -8,6 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { propertiesApi } from "../../api/propertiesApi";
 import { tenantsApi } from "../../api/tenantsApi";
+import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -48,12 +49,12 @@ export default function AddTenantPage() {
   const [depositFile, setDepositFile] = useState(null);
 
   // Load properties → units
-  const { data: properties = [] } = useQuery({
+  const { data: properties = [], isError: propertiesError } = useQuery({
     queryKey: ["properties"],
     queryFn: () => propertiesApi.list({}),
   });
   const [selectedProp, setSelectedProp] = useState("");
-  const { data: units = [] } = useQuery({
+  const { data: units = [], isError: unitsError } = useQuery({
     queryKey: ["units", selectedProp],
     queryFn: () => propertiesApi.getUnits(selectedProp),
     enabled: !!selectedProp,
@@ -67,7 +68,7 @@ export default function AddTenantPage() {
     onSuccess: (data) => {
       toast.success(`${data.full_name} added successfully!`);
       qc.invalidateQueries({ queryKey: ["tenants"] });
-      navigate(`/tenants/${data.id}`);
+      navigate(`/landlord/tenants/${data.id}`);
     },
     onError: (err) => toast.error(err.response?.data?.detail || "Failed to add tenant."),
   });
@@ -87,19 +88,33 @@ export default function AddTenantPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link to="/tenants" className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-brand-tealLt text-brand-mid hover:text-brand-teal transition-colors">
+    <AppPageScaffold
+      variant="registry"
+      icon={User}
+      title="Add new tenant"
+      description="Fill in the details below to register a new tenant."
+      actions={
+        <Link
+          to="/landlord/tenants"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-brand-mid transition-colors hover:bg-brand-tealLt hover:text-brand-teal"
+          aria-label="Back to tenants"
+        >
           <ArrowLeft size={18} />
         </Link>
-        <div>
-          <h2 className="text-xl font-bold text-brand-dark">Add New Tenant</h2>
-          <p className="text-sm text-brand-mid">Fill in the details below to register a new tenant</p>
-        </div>
-      </div>
-
+      }
+    >
+      <div className="mx-auto max-w-3xl space-y-5">
       <form onSubmit={handleSubmit} className="space-y-5">
+        {propertiesError && (
+          <div className="rounded-lg border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+            Could not load your properties. Check the API connection and try again.
+          </div>
+        )}
+        {selectedProp && unitsError && (
+          <div className="rounded-lg border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+            Could not load units for this property.
+          </div>
+        )}
         {/* Personal Info */}
         <FieldGroup title="Personal Information">
           <FormRow>
@@ -255,7 +270,7 @@ export default function AddTenantPage() {
 
         {/* Submit */}
         <div className="flex items-center gap-3 justify-end pb-6">
-          <Link to="/tenants" className="btn-outline">Cancel</Link>
+          <Link to="/landlord/tenants" className="btn-outline">Cancel</Link>
           <button type="submit" className="btn-primary" disabled={mutation.isPending}>
             {mutation.isPending ? (
               <span className="flex items-center gap-2">
@@ -271,5 +286,6 @@ export default function AddTenantPage() {
         </div>
       </form>
     </div>
+    </AppPageScaffold>
   );
 }

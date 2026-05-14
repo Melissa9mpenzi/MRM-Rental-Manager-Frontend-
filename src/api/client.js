@@ -25,13 +25,39 @@ api.interceptors.request.use(
 let isRefreshing = false;
 let refreshQueue = []; // queue of requests waiting on refresh
 
+/** 401 on these routes is not an expired session — never run refresh / hard redirect. */
+function isAuthCredentialRequest(config) {
+  const url = config?.url || "";
+  return (
+    url.includes("/auth/login") ||
+    url.includes("/auth/register") ||
+    url.includes("/auth/forgot-password") ||
+    url.includes("/auth/reset-password") ||
+    url.includes("/auth/verify-email")
+  );
+}
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const d = response.data;
+    if (
+      d &&
+      typeof d === "object" &&
+      d.success === true &&
+      Object.prototype.hasOwnProperty.call(d, "data")
+    ) {
+      response.data = d.data;
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
     // Only try refresh once and only on 401
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isAuthCredentialRequest(originalRequest)) {
+        return Promise.reject(error);
+      }
       if (isRefreshing) {
         // Queue this request until refresh completes
         return new Promise((resolve, reject) => {

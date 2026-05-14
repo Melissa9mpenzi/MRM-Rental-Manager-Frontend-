@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { authApi } from "../api/authApi";
+import { usersApi } from "../api/usersApi";
+import { apiErrorMessage } from "../lib/apiError";
 
 const useAuthStore = create((set, get) => ({
   // ── State ──────────────────────────────────────────────────────
@@ -26,11 +28,10 @@ const useAuthStore = create((set, get) => ({
   register: async (formData) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authApi.register(formData);
-      get()._setSession(data);
+      await authApi.register(formData);
     } catch (err) {
       const message =
-        err.response?.data?.detail || "Registration failed. Please try again.";
+        apiErrorMessage(err, "Registration failed. Please try again.");
       set({ error: message });
       throw new Error(message);
     } finally {
@@ -43,12 +44,12 @@ const useAuthStore = create((set, get) => ({
    */
   login: async ({ email, password }) => {
     set({ isLoading: true, error: null });
+    const emailTrim = String(email ?? "").trim();
     try {
-      const data = await authApi.login({ email, password });
+      const data = await authApi.login({ email: emailTrim, password });
       get()._setSession(data);
     } catch (err) {
-      const message =
-        err.response?.data?.detail || "Login failed. Check your credentials.";
+      const message = apiErrorMessage(err, "Login failed. Check your credentials.");
       set({ error: message });
       throw new Error(message);
     } finally {
@@ -81,6 +82,23 @@ const useAuthStore = create((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  /** PATCH-style merge for name / phone / role (requires access token). */
+  updateProfileRemote: async (partial) => {
+    set({ isLoading: true, error: null });
+    try {
+      const user = await usersApi.putMe(partial);
+      localStorage.setItem("user", JSON.stringify(user));
+      set({ user, error: null });
+      return user;
+    } catch (err) {
+      const message = apiErrorMessage(err, "Could not update profile.");
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));
 
 export default useAuthStore;
