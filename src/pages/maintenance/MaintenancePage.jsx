@@ -7,20 +7,21 @@ import {
 import toast from "react-hot-toast";
 import { maintenanceApi } from "../../api/maintenanceApi";
 import { propertiesApi } from "../../api/propertiesApi";
+import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const STATUS_CONFIG = {
-  open:        { label: "Open",        color: "bg-red-100 text-red-700",     icon: AlertTriangle },
-  in_progress: { label: "In Progress", color: "bg-amber-100 text-amber-700", icon: RefreshCw },
-  resolved:    { label: "Resolved",    color: "bg-green-100 text-green-700", icon: CheckCircle2 },
-  closed:      { label: "Closed",      color: "bg-gray-100 text-gray-500",   icon: X },
+  open:        { label: "Open",        color: "bg-red-500/15 text-red-200 ring-1 ring-red-500/25",     icon: AlertTriangle },
+  in_progress: { label: "In Progress", color: "bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/25", icon: RefreshCw },
+  resolved:    { label: "Resolved",    color: "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30", icon: CheckCircle2 },
+  closed:      { label: "Closed",      color: "bg-white/10 text-white/50 ring-1 ring-white/15",   icon: X },
 };
 const PRIORITY_CONFIG = {
-  low:    { label: "Low",    color: "text-gray-500"   },
-  medium: { label: "Medium", color: "text-amber-600"  },
-  high:   { label: "High",   color: "text-orange-600" },
-  urgent: { label: "Urgent", color: "text-red-600 font-bold" },
+  low:    { label: "Low",    color: "text-white/45"   },
+  medium: { label: "Medium", color: "text-amber-300/95"  },
+  high:   { label: "High",   color: "text-orange-300" },
+  urgent: { label: "Urgent", color: "text-red-300 font-bold" },
 };
 
 function StatusBadge({ status }) {
@@ -40,7 +41,10 @@ function CreateModal({ onClose }) {
   const [selectedProp, setSelectedProp] = useState("");
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const { data: properties = [] } = useQuery({ queryKey: ["properties"], queryFn: () => propertiesApi.list({}) });
+  const { data: properties = [] } = useQuery({
+    queryKey: ["properties"],
+    queryFn: () => propertiesApi.list({}),
+  });
   const { data: units = [] } = useQuery({
     queryKey: ["units", selectedProp],
     queryFn: () => propertiesApi.getUnits(selectedProp),
@@ -68,10 +72,12 @@ function CreateModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-brand-dark">New Maintenance Request</h2>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-brand-tealLt flex items-center justify-center text-brand-mid"><X size={16}/></button>
+      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white">New maintenance request</h2>
+          <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white" aria-label="Close">
+            <X size={16} />
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -143,12 +149,14 @@ function UpdateModal({ request, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-brand-dark">Update Request</h2>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-brand-tealLt flex items-center justify-center text-brand-mid"><X size={16}/></button>
+      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white">Update request</h2>
+          <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white" aria-label="Close">
+            <X size={16} />
+          </button>
         </div>
-        <p className="text-sm font-semibold text-brand-dark mb-4 pb-3 border-b border-brand-tealLt">{request.title}</p>
+        <p className="mb-4 border-b border-white/10 pb-3 text-sm font-semibold text-white/90">{request.title}</p>
         <div className="space-y-4">
           <div>
             <label className="input-label">Status</label>
@@ -203,8 +211,8 @@ function RequestCard({ req, onUpdate }) {
       </div>
       {req.description && <p className="text-xs text-brand-mid leading-relaxed line-clamp-2">{req.description}</p>}
       {req.resolution_note && (
-        <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800">
-          <strong>Resolution:</strong> {req.resolution_note}
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
+          <strong className="text-emerald-50">Resolution:</strong> {req.resolution_note}
         </div>
       )}
       <div className="flex items-center justify-between text-xs text-brand-mid pt-2 border-t border-brand-tealLt/50">
@@ -226,9 +234,9 @@ export default function MaintenancePage() {
   const [createOpen,   setCreateOpen]   = useState(false);
   const [updateTarget, setUpdateTarget] = useState(null);
 
-  const { data: requests = [], isLoading } = useQuery({
+  const { data: requests = [], isLoading, isError } = useQuery({
     queryKey: ["maintenance", filterStatus],
-    queryFn:  () => maintenanceApi.list(filterStatus ? { status: filterStatus } : {}),
+    queryFn: () => maintenanceApi.list(filterStatus ? { status: filterStatus } : {}),
     refetchInterval: 30000,
   });
 
@@ -240,21 +248,23 @@ export default function MaintenancePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-brand-dark">Maintenance</h2>
-          <p className="text-brand-mid text-sm mt-0.5">Track and manage property maintenance requests</p>
-        </div>
-        <button className="btn-primary" onClick={() => setCreateOpen(true)}><Plus size={16} /> New Request</button>
-      </div>
-
+    <AppPageScaffold
+      variant="tickets"
+      icon={Wrench}
+      title="Maintenance"
+      description="Track and manage property maintenance requests"
+      actions={
+        <button type="button" className="btn-primary" onClick={() => setCreateOpen(true)}>
+          <Plus size={16} /> New Request
+        </button>
+      }
+    >
       {/* Summary strip */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Open",        count: counts.open,        color: "bg-red-50 border-red-200 text-red-700",    icon: AlertTriangle },
-          { label: "In Progress", count: counts.in_progress, color: "bg-amber-50 border-amber-200 text-amber-700", icon: RefreshCw },
-          { label: "Resolved",    count: counts.resolved,    color: "bg-green-50 border-green-200 text-green-700", icon: CheckCircle2 },
+          { label: "Open",        count: counts.open,        color: "border-red-500/30 bg-red-500/10 text-red-100",    icon: AlertTriangle },
+          { label: "In Progress", count: counts.in_progress, color: "border-amber-500/30 bg-amber-500/10 text-amber-100", icon: RefreshCw },
+          { label: "Resolved",    count: counts.resolved,    color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100", icon: CheckCircle2 },
         ].map(({ label, count, color, icon: Icon }) => (
           <div key={label} className={`rounded-xl border p-4 flex items-center gap-3 ${color}`}>
             <Icon size={22} className="flex-shrink-0 opacity-80" />
@@ -275,7 +285,11 @@ export default function MaintenancePage() {
           { value: "resolved",    label: "Resolved",    count: counts.resolved },
         ].map((tab) => (
           <button key={tab.value} onClick={() => setFilterStatus(tab.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${filterStatus === tab.value ? "bg-brand-teal text-white shadow-sm" : "bg-white border border-brand-tealLt text-brand-mid hover:border-brand-teal hover:text-brand-dark"}`}>
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+              filterStatus === tab.value
+                ? "bg-brand-teal text-[#041208] shadow-sm"
+                : "border border-white/12 bg-white/[0.06] text-white/70 hover:border-brand-teal/45 hover:text-brand-teal"
+            }`}>
             {tab.label}
             {tab.count > 0 && <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${filterStatus === tab.value ? "bg-white/20" : "bg-brand-tealLt"}`}>{tab.count}</span>}
           </button>
@@ -286,6 +300,11 @@ export default function MaintenancePage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => <div key={i} className="card h-40 animate-pulse bg-brand-tealLt/30" />)}
+        </div>
+      ) : isError ? (
+        <div className="card py-14 text-center">
+          <p className="font-bold text-brand-dark">Could not load maintenance requests</p>
+          <p className="mt-1 text-sm text-brand-mid">Check the API and try again.</p>
         </div>
       ) : requests.length === 0 ? (
         <div className="card text-center py-16 space-y-3">
@@ -304,6 +323,6 @@ export default function MaintenancePage() {
 
       {createOpen  && <CreateModal onClose={() => setCreateOpen(false)} />}
       {updateTarget && <UpdateModal request={updateTarget} onClose={() => setUpdateTarget(null)} />}
-    </div>
+    </AppPageScaffold>
   );
 }

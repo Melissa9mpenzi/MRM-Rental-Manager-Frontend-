@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   Plus, Search, Building2, DoorOpen, DoorClosed,
-  Wrench, ChevronRight, Archive, ArchiveRestore,
+  ChevronRight, Archive, ArchiveRestore,
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -12,6 +12,9 @@ import { propertiesApi } from "../../api/propertiesApi";
 import { Button } from "../../components/ui/Button";
 import { Badge, EmptyState, StatCard } from "../../components/ui/index.jsx";
 import AddPropertyModal from "../../components/domain/AddPropertyModal";
+import AppPageScaffold from "../../components/layout/AppPageScaffold";
+
+const API_ORIGIN = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // ── Property Card ─────────────────────────────────────────────────
 function PropertyCard({ property }) {
@@ -39,14 +42,14 @@ function PropertyCard({ property }) {
       {property.photo_path ? (
         <div className="h-32 -mx-5 -mt-5 mb-4 rounded-t-lg overflow-hidden">
           <img
-            src={property.photo_path.startsWith('http') ? property.photo_path : `http://localhost:8000${property.photo_path}`}
+            src={property.photo_path.startsWith('http') ? property.photo_path : `${API_ORIGIN}${property.photo_path}`}
             alt={property.name}
             className="w-full h-full object-cover"
-            onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('bg-gradient-to-r', 'from-brand-tealLt', 'to-brand-light'); }}
+            onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('bg-gradient-to-r', 'from-brand-tealLt', 'to-white/10'); }}
           />
         </div>
       ) : (
-        <div className="h-20 -mx-5 -mt-5 mb-4 rounded-t-lg bg-gradient-to-r from-brand-tealLt to-brand-light flex items-center justify-center">
+        <div className="h-20 -mx-5 -mt-5 mb-4 rounded-t-lg bg-gradient-to-r from-brand-tealLt to-white/10 flex items-center justify-center">
           <Building2 size={32} className="text-brand-teal opacity-50" />
         </div>
       )}
@@ -76,11 +79,11 @@ function PropertyCard({ property }) {
       {/* Stats row */}
       <div className="grid grid-cols-4 gap-2 mb-4">
         {[
-          { icon: Building2, label: "Total",       value: property.total_units,       color: "text-brand-dark" },
-          { icon: DoorClosed, label: "Occupied",   value: property.occupied_units,    color: "text-brand-teal" },
-          { icon: DoorOpen,   label: "Vacant",     value: property.vacant_units,      color: "text-gray-500" },
-          { icon: Wrench,     label: "Maintenance",value: property.maintenance_units, color: "text-amber-600" },
-        ].map(({ icon: Icon, label, value, color }) => (
+          { label: "Total",       value: property.total_units,       color: "text-brand-dark" },
+          { label: "Occupied",   value: property.occupied_units,    color: "text-brand-teal" },
+          { label: "Vacant",     value: property.vacant_units,      color: "text-gray-500" },
+          { label: "Maintenance",value: property.maintenance_units, color: "text-amber-600" },
+        ].map(({ label, value, color }) => (
           <div key={label} className="bg-brand-bg rounded-lg p-2 text-center">
             <div className={`font-bold text-lg ${color}`}>{value}</div>
             <div className="text-xs text-brand-mid">{label}</div>
@@ -94,7 +97,7 @@ function PropertyCard({ property }) {
           <span className="text-brand-mid font-medium">Occupancy</span>
           <span className={`font-bold ${occupancyColor}`}>{property.occupancy_rate}%</span>
         </div>
-        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
           <div
             className="h-full bg-brand-teal rounded-full transition-all duration-500"
             style={{ width: `${property.occupancy_rate}%` }}
@@ -112,7 +115,7 @@ function PropertyCard({ property }) {
 
       {/* Actions */}
       <div className="flex gap-2">
-        <Link to={`/properties/${property.id}`} className="flex-1">
+        <Link to={`/landlord/properties/${property.id}`} className="flex-1">
           <Button variant="outline" fullWidth className="text-xs">
             <ChevronRight size={14} />
             View Units
@@ -141,33 +144,30 @@ export default function PropertiesPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [addOpen, setAddOpen]       = useState(false);
 
-  const { data: properties = [], isLoading } = useQuery({
+  const { data: propertiesRaw, isLoading, isError } = useQuery({
     queryKey: ["properties", search, showArchived],
     queryFn: () => propertiesApi.list({ search, include_archived: showArchived }),
   });
+  const properties = Array.isArray(propertiesRaw) ? propertiesRaw : [];
 
   // Aggregate stats
-  const totalUnits    = properties.reduce((s, p) => s + p.total_units, 0);
   const occupiedUnits = properties.reduce((s, p) => s + p.occupied_units, 0);
   const vacantUnits   = properties.reduce((s, p) => s + p.vacant_units, 0);
   const totalRent     = properties.reduce((s, p) => s + Number(p.expected_monthly_rent), 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-brand-dark">Properties</h2>
-          <p className="text-brand-mid text-sm mt-0.5">
-            {properties.length} propert{properties.length === 1 ? "y" : "ies"}
-          </p>
-        </div>
+    <AppPageScaffold
+      variant="registry"
+      icon={Building2}
+      title="Properties"
+      description={`${properties.length} propert${properties.length === 1 ? "y" : "ies"} in your portfolio`}
+      actions={
         <Button onClick={() => setAddOpen(true)}>
           <Plus size={16} />
           Add Property
         </Button>
-      </div>
-
+      }
+    >
       {/* Portfolio stats */}
       {properties.length > 0 && (
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
@@ -212,6 +212,11 @@ export default function PropertiesPage() {
             <div key={i} className="card h-64 animate-pulse bg-brand-tealLt/30" />
           ))}
         </div>
+      ) : isError ? (
+        <div className="card py-12 text-center">
+          <h3 className="font-bold text-brand-dark">Could not load properties</h3>
+          <p className="mt-1 text-sm text-brand-mid">Check your connection and API configuration, then try again.</p>
+        </div>
       ) : properties.length === 0 ? (
         <div className="card">
           <EmptyState
@@ -240,6 +245,6 @@ export default function PropertiesPage() {
       )}
 
       <AddPropertyModal open={addOpen} onClose={() => setAddOpen(false)} />
-    </div>
+    </AppPageScaffold>
   );
 }

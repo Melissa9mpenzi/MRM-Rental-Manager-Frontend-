@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, DollarSign, Calendar, CreditCard,
@@ -8,6 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { paymentsApi } from "../../api/paymentsApi";
 import { tenantsApi } from "../../api/tenantsApi";
+import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const CURRENT_YEAR = new Date().getFullYear();
@@ -38,7 +39,6 @@ function Field({ label, required, children }) {
 }
 
 export default function RecordPaymentPage() {
-  const navigate  = useNavigate();
   const qc        = useQueryClient();
   const today     = new Date().toISOString().split("T")[0];
 
@@ -58,9 +58,9 @@ export default function RecordPaymentPage() {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
+  const { data: tenants = [], isLoading: tenantsLoading, isError: tenantsError } = useQuery({
     queryKey: ["tenants"],
-    queryFn:  () => tenantsApi.list({ status: "active" }),
+    queryFn: () => tenantsApi.list({ status: "active" }),
   });
 
   const mutation = useMutation({
@@ -110,16 +110,18 @@ export default function RecordPaymentPage() {
   // ── Success State ──────────────────────────────────────────────────
   if (createdId) {
     return (
-      <div className="max-w-md mx-auto mt-12">
-        <div className="card text-center space-y-5">
-          <div className="w-16 h-16 rounded-full bg-brand-tealLt flex items-center justify-center mx-auto">
-            <CheckCircle2 size={32} className="text-brand-teal" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-brand-dark">Payment Recorded!</h2>
-            <p className="text-brand-mid text-sm mt-1">The payment has been saved successfully.</p>
-          </div>
-          <div className="flex flex-col gap-2">
+      <AppPageScaffold
+        variant="ledger"
+        icon={CheckCircle2}
+        title="Payment recorded"
+        description="The payment has been saved successfully."
+      >
+        <div className="mx-auto mt-8 max-w-md">
+          <div className="card space-y-5 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-tealLt">
+              <CheckCircle2 size={32} className="text-brand-teal" />
+            </div>
+            <div className="flex flex-col gap-2">
             <a
               href={paymentsApi.receiptUrl(createdId)}
               target="_blank"
@@ -134,26 +136,31 @@ export default function RecordPaymentPage() {
             >
               Record Another Payment
             </button>
-            <Link to="/payments" className="btn-ghost">View All Payments</Link>
+            <Link to="/landlord/payments" className="btn-ghost">View All Payments</Link>
           </div>
         </div>
       </div>
+      </AppPageScaffold>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link to="/payments" className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-brand-tealLt text-brand-mid hover:text-brand-teal transition-colors">
+    <AppPageScaffold
+      variant="ledger"
+      icon={DollarSign}
+      title="Record payment"
+      description="Log a rent or deposit payment for a tenant."
+      actions={
+        <Link
+          to="/landlord/payments"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-brand-mid transition-colors hover:bg-brand-tealLt hover:text-brand-teal"
+          aria-label="Back to payments"
+        >
           <ArrowLeft size={18} />
         </Link>
-        <div>
-          <h2 className="text-xl font-bold text-brand-dark">Record Payment</h2>
-          <p className="text-sm text-brand-mid">Log a rent or deposit payment</p>
-        </div>
-      </div>
-
+      }
+    >
+      <div className="mx-auto max-w-2xl space-y-5">
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Tenant + Amount */}
         <div className="card space-y-4">
@@ -167,6 +174,8 @@ export default function RecordPaymentPage() {
                 <option value="">— Select tenant —</option>
                 {tenantsLoading
                   ? <option disabled>Loading…</option>
+                  : tenantsError
+                  ? <option disabled>Could not load tenants</option>
                   : tenants.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.full_name} {t.unit_number ? `· Unit ${t.unit_number}` : ""}
@@ -178,9 +187,9 @@ export default function RecordPaymentPage() {
             {selectedTenant && (
               <div className="mt-1.5 text-xs text-brand-mid bg-brand-tealLt/40 rounded-lg px-3 py-2">
                 Monthly rent: <strong className="text-brand-dark">UGX {Number(selectedTenant.monthly_rent).toLocaleString()}</strong>
-                {selectedTenant.balance > 0 && (
+                {Number(selectedTenant.balance_due || 0) > 0 && (
                   <span className="ml-3 text-red-600 font-semibold">
-                    Arrears: UGX {Number(selectedTenant.balance).toLocaleString()}
+                    Arrears: UGX {Number(selectedTenant.balance_due).toLocaleString()}
                   </span>
                 )}
               </div>
@@ -282,7 +291,7 @@ export default function RecordPaymentPage() {
 
         {/* Submit */}
         <div className="flex items-center gap-3 justify-end pb-6">
-          <Link to="/payments" className="btn-outline">Cancel</Link>
+          <Link to="/landlord/payments" className="btn-outline">Cancel</Link>
           <button type="submit" className="btn-primary" disabled={mutation.isPending}>
             {mutation.isPending ? (
               <span className="flex items-center gap-2">
@@ -298,5 +307,6 @@ export default function RecordPaymentPage() {
         </div>
       </form>
     </div>
+    </AppPageScaffold>
   );
 }

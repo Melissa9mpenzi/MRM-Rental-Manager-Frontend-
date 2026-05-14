@@ -2,19 +2,18 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { Mail, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import useAuthStore from "../../store/authStore";
-import mrmLogo from "../../assets/MRM-LOGO.png";
+import { defaultDashboardPath, pathAllowedForRole } from "../../config/access";
 
 export default function LoginPage() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const login     = useAuthStore((s) => s.login);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const login = useAuthStore((s) => s.login);
   const isLoading = useAuthStore((s) => s.isLoading);
-  const from      = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from?.pathname;
 
-  // Handle verification success from URL params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const verified = params.get("verified");
@@ -24,7 +23,6 @@ export default function LoginPage() {
 
     if (verified === "true") {
       toast.success("Email verified successfully! You can now sign in.");
-      // Clear the query params
       navigate("/login", { replace: true, state: { email } });
     } else if (error === "token_expired") {
       toast.error("Verification link has expired. Please register again.");
@@ -36,39 +34,59 @@ export default function LoginPage() {
       toast.error("Account not found. Please register.");
       navigate("/login", { replace: true });
     } else if (message === "already_verified") {
-      toast.info("Email already verified. Please sign in.");
+      toast("Email already verified. Please sign in.");
       navigate("/login", { replace: true });
     }
   }, [location.search, navigate]);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     defaultValues: { email: location.state?.email || new URLSearchParams(location.search).get("email") || "" },
   });
 
   const onSubmit = async (data) => {
     try {
       await login(data);
-      toast.success("Welcome back!");
-      navigate(from, { replace: true });
+      const user = useAuthStore.getState().user;
+      const role = user?.role;
+      const home = defaultDashboardPath(role);
+      if (from && pathAllowedForRole(from, role)) {
+        toast.success("Welcome back!");
+        navigate(from, { replace: true });
+      } else {
+        if (from) toast("That page is not available for your role. Opening your dashboard.");
+        else toast.success("Welcome back!");
+        navigate(home, { replace: true });
+      }
     } catch (err) {
       toast.error(err.message || "Invalid email or password.");
     }
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-brand-tealLt/60 p-8 md:p-10">
-      {/* Logo and Heading */}
-      <div className="mb-8 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-teal/10 border border-brand-teal/20 flex items-center justify-center">
-            <img src={mrmLogo} alt="MRM" className="h-10 w-auto object-contain" />
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold text-brand-dark tracking-tight">Welcome back</h1>
-        <p className="text-brand-mid text-sm mt-1">Sign in to manage your properties</p>
+    <div className="card-glass rounded-2xl border border-white/[0.1] p-4 shadow-card sm:p-5">
+      <div className="mb-3 text-center">
+        <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Welcome back</h1>
+        <p className="mt-0.5 text-xs text-white/55 sm:text-sm">Sign in to RentDirect UG</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <div className="mb-3 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          disabled
+          className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] py-2 text-[10px] font-semibold text-white/35 sm:text-xs"
+        >
+          Google <span className="text-white/25">· soon</span>
+        </button>
+        <button
+          type="button"
+          disabled
+          className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] py-2 text-[10px] font-semibold text-white/35 sm:text-xs"
+        >
+          Apple <span className="text-white/25">· soon</span>
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
         <Input
           label="Email address"
           type="email"
@@ -94,8 +112,8 @@ export default function LoginPage() {
             error={errors.password?.message}
             {...register("password", { required: "Password is required" })}
           />
-          <div className="mt-2 text-right">
-            <Link to="/forgot-password" className="text-xs text-brand-teal font-semibold hover:underline">
+          <div className="mt-1 text-right">
+            <Link to="/forgot-password" className="text-[11px] font-semibold text-brand-teal hover:underline">
               Forgot password?
             </Link>
           </div>
@@ -104,34 +122,40 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full btn-primary py-3 text-[15px] mt-2 rounded-xl shadow-md hover:shadow-lg"
+          className="btn-primary w-full rounded-xl py-2.5 text-sm font-bold shadow-md hover:shadow-lg sm:py-3"
         >
           {isLoading ? (
-            <span className="flex items-center gap-2 justify-center">
-              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
               Signing in…
             </span>
           ) : (
-            <span className="flex items-center gap-2 justify-center">
-              Sign in <ArrowRight size={16} />
+            <span className="flex items-center justify-center gap-2">
+              Sign in <ArrowRight size={15} />
             </span>
           )}
         </button>
       </form>
 
-      {/* Divider */}
-      <div className="flex items-center gap-3 my-6">
-        <div className="flex-1 h-px bg-brand-tealLt" />
-        <span className="text-xs text-brand-mid font-medium">New to MRM?</span>
-        <div className="flex-1 h-px bg-brand-tealLt" />
+      <div className="my-3 flex items-center gap-2">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-[10px] font-medium text-white/45">New here?</span>
+        <div className="h-px flex-1 bg-white/10" />
       </div>
 
-      <Link
-        to="/register"
-        className="w-full btn-outline py-2.5 text-sm flex items-center justify-center rounded-xl"
-      >
+      <Link to="/register" className="btn-outline flex w-full items-center justify-center rounded-xl py-2 text-xs font-bold sm:text-sm">
         Create a free account
       </Link>
+
+      <p className="mt-3 text-center text-[10px] text-white/45 sm:text-xs">
+        <Link to="/auth/verify-otp" className="font-semibold text-brand-teal hover:underline">
+          Try onboarding
+        </Link>
+        {" · "}
+        <Link to="/" className="font-semibold text-white/55 hover:text-white">
+          Home
+        </Link>
+      </p>
     </div>
   );
 }

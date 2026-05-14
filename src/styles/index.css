@@ -1,135 +1,203 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+  }
   body {
     @apply bg-brand-bg text-brand-dark antialiased;
-    font-family: "Inter", "Quicksand", sans-serif;
+    font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
   }
-  h1 { @apply text-2xl font-bold text-brand-dark; }
-  h2 { @apply text-xl font-semibold text-brand-dark; }
-  h3 { @apply text-base font-semibold text-brand-mid; }
+  #root {
+    min-height: 100dvh;
+  }
+  h1 {
+    @apply text-2xl font-bold text-brand-dark tracking-tight;
+  }
+  h2 {
+    @apply text-xl font-semibold text-brand-dark;
+  }
+  h3 {
+    @apply text-base font-semibold text-brand-mid;
+  }
 
-  /* Smooth scrollbar */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { @apply bg-brand-tealLt rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-brand-teal/40; }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-white/15 hover:bg-white/25;
+  }
+}
+
+@layer utilities {
+  /**
+   * Scroll inside the panel only (not the whole document). Stable gutter + slightly
+   * wider thumb so the bar reads as part of the app chrome, not “browser website scroll”.
+   */
+  .overflow-panel-y {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.22) transparent;
+  }
+  .overflow-panel-y::-webkit-scrollbar {
+    width: 8px;
+  }
+  .overflow-panel-y::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .overflow-panel-y::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.2);
+  }
+  .overflow-panel-y::-webkit-scrollbar-thumb:hover {
+    background: rgb(255 255 255 / 0.32);
+  }
 }
 
 @layer components {
-  /* ── Buttons ─────────────────────────────── */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2
-           bg-brand-teal text-white font-semibold text-sm
-           px-5 py-2.5 rounded-xl shadow-sm
-           hover:bg-[#4d7a70] hover:shadow-md active:scale-[0.98]
-           transition-all duration-150 ease-in-out
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+           bg-brand-teal text-[#041208] font-semibold text-sm
+           px-5 py-2.5 rounded-xl shadow-glow
+           hover:brightness-110 active:scale-[0.98]
+           transition-all duration-150 ease-out
+           disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100;
   }
   .btn-outline {
     @apply inline-flex items-center justify-center gap-2
-           border border-brand-teal/60 text-brand-teal font-semibold text-sm
-           px-5 py-2.5 rounded-xl
-           hover:bg-brand-tealLt hover:border-brand-teal
-           transition-all duration-150 ease-in-out
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           border border-rd-stroke text-brand-dark font-semibold text-sm
+           px-5 py-2.5 rounded-xl bg-white/5 backdrop-blur-sm
+           hover:border-brand-teal/45 hover:bg-brand-tealLt/35 hover:text-brand-teal
+           transition-all duration-150 ease-out
+           disabled:opacity-45 disabled:cursor-not-allowed;
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2
            text-brand-mid font-semibold text-sm
            px-4 py-2 rounded-xl
-           hover:bg-brand-tealLt hover:text-brand-teal
-           transition-all duration-150 ease-in-out;
+           hover:bg-white/[0.07] hover:text-brand-dark
+           transition-all duration-150 ease-out;
   }
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2
            bg-red-600 text-white font-semibold text-sm
            px-5 py-2.5 rounded-xl
-           hover:bg-red-700 active:scale-[0.98]
+           hover:bg-red-500 active:scale-[0.98]
            transition-all duration-150;
   }
 
-  /* ── Cards ───────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl border border-brand-tealLt/70 shadow-card p-5;
+    @apply rounded-2xl border border-rd-stroke shadow-card p-5
+           bg-rd-surface/90 backdrop-blur-xl;
   }
   .card-hover {
-    @apply card hover:border-brand-teal hover:shadow-md transition-all duration-150 cursor-pointer;
+    @apply card hover:border-brand-teal/35 hover:shadow-glow transition-all duration-200 cursor-pointer;
   }
   .card-glass {
-    @apply rounded-2xl border border-white/20 shadow-lg p-5
-           backdrop-blur-md bg-white/80;
+    @apply rounded-3xl border border-white/[0.12] shadow-modal p-6
+           bg-rd-elevated/95 backdrop-blur-2xl;
   }
 
-  /* ── Form inputs ─────────────────────────── */
   .input-field {
-    @apply w-full border border-[#576e6a]/30 rounded-xl px-3.5 py-2.5
-           text-sm text-brand-dark placeholder-brand-mid/50
-           bg-white/90
-           focus:outline-none focus:ring-2 focus:ring-brand-teal/40 focus:border-brand-teal
+    @apply w-full border border-rd-stroke rounded-xl px-3.5 py-2.5
+           text-sm text-brand-dark placeholder-brand-mid/45
+           bg-white/[0.04] backdrop-blur-sm
+           focus:outline-none focus:ring-2 focus:ring-brand-teal/35 focus:border-brand-teal/55
            transition-all duration-150;
   }
   .input-error {
-    @apply input-field border-red-400 focus:ring-red-300 focus:border-red-400;
+    @apply input-field border-red-500/55 focus:ring-red-500/25 focus:border-red-500/70;
   }
   .input-label {
-    @apply block text-xs font-semibold text-brand-dark/80 mb-1.5 tracking-wide;
+    @apply block text-[11px] font-semibold text-brand-mid mb-1.5 tracking-wide uppercase;
   }
 
-  /* ── Badges ──────────────────────────────── */
-  .badge-paid    { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-tealLt text-brand-teal; }
-  .badge-arrears { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700; }
-  .badge-vacant  { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-brand-mid; }
-  .badge-danger  { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700; }
+  .badge-paid {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-tealLt text-brand-teal;
+  }
+  .badge-arrears {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300;
+  }
+  .badge-vacant {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/10 text-brand-mid;
+  }
+  .badge-danger {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/15 text-red-300;
+  }
 
-  /* ── Sidebar nav ─────────────────────────── */
   .nav-item {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl
-           text-sm font-semibold text-white/60
-           hover:bg-white/10 hover:text-white
+           text-sm font-semibold text-white/50
+           hover:bg-white/[0.06] hover:text-white
            transition-all duration-150 cursor-pointer;
   }
   .nav-item-active {
-    @apply nav-item text-brand-teal bg-brand-teal/15 border border-brand-teal/25;
+    @apply nav-item text-brand-teal bg-brand-tealLt/45 border border-brand-teal/35 shadow-[0_0_22px_rgba(0,200,83,0.12)];
   }
 
-  /* ── Skeleton loader ─────────────────────── */
   .skeleton {
-    @apply animate-pulse rounded-xl bg-gradient-to-r from-brand-tealLt/60 via-white/80 to-brand-tealLt/60;
+    @apply animate-pulse rounded-xl bg-gradient-to-r from-white/5 via-white/10 to-white/5;
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.5s ease infinite;
   }
 
-  /* ── Stat card ───────────────────────────── */
+  /* Arbitrary opacity in @apply: theme keys like /12 and /28 are not always resolved for custom colors. */
   .stat-card {
-    @apply card flex items-start gap-3 hover:border-brand-teal/40 transition-all duration-200;
+    @apply flex items-start gap-3 rounded-2xl border border-white/[0.12] p-4 shadow-card
+           bg-rd-elevated/90 backdrop-blur-xl
+           hover:border-brand-teal/[0.28] hover:shadow-glow transition-all duration-200;
   }
 }
 
 @layer utilities {
-  .text-balance { text-wrap: balance; }
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
-/* ── Animations ───────────────────────────── */
 @keyframes skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-fade-in { animation: fade-in 0.25s ease forwards; }
-.animate-slide-up { animation: slide-up 0.3s ease forwards; }
+.animate-fade-in {
+  animation: fade-in 0.28s ease forwards;
+}
+.animate-slide-up {
+  animation: slide-up 0.32s ease forwards;
+}

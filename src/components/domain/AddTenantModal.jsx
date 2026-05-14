@@ -30,14 +30,14 @@ export default function AddTenantModal({ open, onClose }) {
   });
 
   // Load all properties
-  const { data: properties = [] } = useQuery({
+  const { data: properties = [], isError: propertiesError } = useQuery({
     queryKey: ["properties"],
     queryFn: () => propertiesApi.list({ include_archived: false }),
     enabled: open,
   });
 
   // Load units when property selected
-  const { data: propertyDetail } = useQuery({
+  const { data: propertyDetail, isError: propertyDetailError } = useQuery({
     queryKey: ["property", selectedPropertyId],
     queryFn: () => propertiesApi.get(Number(selectedPropertyId)),
     enabled: !!selectedPropertyId,
@@ -94,8 +94,8 @@ export default function AddTenantModal({ open, onClose }) {
     mutation.mutate(fd);
   }
 
-  const inputClass = "w-full border border-brand-tealLt rounded-lg px-3 py-2 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-teal/30 bg-white";
-  const labelClass = "block text-xs font-semibold text-brand-mid mb-1";
+  const inputClass = "input-field rounded-lg";
+  const labelClass = "input-label";
 
   return (
     <Modal open={open} onClose={handleClose} title="Add New Tenant">
@@ -104,6 +104,12 @@ export default function AddTenantModal({ open, onClose }) {
         {/* Step 1 — Property & Unit */}
         <div className="bg-brand-bg rounded-xl p-4 space-y-3">
           <p className="text-xs font-bold text-brand-teal uppercase tracking-wide">1. Property & Unit</p>
+          {propertiesError && (
+            <p className="text-xs text-red-400">Could not load properties from the server.</p>
+          )}
+          {selectedPropertyId && propertyDetailError && (
+            <p className="text-xs text-red-400">Could not load units for this property.</p>
+          )}
 
           <div>
             <label className={labelClass}>Property</label>
@@ -123,7 +129,7 @@ export default function AddTenantModal({ open, onClose }) {
           </div>
 
           <div>
-            <label className={labelClass}>Unit {!selectedPropertyId && <span className="text-gray-400">(select property first)</span>}</label>
+            <label className={labelClass}>Unit {!selectedPropertyId && <span className="text-white/40">(select property first)</span>}</label>
             <select
               className={inputClass}
               value={form.unit_id}
@@ -216,9 +222,9 @@ export default function AddTenantModal({ open, onClose }) {
             <div>
               <label className={labelClass}>Upload Deposit Receipt (optional)</label>
               {receiptFile ? (
-                <div className="flex items-center gap-2 bg-white border border-brand-tealLt rounded-lg px-3 py-2 text-sm">
-                  <FileText size={16} className="text-brand-teal flex-shrink-0" />
-                  <span className="flex-1 truncate text-brand-dark">{receiptFile.name}</span>
+                <div className="flex items-center gap-2 rounded-lg border border-white/12 bg-white/[0.06] px-3 py-2 text-sm">
+                  <FileText size={16} className="flex-shrink-0 text-brand-teal" />
+                  <span className="flex-1 truncate text-white/90">{receiptFile.name}</span>
                   <button onClick={() => setReceiptFile(null)} className="text-red-400 hover:text-red-600">
                     <X size={14} />
                   </button>

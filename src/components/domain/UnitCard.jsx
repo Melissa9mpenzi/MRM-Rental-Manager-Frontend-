@@ -80,9 +80,9 @@ export default function UnitCard({ unit, propertyId }) {
               {menuOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-0 top-8 z-20 bg-white border border-brand-tealLt rounded-lg shadow-modal w-44 py-1">
+                  <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-white/12 bg-rd-elevated/98 py-1 shadow-modal backdrop-blur-xl">
                     <button
-                      className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-brand-dark hover:bg-brand-tealLt transition-colors"
+                      className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-white/90 transition-colors hover:bg-white/10"
                       onClick={() => {
                         statusMutation.mutate(STATUS_CYCLE[unit.status]);
                         setMenuOpen(false);
@@ -92,7 +92,7 @@ export default function UnitCard({ unit, propertyId }) {
                       Mark as {STATUS_CYCLE[unit.status]}
                     </button>
                     <button
-                      className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-red-300 transition-colors hover:bg-red-500/15"
                       onClick={() => { setConfirmDelete(true); setMenuOpen(false); }}
                     >
                       <Trash2 size={14} />
@@ -128,13 +128,12 @@ export default function UnitCard({ unit, propertyId }) {
 
       <ConfirmDialog
         open={confirmDelete}
-        onClose={() => setConfirmDelete(false)}
+        onCancel={() => setConfirmDelete(false)}
         onConfirm={() => deleteMutation.mutate()}
         title="Delete Unit"
         message={`Are you sure you want to delete Unit ${unit.unit_number}? This cannot be undone.`}
         confirmLabel="Delete"
-        danger
-        loading={deleteMutation.isPending}
+        variant="danger"
       />
     </>
   );

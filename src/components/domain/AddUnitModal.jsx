@@ -132,8 +132,8 @@ export default function AddUnitModal({ open, onClose, propertyId }) {
                 onClick={() => toggleAmenity(a)}
                 className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors
                   ${selectedAmenities.includes(a)
-                    ? "bg-brand-teal text-white border-brand-teal"
-                    : "bg-white text-brand-mid border-brand-mid/30 hover:border-brand-teal hover:text-brand-teal"
+                    ? "border-brand-teal bg-brand-teal/20 text-brand-teal"
+                    : "border border-white/12 bg-white/[0.06] text-white/70 hover:border-brand-teal/45 hover:text-brand-teal"
                   }`}
               >
                 {a}

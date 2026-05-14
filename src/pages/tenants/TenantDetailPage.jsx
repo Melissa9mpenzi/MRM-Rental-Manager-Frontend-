@@ -12,7 +12,16 @@ import { Button } from "../../components/ui/Button.jsx";
 import { ConfirmDialog } from "../../components/ui/index.jsx";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const METHOD_LABELS = { mtn_momo:"MTN MoMo", airtel:"Airtel", cash:"Cash", bank:"Bank", other:"Other" };
+const METHOD_LABELS = { mtn_momo:"MTN MoMo", airtel:"Airtel Money", cash:"Cash", bank:"Bank", other:"Other" };
+
+function payType(p) {
+  const v = p?.payment_type;
+  return typeof v === "string" ? v : v?.value ?? "";
+}
+function payMethod(p) {
+  const v = p?.payment_method;
+  return typeof v === "string" ? v : v?.value ?? "";
+}
 
 function InfoRow({ icon: Icon, label, value }) {
   if (!value) return null;
@@ -32,15 +41,16 @@ export default function TenantDetailPage() {
   const [deletingId, setDeletingId]   = useState(null);
   const [moveOutOpen, setMoveOutOpen] = useState(false);
 
-  const { data: tenant, isLoading } = useQuery({
+  const { data: tenant, isLoading, isError } = useQuery({
     queryKey: ["tenant", tenantId],
     queryFn: () => tenantsApi.get(tenantId),
+    enabled: !!tenantId && !Number.isNaN(tenantId),
   });
 
-  const { data: payments = [] } = useQuery({
+  const { data: payments = [], isError: paymentsError } = useQuery({
     queryKey: ["payments", tenantId],
     queryFn: () => paymentsApi.listForTenant(tenantId),
-    enabled: !!tenantId,
+    enabled: !!tenantId && !Number.isNaN(tenantId),
   });
 
   const deleteMutation = useMutation({
@@ -64,15 +74,16 @@ export default function TenantDetailPage() {
   });
 
   if (isLoading) return <div className="card h-32 animate-pulse bg-brand-tealLt/30" />;
+  if (isError) return <div className="card text-center py-10 text-brand-mid">Could not load this tenant from the server.</div>;
   if (!tenant)   return <div className="card text-center py-10 text-brand-mid">Tenant not found</div>;
 
   const balance      = parseFloat(tenant.balance_due || 0);
-  const rentPaid     = payments.filter(p => p.payment_type === "rent").reduce((s,p) => s + parseFloat(p.amount), 0);
+  const rentPaid     = payments.filter(p => payType(p) === "rent").reduce((s,p) => s + parseFloat(p.amount), 0);
   const isActive     = tenant.status === "active";
 
   return (
     <div className="space-y-5">
-      <Link to="/tenants" className="inline-flex items-center gap-1.5 text-sm text-brand-mid hover:text-brand-teal transition-colors">
+      <Link to="/landlord/tenants" className="inline-flex items-center gap-1.5 text-sm text-brand-mid hover:text-brand-teal transition-colors">
         <ArrowLeft size={14}/> All Tenants
       </Link>
 
@@ -81,7 +92,7 @@ export default function TenantDetailPage() {
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-brand-teal flex items-center justify-center text-white font-bold text-xl">
-              {tenant.full_name.split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase()}
+              {(tenant.full_name || "T").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -148,7 +159,9 @@ export default function TenantDetailPage() {
       {/* Payment history */}
       <div className="card">
         <h3 className="text-sm font-bold text-brand-dark mb-4">Payment History ({payments.length})</h3>
-        {payments.length === 0 ? (
+        {paymentsError ? (
+          <p className="text-brand-mid text-sm text-center py-6">Could not load payment history from the server.</p>
+        ) : payments.length === 0 ? (
           <p className="text-brand-mid text-sm text-center py-6">No payments recorded yet</p>
         ) : (
           <div className="overflow-x-auto">
@@ -168,8 +181,8 @@ export default function TenantDetailPage() {
                   <tr key={p.id} className="hover:bg-brand-tealLt/20">
                     <td className="py-2.5 text-brand-mid">{p.payment_date}</td>
                     <td className="py-2.5 font-semibold text-brand-dark">{MONTHS[p.period_month-1]} {p.period_year}</td>
-                    <td className="py-2.5 capitalize text-brand-mid">{p.payment_type}</td>
-                    <td className="py-2.5 text-brand-mid">{METHOD_LABELS[p.payment_method] || p.payment_method}</td>
+                    <td className="py-2.5 capitalize text-brand-mid">{payType(p)}</td>
+                    <td className="py-2.5 text-brand-mid">{METHOD_LABELS[payMethod(p)] || payMethod(p)}</td>
                     <td className="py-2.5 text-right font-bold text-brand-dark">UGX {parseFloat(p.amount).toLocaleString()}</td>
                     <td className="py-2.5 text-right">
                       <div className="flex items-center justify-end gap-2">

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Home } from "lucide-react";
 import toast from "react-hot-toast";
-import mrmLogo from "../../assets/MRM-LOGO.png";
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Home } from "lucide-react";
 
 function TenantAcceptInvite() {
   const [searchParams] = useSearchParams();
@@ -90,145 +89,128 @@ function TenantAcceptInvite() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin w-8 h-8 border-4 border-brand-teal border-t-transparent rounded-full"></div>
+      <div className="flex min-h-[40vh] items-center justify-center py-16">
+        <div className="h-9 w-9 animate-spin rounded-full border-4 border-[#00C896]/30 border-t-[#00C896]" />
       </div>
     );
   }
 
   if (!inviteValid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-red-600" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Invalid Invite</h2>
-          <p className="text-gray-600 mb-6">
-            This invitation link is invalid or has expired. Please contact your landlord for a new invite.
-          </p>
-          <Link
-            to="/login"
-            className="inline-flex items-center justify-center px-6 py-3 bg-brand-teal text-white rounded-xl font-medium hover:bg-brand-teal/90 transition-colors"
-          >
-            Go to Login
-          </Link>
+      <div className="card-glass mx-auto max-w-md p-8 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10">
+          <AlertCircle className="h-7 w-7 text-red-400" />
         </div>
+        <h2 className="text-xl font-extrabold text-white">Invalid invite</h2>
+        <p className="mt-2 text-sm leading-relaxed text-white/55">
+          This invitation link is invalid or has expired. Please contact your landlord for a new invite.
+        </p>
+        <Link
+          to="/login"
+          className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#00C896] px-6 py-3 text-sm font-bold text-[#041208] transition hover:brightness-110"
+        >
+          Go to login
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <img
-          src={mrmLogo}
-          alt="MRM"
-          className="w-full h-full object-cover"
-        />
+    <div className="card-glass overflow-hidden p-0">
+      <div className="relative h-28 overflow-hidden sm:h-36">
+        <img src="/images/hero-villa.jpg" alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060a0e] via-[#060a0e]/40 to-transparent" />
       </div>
 
-      {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-brand-teal/10 border border-brand-teal/20 flex items-center justify-center">
-                <Home className="w-8 h-8 text-brand-teal" />
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Accept Your Invitation</h1>
-            <p className="text-gray-600 mt-2">
-              Create your tenant account for {inviteData?.full_name}
-            </p>
-          </div>
-
-          {/* Success Message */}
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-green-900">Invitation Verified</p>
-                <p className="text-sm text-green-700 mt-1">
-                  Welcome! Set your password to access your tenant portal.
-                </p>
-              </div>
+      <div className="p-6 sm:p-8">
+        <div className="mb-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#00C896]/35 bg-[#00C896]/10">
+              <Home className="h-7 w-7 text-[#00C896]" />
             </div>
           </div>
-
-          {/* Email Display */}
-          <div className="bg-gray-100 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600">Email address</p>
-            <p className="font-medium text-gray-900">{email}</p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleAcceptInvite} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Create Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none transition-all"
-                  placeholder="Min. 6 characters"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 outline-none transition-all"
-                  placeholder="Repeat password"
-                  required
-                />
-                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={verifying}
-              className="w-full py-3 bg-brand-teal text-white rounded-xl font-medium hover:bg-brand-teal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {verifying ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-                  Creating Account...
-                </span>
-              ) : (
-                "Create Account & Access Portal"
-              )}
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-gray-600 mt-6">
-            Already have an account?{" "}
-            <Link to="/login" className="text-brand-teal font-medium hover:underline">
-              Sign in
-            </Link>
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">Accept your invitation</h1>
+          <p className="mt-2 text-sm text-white/55">
+            Create your tenant account for {inviteData?.full_name}
           </p>
         </div>
+
+        <div className="mb-6 rounded-xl border border-[#00C896]/25 bg-[#00C896]/10 p-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#00C896]" />
+            <div className="text-left">
+              <p className="text-sm font-bold text-white">Invitation verified</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/55">
+                Welcome! Set your password to access your tenant portal.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-left">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-white/40">Email address</p>
+          <p className="mt-1 font-medium text-white">{email}</p>
+        </div>
+
+        <form onSubmit={handleAcceptInvite} className="space-y-5">
+          <div>
+            <label className="mb-2 block text-xs font-semibold text-white/55">Create password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-[#00C896]/45"
+                placeholder="Min. 6 characters"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-xs font-semibold text-white/55">Confirm password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-[#00C896]/45"
+                placeholder="Repeat password"
+                required
+              />
+              <Lock className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/35" />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={verifying}
+            className="w-full rounded-xl bg-[#00C896] py-3 text-sm font-bold text-[#041208] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {verifying ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#041208]/30 border-t-[#041208]" />
+                Creating account…
+              </span>
+            ) : (
+              "Create account & access portal"
+            )}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-white/50">
+          Already have an account?{" "}
+          <Link to="/login" className="font-bold text-[#00C896] hover:underline">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );
