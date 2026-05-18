@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { authApi } from "../../api/authApi";
 import { apiErrorMessage } from "../../lib/apiError";
 import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/index.jsx";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -13,7 +14,14 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [verifyToken, setVerifyToken] = useState("");
-  const [form, setForm] = useState({ full_name: "", email: "", phone: "", password: "", confirm: "" });
+  const [form, setForm] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    role: "tenant",
+    password: "",
+    confirm: "",
+  });
 
   useEffect(() => {
     if (searchParams.get("step") === "verify") {
@@ -72,6 +80,7 @@ export default function RegisterPage() {
         email: form.email,
         phone: form.phone,
         password: form.password,
+        role: form.role,
       });
       setEmail(form.email);
       setStep(2);
@@ -146,6 +155,23 @@ export default function RegisterPage() {
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
               />
+            </div>
+            <div className="md:col-span-2">
+              <Select
+                className="select-auth"
+                label="Sign up as"
+                value={form.role}
+                onChange={(e) => set("role", e.target.value)}
+                options={[
+                  { value: "tenant", label: "Tenant — browse & rent (fastest path)" },
+                  { value: "landlord", label: "Landlord — list & manage properties (KYC + approval)" },
+                  { value: "agent", label: "Agent — agency workspace (KYC + approval)" },
+                ]}
+              />
+              <p className="mt-1 text-[10px] text-white/40 sm:text-[11px]">
+                Admins are created internally only. After email verification you can sign in; landlords and agents go
+                through KYC and moderation before publishing listings.
+              </p>
             </div>
             <Input
               required

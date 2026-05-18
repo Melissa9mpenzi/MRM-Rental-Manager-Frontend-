@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Search, Shield } from "lucide-react";
 import { workspaceApi } from "../../api/workspaceApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
@@ -17,6 +17,14 @@ export default function AdminUsersListPage() {
   const [role, setRole] = useState("");
   const [page, setPage] = useState(0);
   const limit = 25;
+  const qc = useQueryClient();
+
+  const kycMutation = useMutation({
+    mutationFn: ({ id, action }) => workspaceApi.adminKycReview(id, { action }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+    },
+  });
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["workspace-admin-users", search, role, page],
@@ -84,6 +92,9 @@ export default function AdminUsersListPage() {
                   <th className="px-4 py-3">Role</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Email verified</th>
+                  <th className="px-4 py-3">KYC</th>
+                  <th className="px-4 py-3">Trusted</th>
+                  <th className="px-4 py-3">Actions</th>
                   <th className="px-4 py-3">Joined</th>
                 </tr>
               </thead>
@@ -108,6 +119,32 @@ export default function AdminUsersListPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">{u.email_verified ? "Yes" : "No"}</td>
+                    <td className="px-4 py-3 text-xs capitalize text-white/70">{u.kyc_review_status || "—"}</td>
+                    <td className="px-4 py-3 text-xs">{u.trusted_for_commerce ? "Yes" : "No"}</td>
+                    <td className="px-4 py-3">
+                      {(u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending" ? (
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            disabled={kycMutation.isPending}
+                            onClick={() => kycMutation.mutate({ id: u.id, action: "approve" })}
+                            className="rounded-lg bg-emerald-600/90 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-500"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            disabled={kycMutation.isPending}
+                            onClick={() => kycMutation.mutate({ id: u.id, action: "reject" })}
+                            className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/10"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-white/35">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-xs text-white/50">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
                     </td>

@@ -16,6 +16,8 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import VerifyOtpPage from "./pages/auth/VerifyOtpPage";
 import SelectRolePage from "./pages/auth/SelectRolePage";
 import KycPage from "./pages/auth/KycPage";
+import AdminTwoFaPage from "./pages/auth/AdminTwoFaPage";
+import PendingApprovalPage from "./pages/auth/PendingApprovalPage";
 import RoleHomeRedirect from "./pages/auth/RoleHomeRedirect";
 
 import LandingPage from "./pages/marketing/LandingPage";
@@ -81,7 +83,12 @@ const qc = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={qc}>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <Toaster
           position="top-right"
           toastOptions={{
@@ -122,7 +129,11 @@ export default function App() {
 
           {/* ── Authenticated app (JWT) + role-prefixed modules ── */}
           <Route element={<ProtectedRoute />}>
+            <Route element={<AuthLayout />}>
+              <Route path="/auth/admin-2fa" element={<AdminTwoFaPage />} />
+            </Route>
             <Route element={<AppLayout />}>
+              <Route path="/verification-pending" element={<PendingApprovalPage />} />
               <Route path="/dashboard" element={<RoleHomeRedirect />} />
 
               {/* Tenant */}

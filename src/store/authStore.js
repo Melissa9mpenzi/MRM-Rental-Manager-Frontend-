@@ -19,6 +19,9 @@ const useAuthStore = create((set, get) => ({
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("refresh_token", data.refresh_token);
     localStorage.setItem("user", JSON.stringify(data.user));
+    if (data.user?.role === "admin") {
+      sessionStorage.removeItem("rd_admin_2fa_verified");
+    }
     set({ user: data.user, isAuthenticated: true, error: null });
   },
 
@@ -48,6 +51,7 @@ const useAuthStore = create((set, get) => ({
     try {
       const data = await authApi.login({ email: emailTrim, password });
       get()._setSession(data);
+      return data;
     } catch (err) {
       const message = apiErrorMessage(err, "Login failed. Check your credentials.");
       set({ error: message });
@@ -69,6 +73,7 @@ const useAuthStore = create((set, get) => ({
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
+      sessionStorage.removeItem("rd_admin_2fa_verified");
       set({ user: null, isAuthenticated: false, error: null });
     }
   },

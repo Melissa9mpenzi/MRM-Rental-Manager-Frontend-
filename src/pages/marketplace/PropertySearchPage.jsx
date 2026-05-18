@@ -1,5 +1,6 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useDeferredValue } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   Search,
   SlidersHorizontal,
@@ -15,7 +16,8 @@ import {
   Store,
   X,
 } from "lucide-react";
-import { PUBLIC_LISTINGS } from "../../data/publicListings";
+import { marketplaceApi } from "../../api/marketplaceApi";
+import { listingImageUrl } from "../../lib/mediaUrl";
 import useAuthStore from "../../store/authStore";
 import ListingSaveButton from "../../components/domain/ListingSaveButton";
 
@@ -59,7 +61,34 @@ function fmtPriceShort(n) {
   return String(n);
 }
 
+const TYPE_FILTER_TO_UNIT_ENUM = {
+  Studio: "studio",
+  "Shop/Retail": "shop",
+  "Office Space": "office",
+  Warehouse: "other",
+  Hostel: "other",
+  Duplex: "two_bedroom",
+  Bungalow: "two_bedroom",
+  Condominium: "two_bedroom",
+  Apartment: "one_bedroom",
+  House: "two_bedroom",
+  Villa: "three_bedroom",
+  "Land/Plot": "other",
+  Commercial: "shop",
+  Airbnb: "one_bedroom",
+};
+
 function inferPropertyType(listing) {
+  if (listing.unit_type) {
+    const u = String(listing.unit_type).toLowerCase();
+    if (u === "studio" || u === "bedsitter") return "Studio";
+    if (u === "one_bedroom") return "Apartment";
+    if (u === "two_bedroom") return "House";
+    if (u === "three_bedroom") return "House";
+    if (u === "shop") return "Shop/Retail";
+    if (u === "office") return "Office Space";
+    if (u === "other") return "Commercial";
+  }
   const t = `${listing.title} ${listing.desc || ""}`.toLowerCase();
   if (t.includes("studio")) return "Studio";
   if (t.includes("villa")) return "Villa";
@@ -116,6 +145,28 @@ export default function PropertySearchPage() {
   const [types, setTypes] = useState(() => new Set());
   const [typeQuery, setTypeQuery] = useState("");
 
+  const deferredQ = useDeferredValue(q);
+
+  const apiUnitType = useMemo(() => {
+    if (types.size !== 1) return undefined;
+    const only = [...types][0];
+    return TYPE_FILTER_TO_UNIT_ENUM[only];
+  }, [types]);
+
+  const { data: listings = [], isLoading, isError } = useQuery({
+    queryKey: ["marketplace-listings", deferredQ.trim(), priceMin, priceMax, apiUnitType],
+    queryFn: () =>
+      marketplaceApi.list({
+        search: deferredQ.trim(),
+        min_rent: priceMin,
+        max_rent: priceMax,
+        unit_type: apiUnitType,
+      }),
+    staleTime: 20_000,
+  });
+
+  const rows = Array.isArray(listings) ? listings : [];
+
   const isAuthed = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
 
@@ -166,7 +217,7 @@ export default function PropertySearchPage() {
   }, [typeQuery]);
 
   const filtered = useMemo(() => {
-    return PUBLIC_LISTINGS.filter((p) => {
+    return rows.filter((p) => {
       const qq = q.trim().toLowerCase();
       if (qq) {
         const blob = `${p.title} ${p.loc} ${p.address}`.toLowerCase();
@@ -182,7 +233,7 @@ export default function PropertySearchPage() {
       }
       return true;
     });
-  }, [q, priceMin, priceMax, bedrooms, types, amenities]);
+  }, [q, priceMin, priceMax, bedrooms, types, amenities, rows]);
 
   const minPct = ((priceMin - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
   const maxPct = ((priceMax - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
@@ -417,8 +468,8 @@ export default function PropertySearchPage() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-white/40">
             <p>
-              Showing <span className="font-bold text-white/75">{filtered.length}</span> of {PUBLIC_LISTINGS.length}{" "}
-              listings
+              Showing <span className="font-bold text-white/75">{filtered.length}</span> of {rows.length} listings
+              {isLoading && <span className="ml-2 text-white/35">(loading…)</span>}
               {activeFilterCount > 0 && (
                 <span className="ml-2 rounded-full bg-white/[0.08] px-2 py-0.5 font-bold text-white/55">
                   {activeFilterCount} filter{activeFilterCount === 1 ? "" : "s"}
@@ -426,6 +477,12 @@ export default function PropertySearchPage() {
               )}
             </p>
           </div>
+
+          {isError && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              Could not load listings from the API. Check that the backend is running and CORS allows this origin.
+            </div>
+          )}
 
           <div className="grid gap-4 md:grid-cols-2">
             {filtered.map((p) => (
@@ -438,7 +495,7 @@ export default function PropertySearchPage() {
                 <Link to={`/property/${p.id}`} className="block">
                   <div className="relative h-40 overflow-hidden bg-[#0d1520]">
                     <img
-                      src={p.image}
+                      src={listingImageUrl(p.image)}
                       alt=""
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
                     />
@@ -461,7 +518,7 @@ export default function PropertySearchPage() {
                       <span className="text-white/50">{inferPropertyType(p)}</span>
                     </p>
                     <p className="mt-3 text-lg font-extrabold text-[#00C896]">
-                      UGX {p.price.toLocaleString()}
+                      UGX {Number(p.price || 0).toLocaleString()}
                       <span className="text-xs font-semibold text-white/40">/mo</span>
                     </p>
                   </div>

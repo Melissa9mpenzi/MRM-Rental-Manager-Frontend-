@@ -12,6 +12,9 @@ const api = axios.create({
 // ── REQUEST INTERCEPTOR — attach JWT ──────────────────────────────
 api.interceptors.request.use(
   (config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
     const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -31,6 +34,7 @@ function isAuthCredentialRequest(config) {
   return (
     url.includes("/auth/login") ||
     url.includes("/auth/register") ||
+    url.includes("/auth/firebase") ||
     url.includes("/auth/forgot-password") ||
     url.includes("/auth/reset-password") ||
     url.includes("/auth/verify-email")

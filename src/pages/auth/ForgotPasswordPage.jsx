@@ -57,9 +57,16 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await authApi.forgotPassword({ email });
+      const res = await authApi.forgotPassword({ email });
       setStep(2);
-      toast.success("Reset code sent! Check your email.");
+      if (res?.dev_reset_otp) {
+        toast.success(
+          `Dev mode: email not configured. Use code ${res.dev_reset_otp} (also in API terminal).`,
+          { duration: 12000 }
+        );
+      } else {
+        toast.success("Reset code sent! Check your inbox and spam folder.");
+      }
     } catch (err) {
       toast.error(apiErrorMessage(err, "Something went wrong. Please try again."));
     } finally {
@@ -135,7 +142,10 @@ export default function ForgotPasswordPage() {
       {step === 1 && (
         <div className="animate-fade-in">
           <h1 className="text-lg font-bold text-white sm:text-xl">Forgot password?</h1>
-          <p className="mb-3 mt-0.5 text-xs text-white/55">We&apos;ll send a reset code to your email.</p>
+          <p className="mb-3 mt-0.5 text-xs text-white/55">
+            We&apos;ll email a <strong className="text-white/80">6-digit code</strong> (not a link). SMTP must be set in the API
+            <code className="mx-1 text-[10px] text-white/45">.env</code> or the code appears in the server terminal in dev.
+          </p>
           <form onSubmit={handleSend} className="space-y-3">
             <Input
               required
