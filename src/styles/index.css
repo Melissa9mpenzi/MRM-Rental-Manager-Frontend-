@@ -121,6 +121,23 @@
     @apply block text-[11px] font-semibold text-brand-mid mb-1.5 tracking-wide uppercase;
   }
 
+  /**
+   * Native <select> on dark auth cards: closed state stays on-brand; option list is often OS-white,
+   * so options need dark text (many browsers honor `option { color }`).
+   */
+  .select-auth {
+    @apply w-full rounded-xl border border-white/[0.18] bg-white/[0.1] px-3.5 py-2.5 text-sm font-medium
+           text-white shadow-inner
+           focus:outline-none focus:ring-2 focus:ring-brand-teal/40 focus:border-brand-teal/55
+           transition-all duration-150;
+    color-scheme: dark;
+  }
+  .select-auth option,
+  .select-auth optgroup {
+    color: #0a1210;
+    background-color: #f0f7f4;
+  }
+
   .badge-paid {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-tealLt text-brand-teal;
   }

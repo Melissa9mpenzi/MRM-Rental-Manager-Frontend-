@@ -6,6 +6,7 @@ import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import useAuthStore from "../../store/authStore";
 import { defaultDashboardPath, pathAllowedForRole } from "../../config/access";
+import { postLoginDestination } from "../../lib/onboardingAuth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -47,16 +48,17 @@ export default function LoginPage() {
     try {
       await login(data);
       const user = useAuthStore.getState().user;
-      const role = user?.role;
-      const home = defaultDashboardPath(role);
-      if (from && pathAllowedForRole(from, role)) {
+      const next = postLoginDestination(user);
+      const home = defaultDashboardPath(user?.role);
+      const needsOnboarding = next !== home;
+      if (!needsOnboarding && from && pathAllowedForRole(from, user?.role)) {
         toast.success("Welcome back!");
         navigate(from, { replace: true });
-      } else {
-        if (from) toast("That page is not available for your role. Opening your dashboard.");
-        else toast.success("Welcome back!");
-        navigate(home, { replace: true });
+        return;
       }
+      if (from && needsOnboarding) toast.success("Welcome back! Complete the next step to continue.");
+      else toast.success("Welcome back!");
+      navigate(next, { replace: true });
     } catch (err) {
       toast.error(err.message || "Invalid email or password.");
     }

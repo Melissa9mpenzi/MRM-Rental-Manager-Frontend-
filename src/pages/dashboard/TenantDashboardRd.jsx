@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -11,19 +11,15 @@ import {
   Sparkles,
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
-import { useSavedListingsStore } from "../../store/savedListingsStore";
-import { PUBLIC_LISTINGS } from "../../data/publicListings";
+import { marketplaceApi } from "../../api/marketplaceApi";
+import { savedListingsApi } from "../../api/savedListingsApi";
+import { listingImageUrl } from "../../lib/mediaUrl";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { notificationsApi } from "../../api/notificationsApi";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
-const RECOMMENDED = PUBLIC_LISTINGS.slice(0, 6);
-
-const FALLBACK_LEASE_IMAGE =
-  PUBLIC_LISTINGS.find((l) => /ntinda/i.test(l.title) || /ntinda/i.test(l.address))?.image ??
-  PUBLIC_LISTINGS[0]?.image ??
-  "/images/hero-villa.jpg";
+const FALLBACK_LEASE_IMAGE = "/images/hero-villa.jpg";
 
 function fmtPaidYtd(n) {
   const v = Number(n) || 0;
@@ -34,12 +30,21 @@ function fmtPaidYtd(n) {
 
 export default function TenantDashboardRd() {
   const user = useAuthStore((s) => s.user);
-  const hydrate = useSavedListingsStore((s) => s.hydrate);
-  const savedCount = useSavedListingsStore((s) => s.ids.length);
 
-  useEffect(() => {
-    if (user?.role === "tenant" && user?.id != null) hydrate(user.id);
-  }, [user?.id, user?.role, hydrate]);
+  const { data: savedRows = [] } = useQuery({
+    queryKey: ["saved-units"],
+    queryFn: () => savedListingsApi.list(),
+    enabled: user?.role === "tenant",
+    staleTime: 30_000,
+  });
+  const savedCount = Array.isArray(savedRows) ? savedRows.length : 0;
+
+  const { data: marketRows = [] } = useQuery({
+    queryKey: ["marketplace-listings", "dash-rec"],
+    queryFn: () => marketplaceApi.list({}),
+    staleTime: 60_000,
+  });
+  const recommended = useMemo(() => (Array.isArray(marketRows) ? marketRows : []).slice(0, 6), [marketRows]);
 
   const leaseQuery = useQuery({
     queryKey: ["tenant-my-lease"],
@@ -254,26 +259,30 @@ export default function TenantDashboardRd() {
             </Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1">
-            {RECOMMENDED.map((l) => (
+            {recommended.length === 0 ? (
+              <p className="px-3 py-6 text-center text-sm text-white/45">No vacant listings on the platform yet.</p>
+            ) : (
+              recommended.map((l) => (
               <Link
                 key={l.id}
                 to={`/property/${l.id}`}
                 className="w-[200px] flex-shrink-0 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] transition hover:border-[#00C896]/35"
               >
                 <div className="relative h-28 overflow-hidden bg-[#0d1520]">
-                  <img src={l.image} alt="" className="h-full w-full object-cover" />
+                  <img src={listingImageUrl(l.image)} alt="" className="h-full w-full object-cover" />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
                 </div>
                 <div className="p-3">
                   <div className="line-clamp-1 text-sm font-bold text-white">{l.title}</div>
                   <div className="mt-0.5 line-clamp-1 text-xs text-white/45">{l.address}</div>
                   <div className="mt-2 text-sm font-extrabold text-[#00C896]">
-                    UGX {l.price.toLocaleString()}
+                    UGX {Number(l.price || 0).toLocaleString()}
                     <span className="text-xs font-semibold text-white/40">/mo</span>
                   </div>
                 </div>
               </Link>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

@@ -1,10 +1,10 @@
 import { Navigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
-import { defaultDashboardPath } from "../../config/access";
+import { postLoginDestination } from "../../lib/onboardingAuth";
 
-/** Maps `/dashboard` → the correct role-prefixed home. */
+/** Maps `/dashboard` → onboarding step or the correct role home. */
 export default function RoleHomeRedirect() {
   const user = useAuthStore((s) => s.user);
-  const role = user?.role;
-  return <Navigate to={defaultDashboardPath(role)} replace />;
+  const next = postLoginDestination(user);
+  return <Navigate to={next} replace />;
 }

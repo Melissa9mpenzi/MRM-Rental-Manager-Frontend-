@@ -106,11 +106,11 @@ export function ConfirmDialog({ open, title, message, confirmLabel = "Confirm", 
 }
 
 // ── SELECT ────────────────────────────────────────────────────────
-export function Select({ label, options = [], error, ...props }) {
+export function Select({ label, options = [], error, className = "", ...props }) {
   return (
     <div className="w-full">
       {label && <label className="input-label">{label}</label>}
-      <select className="input-field" {...props}>
+      <select className={(className && className.trim()) || "input-field"} {...props}>
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}

@@ -119,6 +119,26 @@ export default function LandlordDashboard() {
         <p className="mt-0.5 text-sm text-white/55">Landlord overview — revenue, occupancy, and arrears</p>
       </div>
 
+      {!user?.trusted_for_commerce && (
+        <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <strong className="font-bold">Limited mode.</strong> Complete KYC and wait for admin approval to publish new
+          listings and unlock payouts.{" "}
+          {!user?.kyc_submitted_at ? (
+            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
+              Submit KYC →
+            </Link>
+          ) : user?.kyc_review_status === "pending" ? (
+            <Link to="/verification-pending" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
+              View status →
+            </Link>
+          ) : user?.kyc_review_status === "rejected" ? (
+            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
+              Resubmit KYC →
+            </Link>
+          ) : null}
+        </div>
+      )}
+
       {isError && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           Could not load dashboard stats. Check that the API is running and you are signed in.

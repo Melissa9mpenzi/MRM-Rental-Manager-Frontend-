@@ -73,6 +73,7 @@ const PREFIX = {
 export function pathAllowedForRole(pathname, role) {
   if (!pathname || !role) return false;
   if (pathname === "/dashboard") return true;
+  if (pathname === "/verification-pending") return true;
   if (pathname.startsWith("/browse-properties") || pathname.startsWith("/property/")) return true;
 
   if (role === API_ROLES.tenant) {
