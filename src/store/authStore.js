@@ -61,6 +61,21 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
+  /** Session from POST /auth/firebase (Google / Apple via Firebase popup). */
+  loginWithFirebase: async (sessionData) => {
+    set({ isLoading: true, error: null });
+    try {
+      get()._setSession(sessionData);
+      return sessionData;
+    } catch (err) {
+      const message = apiErrorMessage(err, "Social sign-in failed.");
+      set({ error: message });
+      throw err;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   /**
    * Log out — clears session locally and invalidates server-side token.
    */

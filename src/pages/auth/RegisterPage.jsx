@@ -6,6 +6,7 @@ import { authApi } from "../../api/authApi";
 import { apiErrorMessage } from "../../lib/apiError";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/index.jsx";
+import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -126,6 +127,17 @@ export default function RegisterPage() {
           <div className="mb-3">
             <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Create your account</h1>
             <p className="mt-0.5 text-xs text-white/55">RentDirect UG · quick signup</p>
+          </div>
+
+          <SocialAuthButtons
+            disabled={loading}
+            hint="Already registered? Sign in with Google or Apple (same email as your account)."
+          />
+
+          <div className="my-3 flex items-center gap-2">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-[10px] font-medium text-white/45">or register with email</span>
+            <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <form onSubmit={handleRegister} className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-x-3 md:gap-y-2.5">

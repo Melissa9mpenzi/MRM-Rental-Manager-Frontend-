@@ -7,6 +7,7 @@ import { Input } from "../../components/ui/Input";
 import useAuthStore from "../../store/authStore";
 import { defaultDashboardPath, pathAllowedForRole } from "../../config/access";
 import { postLoginDestination } from "../../lib/onboardingAuth";
+import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -71,21 +72,12 @@ export default function LoginPage() {
         <p className="mt-0.5 text-xs text-white/55 sm:text-sm">Sign in to RentDirect UG</p>
       </div>
 
-      <div className="mb-3 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          disabled
-          className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] py-2 text-[10px] font-semibold text-white/35 sm:text-xs"
-        >
-          Google <span className="text-white/25">· soon</span>
-        </button>
-        <button
-          type="button"
-          disabled
-          className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] py-2 text-[10px] font-semibold text-white/35 sm:text-xs"
-        >
-          Apple <span className="text-white/25">· soon</span>
-        </button>
+      <SocialAuthButtons disabled={isLoading} />
+
+      <div className="my-3 flex items-center gap-2">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-[10px] font-medium text-white/45">or sign in with email</span>
+        <div className="h-px flex-1 bg-white/10" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>

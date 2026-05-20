@@ -9,17 +9,12 @@ import toast from "react-hot-toast";
 import { paymentsApi } from "../../api/paymentsApi";
 import { tenantsApi } from "../../api/tenantsApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
+import { RECORD_PAYMENT_METHODS } from "../../lib/paymentMethods";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - 2 + i);
-const METHODS = [
-  { value: "mtn_momo",  label: "MTN MoMo" },
-  { value: "airtel",   label: "Airtel Money" },
-  { value: "cash",     label: "Cash" },
-  { value: "bank",     label: "Bank Transfer" },
-  { value: "other",    label: "Other" },
-];
 const TYPES = [
   { value: "rent",    label: "Rent" },
   { value: "deposit", label: "Deposit" },
@@ -214,11 +209,18 @@ export default function RecordPaymentPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Payment Method" required>
-              <div className="relative">
-                <CreditCard size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-mid" />
-                <select className="input-field pl-9" value={form.payment_method}
-                  onChange={(e) => set("payment_method", e.target.value)}>
-                  {METHODS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              <div className="flex items-center gap-2">
+                <PaymentMethodIcon method={form.payment_method} className="h-9 w-9 flex-shrink-0 rounded-lg" />
+                <select
+                  className="input-field min-w-0 flex-1"
+                  value={form.payment_method}
+                  onChange={(e) => set("payment_method", e.target.value)}
+                >
+                  {RECORD_PAYMENT_METHODS.map((m) => (
+                    <option key={m.id} value={m.apiValue}>
+                      {m.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </Field>

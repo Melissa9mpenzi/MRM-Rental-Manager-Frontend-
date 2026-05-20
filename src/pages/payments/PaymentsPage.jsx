@@ -7,35 +7,15 @@ import {
 } from "lucide-react";
 import { paymentsApi } from "../../api/paymentsApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import PaymentMethodBadge from "../../components/payments/PaymentMethodBadge";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const METHOD_LABELS = {
-  mtn_momo: "MTN MoMo", airtel: "Airtel", cash: "Cash",
-  bank: "Bank", other: "Other",
-};
-const METHOD_COLORS = {
-  mtn_momo: "bg-yellow-500/15 text-yellow-200 ring-1 ring-yellow-500/25",
-  airtel:   "bg-red-500/12 text-red-200 ring-1 ring-red-500/25",
-  cash:     "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/25",
-  bank:     "bg-sky-500/15 text-sky-200 ring-1 ring-sky-500/25",
-  other:    "bg-white/10 text-white/60 ring-1 ring-white/15",
-};
 const TYPE_COLORS = {
   rent:    "bg-brand-tealLt text-brand-teal ring-1 ring-brand-teal/30",
   deposit: "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/25",
   penalty: "bg-red-500/12 text-red-200 ring-1 ring-red-500/25",
   other:   "bg-white/10 text-white/60 ring-1 ring-white/15",
 };
-
-function MethodBadge({ method }) {
-  const m = typeof method === "string" ? method : method?.value ?? "";
-  const color = METHOD_COLORS[m] || "bg-white/10 text-white/60 ring-1 ring-white/15";
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${color}`}>
-      {METHOD_LABELS[m] || m}
-    </span>
-  );
-}
 
 function TypeBadge({ type }) {
   const t = typeof type === "string" ? type : type?.value ?? "";
@@ -166,7 +146,7 @@ export default function PaymentsPage() {
                   <td className="px-3 py-3 font-semibold text-brand-dark text-xs whitespace-nowrap">
                     {MONTHS[(p.period_month || 1) - 1]} {p.period_year}
                   </td>
-                  <td className="px-3 py-3"><MethodBadge method={p.payment_method} /></td>
+                  <td className="px-3 py-3"><PaymentMethodBadge method={p.payment_method} /></td>
                   <td className="px-3 py-3"><TypeBadge type={p.payment_type} /></td>
                   <td className="px-3 py-3 text-right font-bold text-brand-dark whitespace-nowrap">
                     UGX {parseFloat(p.amount).toLocaleString()}
