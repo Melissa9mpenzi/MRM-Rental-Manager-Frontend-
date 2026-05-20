@@ -1,11 +1,11 @@
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { paymentsApi } from "../../api/paymentsApi";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
-
-const METHODS = ["cash","mtn_momo","airtel","bank","other"];
+import PaymentMethodIcon from "../payments/PaymentMethodIcon";
+import { RECORD_PAYMENT_METHODS } from "../../lib/paymentMethods";
 const TYPES   = ["rent","deposit","penalty","other"];
 const today   = new Date().toISOString().split("T")[0];
 
@@ -13,7 +13,7 @@ export default function PaymentForm({ tenant, onSuccess }) {
   const qc = useQueryClient();
   const now = new Date();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm({
     defaultValues: {
       amount:         tenant?.monthly_rent || "",
       payment_method: "cash",
@@ -23,6 +23,8 @@ export default function PaymentForm({ tenant, onSuccess }) {
       payment_date:   today,
     },
   });
+
+  const selectedMethod = useWatch({ control, name: "payment_method" });
 
   const mutation = useMutation({
     mutationFn: (data) => paymentsApi.create({
@@ -55,9 +57,16 @@ export default function PaymentForm({ tenant, onSuccess }) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="input-label">Method</label>
-          <select className="input-field" {...register("payment_method")}>
-            {METHODS.map(m => <option key={m} value={m}>{m.replace("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}</option>)}
-          </select>
+          <div className="flex items-center gap-2">
+            <PaymentMethodIcon method={selectedMethod} className="h-9 w-9 flex-shrink-0 rounded-lg" />
+            <select className="input-field min-w-0 flex-1" {...register("payment_method")}>
+              {RECORD_PAYMENT_METHODS.map((m) => (
+                <option key={m.id} value={m.apiValue}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div>
           <label className="input-label">Type</label>

@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import PaymentMethodBadge from "../../components/payments/PaymentMethodBadge";
+import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
+import { paymentsApi } from "../../api/paymentsApi";
 
 function fmt(n) {
   return `UGX ${Number(n || 0).toLocaleString()}`;
@@ -18,6 +21,13 @@ export default function TenantWalletPage() {
     queryKey: ["tenant-my-payments"],
     queryFn: () => tenantPortalApi.myPayments(),
     enabled: user?.role === "tenant",
+    retry: false,
+  });
+
+  const walletQuery = useQuery({
+    queryKey: ["wallet-summary"],
+    queryFn: () => paymentsApi.walletSummary(),
+    enabled: !!user,
     retry: false,
   });
 
@@ -88,8 +98,23 @@ export default function TenantWalletPage() {
                 {paymentsQuery.isLoading ? "…" : fmt(ytdPaid)}
               </div>
               <p className="mt-2 max-w-md text-xs text-white/50">
-                Totals come from <code className="rounded bg-black/30 px-1 font-mono text-[10px]">GET /tenant/my-payments</code>.
+                {walletQuery.data?.payment_count != null
+                  ? `${walletQuery.data.payment_count} payments on file`
+                  : "Totals from your payment history"}
               </p>
+              {walletQuery.data?.by_method && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {Object.entries(walletQuery.data.by_method).map(([key, val]) => (
+                    <span
+                      key={key}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-white/70"
+                    >
+                      <PaymentMethodIcon method={key} className="h-5 w-5 rounded" />
+                      {fmt(val)}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -131,7 +156,9 @@ export default function TenantWalletPage() {
                       {t.unit_number ? ` · ${t.unit_number}` : ""}
                     </td>
                     <td className="px-5 py-3 text-white/50">{t.payment_date ?? "—"}</td>
-                    <td className="px-5 py-3 text-white/50">{t.payment_method ?? "—"}</td>
+                    <td className="px-5 py-3">
+                      <PaymentMethodBadge method={t.payment_method} />
+                    </td>
                     <td className="px-5 py-3 text-right">
                       <span className="inline-flex items-center gap-1 font-bold text-brand-teal">
                         <ArrowDownLeft size={14} />+{fmt(t.amount)}

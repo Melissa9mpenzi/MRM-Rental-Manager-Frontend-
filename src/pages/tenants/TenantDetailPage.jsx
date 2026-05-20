@@ -10,9 +10,9 @@ import ArrearsBadge from "../../components/domain/ArrearsBadge.jsx";
 import PaymentForm from "../../components/domain/PaymentForm.jsx";
 import { Button } from "../../components/ui/Button.jsx";
 import { ConfirmDialog } from "../../components/ui/index.jsx";
+import PaymentMethodBadge from "../../components/payments/PaymentMethodBadge";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const METHOD_LABELS = { mtn_momo:"MTN MoMo", airtel:"Airtel Money", cash:"Cash", bank:"Bank", other:"Other" };
 
 function payType(p) {
   const v = p?.payment_type;
@@ -182,7 +182,7 @@ export default function TenantDetailPage() {
                     <td className="py-2.5 text-brand-mid">{p.payment_date}</td>
                     <td className="py-2.5 font-semibold text-brand-dark">{MONTHS[p.period_month-1]} {p.period_year}</td>
                     <td className="py-2.5 capitalize text-brand-mid">{payType(p)}</td>
-                    <td className="py-2.5 text-brand-mid">{METHOD_LABELS[payMethod(p)] || payMethod(p)}</td>
+                    <td className="py-2.5"><PaymentMethodBadge method={payMethod(p)} /></td>
                     <td className="py-2.5 text-right font-bold text-brand-dark">UGX {parseFloat(p.amount).toLocaleString()}</td>
                     <td className="py-2.5 text-right">
                       <div className="flex items-center justify-end gap-2">
