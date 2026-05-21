@@ -16,7 +16,24 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import VerifyOtpPage from "./pages/auth/VerifyOtpPage";
 import SelectRolePage from "./pages/auth/SelectRolePage";
 import KycPage from "./pages/auth/KycPage";
-import AdminTwoFaPage from "./pages/auth/AdminTwoFaPage";
+import GovernmentTwoFaPage from "./pages/auth/GovernmentTwoFaPage";
+import GovernmentAuthLayout from "./layouts/GovernmentAuthLayout";
+import GovernmentLoginPage from "./pages/government/auth/GovernmentLoginPage";
+import GovernmentAcceptInvitePage from "./pages/government/auth/GovernmentAcceptInvitePage";
+import GovernmentPortalLayout from "./layouts/GovernmentPortalLayout";
+import GovOfficersPage from "./pages/government/GovOfficersPage";
+import GovernmentOverviewPage from "./pages/government/GovernmentOverviewPage";
+import NiraDashboardPage from "./pages/government/NiraDashboardPage";
+import KccaDashboardPage from "./pages/government/KccaDashboardPage";
+import UraDashboardPage from "./pages/government/UraDashboardPage";
+import GovFraudPage from "./pages/government/GovFraudPage";
+import GovAuditPage from "./pages/government/GovAuditPage";
+import GovApprovalsPage from "./pages/government/GovApprovalsPage";
+import GovInspectionsPage from "./pages/government/GovInspectionsPage";
+import GovAnalyticsPage from "./pages/government/GovAnalyticsPage";
+import GovSettingsPage from "./pages/government/GovSettingsPage";
+import { GOVERNMENT_PORTAL_ROLES } from "./config/governmentAccess";
+import SystemDashboardPage from "./pages/system/SystemDashboardPage";
 import PendingApprovalPage from "./pages/auth/PendingApprovalPage";
 import RoleHomeRedirect from "./pages/auth/RoleHomeRedirect";
 
@@ -29,7 +46,6 @@ import ListingIdRedirect from "./pages/marketplace/ListingIdRedirect";
 import LandlordDashboard from "./pages/dashboard/LandlordDashboard";
 import TenantDashboardRd from "./pages/dashboard/TenantDashboardRd";
 import AgentDashboardRd from "./pages/dashboard/AgentDashboardRd";
-import AdminDashboardRd from "./pages/dashboard/AdminDashboardRd";
 import AdminUsersListPage from "./pages/admin/AdminUsersListPage";
 
 import TenantAcceptInvite from "./pages/tenant/TenantAcceptInvite";
@@ -64,16 +80,6 @@ import {
   AgentDealsPage,
   AgentCommissionsPage,
   AgentAnalyticsPage,
-  AdminListingsPage,
-  AdminModerationPage,
-  AdminPaymentsPage,
-  AdminContractsPage,
-  AdminFraudPage,
-  AdminAnalyticsPage,
-  AdminReportsPage,
-  AdminSupportPage,
-  AdminAuditLogsPage,
-  AdminSystemSettingsPage,
 } from "./pages/workspace/placeholders.jsx";
 
 const qc = new QueryClient({
@@ -117,7 +123,13 @@ export default function App() {
             <Route path="/property/:id" element={<ListingDetailPage />} />
           </Route>
 
-          {/* ── Auth ── */}
+          {/* ── Government portal auth (invitation-only, no social signup) ── */}
+          <Route element={<GovernmentAuthLayout />}>
+            <Route path="/government/login" element={<GovernmentLoginPage />} />
+            <Route path="/government/accept-invite" element={<GovernmentAcceptInvitePage />} />
+          </Route>
+
+          {/* ── Public auth (tenant / landlord / agent) ── */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -130,11 +142,18 @@ export default function App() {
           {/* ── Authenticated app (JWT) + role-prefixed modules ── */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AuthLayout />}>
-              <Route path="/auth/admin-2fa" element={<AdminTwoFaPage />} />
+              <Route path="/auth/admin-2fa" element={<GovernmentTwoFaPage />} />
+              <Route path="/auth/government-2fa" element={<GovernmentTwoFaPage />} />
             </Route>
             <Route element={<AppLayout />}>
               <Route path="/verification-pending" element={<PendingApprovalPage />} />
               <Route path="/dashboard" element={<RoleHomeRedirect />} />
+
+              {/* System administrator (seed-only) */}
+              <Route element={<RoleGuard allowed={[API_ROLES.system_admin]} />}>
+                <Route path="/system" element={<Navigate to="/system/dashboard" replace />} />
+                <Route path="/system/dashboard" element={<SystemDashboardPage />} />
+              </Route>
 
               {/* Tenant */}
               <Route element={<RoleGuard allowed={[API_ROLES.tenant]} />}>
@@ -190,25 +209,27 @@ export default function App() {
                 <Route path="/agent/settings" element={<SettingsPage />} />
               </Route>
 
-              {/* Admin */}
-              <Route element={<RoleGuard allowed={[API_ROLES.admin]} />}>
-                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/admin/dashboard" element={<AdminDashboardRd />} />
-                <Route path="/admin/users" element={<AdminUsersListPage />} />
-                <Route path="/admin/listings" element={<AdminListingsPage />} />
-                <Route path="/admin/moderation" element={<AdminModerationPage />} />
-                <Route path="/admin/payments" element={<AdminPaymentsPage />} />
-                <Route path="/admin/contracts" element={<AdminContractsPage />} />
-                <Route path="/admin/fraud" element={<AdminFraudPage />} />
-                <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-                <Route path="/admin/reports" element={<AdminReportsPage />} />
-                <Route path="/admin/support" element={<AdminSupportPage />} />
-                <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
-                <Route path="/admin/system-settings" element={<AdminSystemSettingsPage />} />
-                <Route path="/admin/notifications" element={<SharedInAppNotificationsPage />} />
-                <Route path="/admin/messages" element={<MessagesPage />} />
-                <Route path="/admin/settings" element={<SettingsPage />} />
+              {/* Government portal (web-only — NIRA / KCCA / URA / super) */}
+              <Route element={<RoleGuard allowed={GOVERNMENT_PORTAL_ROLES} />}>
+                <Route element={<GovernmentPortalLayout />}>
+                  <Route path="/government" element={<Navigate to="/government/overview" replace />} />
+                  <Route path="/government/overview" element={<GovernmentOverviewPage />} />
+                  <Route path="/government/nira" element={<NiraDashboardPage />} />
+                  <Route path="/government/kcca" element={<KccaDashboardPage />} />
+                  <Route path="/government/ura" element={<UraDashboardPage />} />
+                  <Route path="/government/fraud" element={<GovFraudPage />} />
+                  <Route path="/government/approvals" element={<GovApprovalsPage />} />
+                  <Route path="/government/inspections" element={<GovInspectionsPage />} />
+                  <Route path="/government/audit" element={<GovAuditPage />} />
+                  <Route path="/government/analytics" element={<GovAnalyticsPage />} />
+                  <Route path="/government/settings" element={<GovSettingsPage />} />
+                  <Route path="/government/officers" element={<GovOfficersPage />} />
+                  <Route path="/government/users" element={<AdminUsersListPage />} />
+                </Route>
               </Route>
+
+              {/* Legacy /admin URLs → government portal */}
+              <Route path="/admin/*" element={<Navigate to="/government/overview" replace />} />
 
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>

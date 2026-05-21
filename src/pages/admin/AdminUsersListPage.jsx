@@ -9,7 +9,10 @@ const ROLE_OPTIONS = [
   { value: "tenant", label: "Tenant" },
   { value: "landlord", label: "Landlord" },
   { value: "staff", label: "Staff" },
-  { value: "admin", label: "Admin" },
+  { value: "system_admin", label: "System administrator" },
+  { value: "gov_nira", label: "NIRA officer" },
+  { value: "gov_kcca", label: "KCCA officer" },
+  { value: "gov_ura", label: "URA officer" },
 ];
 
 export default function AdminUsersListPage() {

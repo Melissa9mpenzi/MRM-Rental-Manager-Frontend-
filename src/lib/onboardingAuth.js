@@ -1,15 +1,18 @@
 import { defaultDashboardPath } from "../config/access";
+import { isGovernmentOfficer } from "../config/governmentAccess";
+import { GOV_PORTAL } from "../config/governmentPortal";
 
 /**
- * Where to send the user after login or when hitting `/dashboard`.
- * Tenant: home after email verify. Landlord/agent: KYC → pending → home. Admin: mandatory 2FA gate each session.
+ * Post-login routing.
+ * - Government officers: government portal login + 2FA
+ * - System administrator: main login → /system/dashboard (optional gov 2FA for portal)
  */
 export function postLoginDestination(user) {
   if (!user) return "/login";
   const role = user.role;
 
-  if (role === "admin" && sessionStorage.getItem("rd_admin_2fa_verified") !== "1") {
-    return "/auth/admin-2fa";
+  if (isGovernmentOfficer(role)) {
+    return GOV_PORTAL.login;
   }
 
   if ((role === "landlord" || role === "staff") && user.email_verified) {

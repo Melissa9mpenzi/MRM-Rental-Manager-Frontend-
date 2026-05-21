@@ -61,7 +61,12 @@ export async function runTenantCheckoutUi({
     );
     throw new Error("Airtel not supported");
   }
-  if ((methodId === "card" || methodId === "sui") && !supports.card) {
+  const methodCfg = resolvePaymentMethod(methodId);
+  if (methodCfg.comingSoon) {
+    toast.error("Blockchain payments are coming soon.");
+    throw new Error("Payment method not available");
+  }
+  if (methodId === "card" && !supports.card) {
     toast.error("Card payments need Pesapal on the server (PAYMENT_GATEWAY_PROVIDER=pesapal).");
     throw new Error("Card not supported");
   }

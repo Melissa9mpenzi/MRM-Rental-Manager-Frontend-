@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authApi } from "../api/authApi";
+import { governmentAuthApi } from "../api/governmentAuthApi";
 import { usersApi } from "../api/usersApi";
 import { apiErrorMessage } from "../lib/apiError";
 
@@ -19,7 +20,9 @@ const useAuthStore = create((set, get) => ({
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("refresh_token", data.refresh_token);
     localStorage.setItem("user", JSON.stringify(data.user));
-    if (data.user?.role === "admin") {
+    const r = String(data.user?.role || "");
+    if (r.startsWith("gov_") || r === "system_admin") {
+      sessionStorage.removeItem("rd_gov_2fa_verified");
       sessionStorage.removeItem("rd_admin_2fa_verified");
     }
     set({ user: data.user, isAuthenticated: true, error: null });
@@ -45,6 +48,22 @@ const useAuthStore = create((set, get) => ({
   /**
    * Log in with email + password.
    */
+  governmentLogin: async ({ email, password }) => {
+    set({ isLoading: true, error: null });
+    const emailTrim = String(email ?? "").trim();
+    try {
+      const data = await governmentAuthApi.login({ email: emailTrim, password });
+      get()._setSession(data);
+      return data;
+    } catch (err) {
+      const message = apiErrorMessage(err, "Government sign-in failed.");
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   login: async ({ email, password }) => {
     set({ isLoading: true, error: null });
     const emailTrim = String(email ?? "").trim();
@@ -89,6 +108,7 @@ const useAuthStore = create((set, get) => ({
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
       sessionStorage.removeItem("rd_admin_2fa_verified");
+      sessionStorage.removeItem("rd_gov_2fa_verified");
       set({ user: null, isAuthenticated: false, error: null });
     }
   },

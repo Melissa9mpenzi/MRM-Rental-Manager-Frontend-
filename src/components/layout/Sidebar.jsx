@@ -79,28 +79,9 @@ const AGENT_NAV = [
   { to: "/agent/settings", icon: Settings, label: "Settings" },
 ];
 
-const ADMIN_NAV = [
-  { to: "/admin/dashboard", icon: Shield, label: "Dashboard" },
-  { to: "/admin/users", icon: Users, label: "Users" },
-  { to: "/admin/listings", icon: ListChecks, label: "Listings" },
-  { to: "/admin/moderation", icon: Flag, label: "Moderation" },
-  { to: "/admin/payments", icon: CreditCard, label: "Payments" },
-  { to: "/admin/contracts", icon: FileText, label: "Contracts" },
-  { to: "/admin/fraud", icon: Activity, label: "Fraud detection" },
-  { to: "/admin/analytics", icon: LineChart, label: "Analytics" },
-  { to: "/admin/reports", icon: PieChart, label: "Reports" },
-  { to: "/admin/support", icon: LifeBuoy, label: "Support" },
-  { to: "/admin/audit-logs", icon: ScrollText, label: "Audit logs" },
-  { to: "/admin/system-settings", icon: Server, label: "System settings" },
-  { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
-  { to: "/admin/notifications", icon: Bell, label: "Notifications" },
-  { to: "/admin/settings", icon: Settings, label: "Settings" },
-];
-
 function navForRole(role) {
   if (role === "tenant") return TENANT_NAV;
   if (role === "staff" || role === "agent") return AGENT_NAV;
-  if (role === "admin") return ADMIN_NAV;
   return LANDLORD_NAV;
 }
 

@@ -48,9 +48,10 @@ export const PAYMENT_METHODS = [
     id: "sui",
     label: "Sui Wallet",
     shortLabel: "Sui",
-    sub: "On-chain settlement (preview)",
+    sub: "Blockchain payments — coming soon",
     logo: "sui",
     apiValue: "other",
+    comingSoon: true,
   },
   {
     id: "other",
@@ -62,9 +63,9 @@ export const PAYMENT_METHODS = [
   },
 ];
 
-/** Methods shown on tenant “Pay rent” (mobile money + cards). */
+/** Methods shown on tenant “Pay rent” (MoMo + Pesapal-backed card; blockchain later). */
 export const TENANT_PAY_METHODS = PAYMENT_METHODS.filter((m) =>
-  ["mtn_momo", "airtel", "card", "sui"].includes(m.id),
+  ["mtn_momo", "airtel", "card"].includes(m.id),
 );
 
 /** Methods for landlord record-payment forms. */

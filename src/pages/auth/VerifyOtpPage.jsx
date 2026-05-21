@@ -1,12 +1,25 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ShieldCheck } from "lucide-react";
+import { authApi } from "../../api/authApi";
+import { apiErrorMessage } from "../../lib/apiError";
 
 export default function VerifyOtpPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [email, setEmail] = useState(() => decodeURIComponent(searchParams.get("email") || ""));
+  const [loading, setLoading] = useState(false);
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const inputs = useRef([]);
+
+  const devOtp = location.state?.devOtp;
+
+  useEffect(() => {
+    const em = searchParams.get("email");
+    if (em) setEmail(decodeURIComponent(em));
+  }, [searchParams]);
 
   useEffect(() => {
     inputs.current[0]?.focus();
@@ -24,13 +37,27 @@ export default function VerifyOtpPage() {
     if (e.key === "Backspace" && !digits[i] && i > 0) inputs.current[i - 1]?.focus();
   };
 
-  const verify = () => {
-    if (digits.some((d) => !d)) {
+  const verify = async () => {
+    const otp = digits.join("");
+    const addr = email.trim();
+    if (!addr) {
+      toast.error("Enter the email you registered with.");
+      return;
+    }
+    if (otp.length !== 6) {
       toast.error("Enter the 6-digit code.");
       return;
     }
-    toast.success("Verification recorded. Continue to select your role.");
-    navigate("/auth/select-role");
+    setLoading(true);
+    try {
+      const res = await authApi.verifyEmail({ email: addr, token: otp });
+      toast.success(res?.message || "Email verified. You can sign in.");
+      navigate("/login", { replace: true, state: { email: addr } });
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Verification failed."));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,15 +66,38 @@ export default function VerifyOtpPage() {
         <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl border border-brand-teal/30 bg-brand-teal/10 sm:h-12 sm:w-12">
           <ShieldCheck className="h-6 w-6 text-brand-teal sm:h-7 sm:w-7" />
         </div>
-        <h1 className="text-lg font-bold text-white sm:text-xl">Verify OTP</h1>
+        <h1 className="text-lg font-bold text-white sm:text-xl">Verify your email</h1>
         <p className="mt-1 max-w-xs text-[11px] text-white/55 sm:text-xs">
-          Optional onboarding step. For production signup, verify your email from the link we send, or use{" "}
-          <Link to="/register?step=verify" className="font-semibold text-brand-teal hover:underline">
-            token entry on Register
-          </Link>
-          .
+          Enter the 6-digit code we sent
+          {email ? (
+            <>
+              {" "}
+              to <strong className="text-white">{email}</strong>
+            </>
+          ) : (
+            " to your inbox"
+          )}
+          . You can also open the verification link in the email.
         </p>
+        {devOtp && (
+          <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-200">
+            Dev mode: use code <strong>{devOtp}</strong>
+          </p>
+        )}
       </div>
+
+      {!email && (
+        <div className="mb-4">
+          <label className="mb-1 block text-[11px] font-semibold text-white/70">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full rounded-xl border border-white/[0.12] bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-brand-teal/50"
+          />
+        </div>
+      )}
 
       <div className="flex justify-center gap-1.5 sm:gap-2">
         {digits.map((d, i) => (
@@ -64,19 +114,21 @@ export default function VerifyOtpPage() {
         ))}
       </div>
 
-      <button type="button" onClick={verify} className="btn-primary mt-5 w-full rounded-xl py-2.5 text-sm font-bold sm:py-3">
-        Verify &amp; continue
+      <button
+        type="button"
+        onClick={verify}
+        disabled={loading}
+        className="btn-primary mt-5 w-full rounded-xl py-2.5 text-sm font-bold sm:py-3"
+      >
+        {loading ? "Verifying…" : "Verify & continue"}
       </button>
 
-      <p className="mt-3 text-center text-[10px] text-white/45 sm:text-xs">
-        Didn&apos;t receive a code?{" "}
-        <button type="button" className="font-semibold text-brand-teal hover:underline">
-          Resend
-        </button>
-      </p>
-
       <p className="mt-3 text-center text-[11px] text-white/50 sm:text-xs">
-        <Link to="/login" className="font-semibold text-white/70 hover:text-brand-teal">
+        <Link to="/register" className="font-semibold text-white/70 hover:text-brand-teal">
+          Register with a different email
+        </Link>
+        {" · "}
+        <Link to="/login" className="font-semibold text-brand-teal hover:underline">
           Back to sign in
         </Link>
       </p>

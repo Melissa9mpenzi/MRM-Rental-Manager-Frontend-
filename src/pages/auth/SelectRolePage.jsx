@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { User, Building2, Briefcase, Shield } from "lucide-react";
+import { User, Building2, Briefcase } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import { defaultDashboardPath } from "../../config/access";
 
@@ -9,15 +9,6 @@ const ROLES = [
   { id: "tenant", apiRole: "tenant", title: "Tenant", desc: "Find and rent", icon: User, accent: "from-sky-500/20 to-transparent" },
   { id: "landlord", apiRole: "landlord", title: "Landlord", desc: "List & manage", icon: Building2, accent: "from-brand-teal/20 to-transparent" },
   { id: "agent", apiRole: "staff", title: "Agent", desc: "Leads & clients", icon: Briefcase, accent: "from-violet-500/25 to-transparent" },
-  {
-    id: "admin",
-    apiRole: null,
-    title: "Admin",
-    desc: "RentDirect only",
-    icon: Shield,
-    accent: "from-white/10 to-transparent",
-    disabled: true,
-  },
 ];
 
 /**

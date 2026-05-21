@@ -1,17 +1,26 @@
 /**
- * RentDirect UG — web access model (role-prefixed private areas + public routes).
- * Route guards MUST use JWT-backed `user.role` from the auth store — not client-only overrides.
+ * RentDirect UG — web access model.
+ * Roles: tenant, agent (staff), landlord, government officers, system administrator.
  */
 
-/** Canonical API roles (see backend UserRole). */
+import {
+  canAccessGovernmentPortal,
+  defaultGovernmentPath,
+  isSystemAdministrator,
+  pathAllowedForGovernment,
+} from "./governmentAccess";
+
 export const API_ROLES = {
   tenant: "tenant",
   landlord: "landlord",
   staff: "staff",
-  admin: "admin",
+  agent: "agent",
+  system_admin: "system_admin",
+  gov_nira: "gov_nira",
+  gov_kcca: "gov_kcca",
+  gov_ura: "gov_ura",
 };
 
-/** First screen after login for each role. */
 export function defaultDashboardPath(role) {
   switch (role) {
     case API_ROLES.tenant:
@@ -19,16 +28,19 @@ export function defaultDashboardPath(role) {
     case API_ROLES.landlord:
       return "/landlord/dashboard";
     case API_ROLES.staff:
-    case "agent":
+    case API_ROLES.agent:
       return "/agent/dashboard";
-    case API_ROLES.admin:
-      return "/admin/dashboard";
+    case API_ROLES.system_admin:
+      return "/system/dashboard";
+    case API_ROLES.gov_nira:
+    case API_ROLES.gov_kcca:
+    case API_ROLES.gov_ura:
+      return defaultGovernmentPath(role);
     default:
       return "/landlord/dashboard";
   }
 }
 
-/** Full notifications centre route for each role. */
 export function notificationsPathForRole(role) {
   switch (role) {
     case API_ROLES.tenant:
@@ -36,16 +48,18 @@ export function notificationsPathForRole(role) {
     case API_ROLES.landlord:
       return "/landlord/notifications";
     case API_ROLES.staff:
-    case "agent":
+    case API_ROLES.agent:
       return "/agent/notifications";
-    case API_ROLES.admin:
-      return "/admin/notifications";
+    case API_ROLES.system_admin:
+    case API_ROLES.gov_nira:
+    case API_ROLES.gov_kcca:
+    case API_ROLES.gov_ura:
+      return "/government/overview";
     default:
       return "/landlord/notifications";
   }
 }
 
-/** In-app messages route for each role. */
 export function messagesPathForRole(role) {
   switch (role) {
     case API_ROLES.tenant:
@@ -53,10 +67,10 @@ export function messagesPathForRole(role) {
     case API_ROLES.landlord:
       return "/landlord/messages";
     case API_ROLES.staff:
-    case "agent":
+    case API_ROLES.agent:
       return "/agent/messages";
-    case API_ROLES.admin:
-      return "/admin/messages";
+    case API_ROLES.system_admin:
+      return "/government/overview";
     default:
       return "/tenant/messages";
   }
@@ -66,10 +80,10 @@ const PREFIX = {
   tenant: "/tenant",
   landlord: "/landlord",
   agent: "/agent",
-  admin: "/admin",
+  system: "/system",
+  government: "/government",
 };
 
-/** Whether an authenticated `role` may navigate to `pathname` (deep link / post-login return). */
 export function pathAllowedForRole(pathname, role) {
   if (!pathname || !role) return false;
   if (pathname === "/dashboard") return true;
@@ -82,11 +96,18 @@ export function pathAllowedForRole(pathname, role) {
   if (role === API_ROLES.landlord) {
     return pathname === PREFIX.landlord || pathname.startsWith(`${PREFIX.landlord}/`);
   }
-  if (role === API_ROLES.staff || role === "agent") {
+  if (role === API_ROLES.staff || role === API_ROLES.agent) {
     return pathname === PREFIX.agent || pathname.startsWith(`${PREFIX.agent}/`);
   }
-  if (role === API_ROLES.admin) {
-    return pathname === PREFIX.admin || pathname.startsWith(`${PREFIX.admin}/`);
+  if (isSystemAdministrator(role)) {
+    return (
+      pathname === PREFIX.system ||
+      pathname.startsWith(`${PREFIX.system}/`) ||
+      pathname.startsWith(PREFIX.government)
+    );
+  }
+  if (canAccessGovernmentPortal(role)) {
+    return pathAllowedForGovernment(pathname, role);
   }
   return false;
 }
