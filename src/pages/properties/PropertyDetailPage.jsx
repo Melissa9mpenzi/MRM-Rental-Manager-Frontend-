@@ -13,7 +13,9 @@ import EditPropertyModal from "../../components/domain/EditPropertyModal";
 import UnitCard from "../../components/domain/UnitCard";
 
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
-const API_ORIGIN = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { platformApiOrigin } from "../../api/config";
+
+const API_ORIGIN = platformApiOrigin();
 
 export default function PropertyDetailPage() {
   const { id } = useParams();

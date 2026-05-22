@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { dashboardApi } from "../../api/dashboardApi";
+import { listingImageUrl } from "../../lib/mediaUrl";
 import useAuthStore from "../../store/authStore";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
@@ -74,7 +75,7 @@ function RecentProperty({ p }) {
       <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-brand-tealLt/30">
         {p.photo_path ? (
           <img
-            src={p.photo_path.startsWith("http") ? p.photo_path : `${import.meta.env.VITE_API_URL || "http://localhost:8000"}${p.photo_path}`}
+            src={p.photo_path.startsWith("http") ? p.photo_path : `${listingImageUrl(p.photo_path)}`}
             alt={p.name}
             className="h-full w-full object-cover"
           />

@@ -9,7 +9,9 @@ import { maintenanceApi } from "../../api/maintenanceApi";
 import { propertiesApi } from "../../api/propertiesApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { platformApiOrigin } from "../../api/config";
+
+const BASE_URL = platformApiOrigin();
 
 const STATUS_CONFIG = {
   open:        { label: "Open",        color: "bg-red-500/15 text-red-200 ring-1 ring-red-500/25",     icon: AlertTriangle },

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Home, CreditCard, FileText, Wrench, User, LogOut, Bell } from "lucide-react";
 import toast from "react-hot-toast";
+import { tenantPortalApi } from "../../api/tenantPortalApi";
 import useAuthStore from "../../store/authStore";
 
 function TenantDashboard() {
@@ -20,32 +21,14 @@ function TenantDashboard() {
   async function fetchTenantData() {
     try {
       setLoading(true);
-      // Fetch tenant profile
-      const meRes = await fetch("http://localhost:8000/api/v1/tenant/me", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (meRes.ok) {
-        const meData = await meRes.json();
-        setTenantData(meData);
-      }
-
-      // Fetch payments
-      const payRes = await fetch("http://localhost:8000/api/v1/tenant/my-payments", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (payRes.ok) {
-        const payData = await payRes.json();
-        setPayments(payData);
-      }
-
-      // Fetch lease
-      const leaseRes = await fetch("http://localhost:8000/api/v1/tenant/my-lease", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (leaseRes.ok) {
-        const leaseData = await leaseRes.json();
-        setLease(leaseData);
-      }
+      const [meData, payData, leaseData] = await Promise.all([
+        tenantPortalApi.myProfile(),
+        tenantPortalApi.myPayments(),
+        tenantPortalApi.myLease(),
+      ]);
+      setTenantData(meData);
+      setPayments(Array.isArray(payData) ? payData : []);
+      setLease(leaseData);
     } catch (err) {
       toast.error("Failed to load tenant data.");
     } finally {

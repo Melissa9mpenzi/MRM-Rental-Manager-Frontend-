@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Home } from "lucide-react";
+import { tenantPortalApi } from "../../api/tenantPortalApi";
+import { apiErrorMessage } from "../../lib/apiError";
 
 function TenantAcceptInvite() {
   const [searchParams] = useSearchParams();
@@ -29,16 +31,12 @@ function TenantAcceptInvite() {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/v1/tenant/invite/verify?token=${token}`
-      );
-      const data = await response.json();
-
-      if (response.ok && data.valid) {
+      const data = await tenantPortalApi.verifyInvite(token);
+      if (data?.valid) {
         setInviteValid(true);
         setInviteData(data);
       } else {
-        toast.error(data.detail || "Invalid or expired invite link.");
+        toast.error(data?.detail || "Invalid or expired invite link.");
       }
     } catch (err) {
       toast.error("Failed to verify invite. Please try again.");
@@ -63,25 +61,11 @@ function TenantAcceptInvite() {
     setVerifying(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/v1/tenant/invite/accept",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token, password }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Account created successfully! Please log in.");
-        navigate("/login");
-      } else {
-        toast.error(data.detail || "Failed to create account.");
-      }
+      await tenantPortalApi.acceptInvite({ token, password });
+      toast.success("Account created successfully! Please log in.");
+      navigate("/login");
     } catch (err) {
-      toast.error("Network error. Please try again.");
+      toast.error(apiErrorMessage(err, "Failed to create account."));
     } finally {
       setVerifying(false);
     }

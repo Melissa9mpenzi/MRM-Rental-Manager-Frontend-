@@ -5,7 +5,9 @@ import { Building2, Search, MapPin, ExternalLink, DoorOpen } from "lucide-react"
 import { workspaceApi } from "../../api/workspaceApi";
 import PortalPageHeader from "../../components/system/PortalPageHeader";
 
-const API_ORIGIN = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { platformApiOrigin } from "../../api/config";
+
+const API_ORIGIN = platformApiOrigin();
 
 function photoUrl(path) {
   if (!path) return null;

@@ -14,7 +14,9 @@ import { Badge, EmptyState, StatCard } from "../../components/ui/index.jsx";
 import AddPropertyModal from "../../components/domain/AddPropertyModal";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
-const API_ORIGIN = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { platformApiOrigin } from "../../api/config";
+
+const API_ORIGIN = platformApiOrigin();
 
 // ── Property Card ─────────────────────────────────────────────────
 function PropertyCard({ property }) {
