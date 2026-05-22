@@ -40,45 +40,50 @@ export function governmentAgencyForRole(role) {
     case "system_admin":
       return "all";
     default:
-      return "all";
+      return null;
   }
 }
 
-/** Sidebar navigation — matches enterprise government dashboard mockup */
+/**
+ * Sidebar navigation — each item lists which officer agencies may access.
+ * System administrator sees every item.
+ */
 export const GOV_NAV = [
-  { id: "overview", label: "Overview", path: "/government/overview", agencies: ["all", "nira", "kcca", "ura"] },
-  { id: "nira", label: "NIRA Verification", path: "/government/nira", agencies: ["all", "nira"] },
-  { id: "kcca", label: "KCCA Property Verification", path: "/government/kcca", agencies: ["all", "kcca"] },
-  { id: "ura", label: "URA Tax Compliance", path: "/government/ura", agencies: ["all", "ura"] },
-  { id: "fraud", label: "Fraud Detection", path: "/government/fraud", agencies: ["all", "nira", "kcca", "ura"] },
-  { id: "approvals", label: "Approvals", path: "/government/approvals", agencies: ["all"] },
-  { id: "inspections", label: "Inspection Requests", path: "/government/inspections", agencies: ["all", "kcca"] },
-  { id: "analytics", label: "Reports & Analytics", path: "/government/analytics", agencies: ["all", "ura"] },
-  { id: "audit", label: "Audit Logs", path: "/government/audit", agencies: ["all", "nira", "kcca", "ura"] },
+  { id: "overview", label: "Overview", path: "/government/overview", agencies: ["nira", "kcca", "ura"] },
+  { id: "nira", label: "NIRA Verification", path: "/government/nira", agencies: ["nira"] },
+  { id: "kcca", label: "KCCA Property Verification", path: "/government/kcca", agencies: ["kcca"] },
+  { id: "ura", label: "URA Tax Compliance", path: "/government/ura", agencies: ["ura"] },
+  { id: "fraud", label: "Fraud Detection", path: "/government/fraud", agencies: ["nira", "kcca", "ura"] },
+  { id: "approvals", label: "Approvals", path: "/government/approvals", agencies: [], systemAdminOnly: true },
+  { id: "inspections", label: "Inspection Requests", path: "/government/inspections", agencies: ["kcca"] },
+  { id: "analytics", label: "Reports & Analytics", path: "/government/analytics", agencies: ["ura"] },
+  { id: "audit", label: "Audit Logs", path: "/government/audit", agencies: ["nira", "kcca", "ura"] },
   {
     id: "officers",
     label: "Officers",
     path: "/government/officers",
-    agencies: ["all"],
+    agencies: [],
     systemAdminOnly: true,
   },
   {
     id: "users",
     label: "Platform users",
     path: "/government/users",
-    agencies: ["all"],
+    agencies: [],
     systemAdminOnly: true,
   },
-  { id: "settings", label: "System Settings", path: "/government/settings", agencies: ["all"] },
+  { id: "settings", label: "System Settings", path: "/government/settings", agencies: ["nira", "kcca", "ura"] },
 ];
 
 export function navItemsForRole(role) {
   const agency = governmentAgencyForRole(role);
-  return GOV_NAV.filter(
-    (item) =>
-      (item.agencies.includes("all") || item.agencies.includes(agency)) &&
-      (!item.systemAdminOnly || isSystemAdministrator(role))
-  );
+  const isAdmin = isSystemAdministrator(role);
+  return GOV_NAV.filter((item) => {
+    if (item.systemAdminOnly && !isAdmin) return false;
+    if (isAdmin) return true;
+    if (!agency) return false;
+    return item.agencies.includes(agency);
+  });
 }
 
 export function defaultGovernmentPath(role) {
@@ -88,7 +93,22 @@ export function defaultGovernmentPath(role) {
 
 export function pathAllowedForGovernment(pathname, role) {
   if (!pathname?.startsWith("/government")) return false;
+  if (pathname === "/government" || pathname === "/government/") return true;
   return navItemsForRole(role).some(
     (item) => pathname === item.path || pathname.startsWith(`${item.path}/`)
   );
+}
+
+/** Quick actions on overview — scoped to agency (icons assigned in overview page). */
+export function quickActionsForAgency(agency) {
+  const all = [
+    { id: "officers", label: "Add New Officer", to: "/government/officers", agencies: ["all"] },
+    { id: "nira", label: "New Verification Request", to: "/government/nira", agencies: ["nira", "all"] },
+    { id: "kcca", label: "Property Verification", to: "/government/kcca", agencies: ["kcca", "all"] },
+    { id: "ura", label: "Tax Compliance Report", to: "/government/ura", agencies: ["ura", "all"] },
+    { id: "analytics", label: "Generate Report", to: "/government/analytics", agencies: ["ura", "all"] },
+    { id: "settings", label: "Portal Settings", to: "/government/settings", agencies: ["nira", "kcca", "ura", "all"] },
+  ];
+  const key = agency === "all" ? "all" : agency;
+  return all.filter((a) => a.agencies.includes(key) || (key === "all" && a.agencies.includes("all")));
 }

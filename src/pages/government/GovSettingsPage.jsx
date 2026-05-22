@@ -1,15 +1,52 @@
+import { Shield, Key, FileCheck, Globe } from "lucide-react";
+import GovModuleHeader from "../../components/government/GovModuleHeader";
+
 export default function GovSettingsPage() {
   return (
-    <div className="gov-glass max-w-xl space-y-4 p-6">
-      <h2 className="text-lg font-bold text-white">System Settings</h2>
-      <p className="text-sm text-white/55">Government portal security (enterprise policy):</p>
-      <ul className="space-y-2 text-sm text-white/70">
-        <li>✓ Mandatory 2FA each session (web)</li>
-        <li>✓ Role-scoped agency modules (NIRA / KCCA / URA)</li>
-        <li>✓ Audit logging on all verification actions</li>
-        <li>○ IP allowlist — configure in production deployment</li>
-        <li>○ Walrus / Sui audit anchors — blockchain phase</li>
-      </ul>
+    <div className="space-y-5">
+      <GovModuleHeader
+        title="System Settings"
+        subtitle="Security and compliance policies for the national government portal."
+      />
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="gov-glass p-4">
+          <Shield className="text-emerald-400" size={20} />
+          <h3 className="mt-2 font-bold text-white">Authentication</h3>
+          <ul className="mt-2 space-y-1.5 text-sm text-white/65">
+            <li>✓ Invitation-only officer accounts</li>
+            <li>✓ Mandatory 2FA each session</li>
+            <li>✓ No public or social signup</li>
+            <li>✓ Work ID + security PIN on accept</li>
+          </ul>
+        </div>
+        <div className="gov-glass p-4">
+          <Key className="text-cyan-400" size={20} />
+          <h3 className="mt-2 font-bold text-white">Access control</h3>
+          <ul className="mt-2 space-y-1.5 text-sm text-white/65">
+            <li>✓ Role-scoped NIRA / KCCA / URA modules</li>
+            <li>✓ System admin: full platform + gov</li>
+            <li>○ IP allowlist (production)</li>
+          </ul>
+        </div>
+        <div className="gov-glass p-4">
+          <FileCheck className="text-purple-400" size={20} />
+          <h3 className="mt-2 font-bold text-white">Audit</h3>
+          <ul className="mt-2 space-y-1.5 text-sm text-white/65">
+            <li>✓ All verification actions logged</li>
+            <li>✓ Gov login session records</li>
+            <li>○ Blockchain anchors (planned)</li>
+          </ul>
+        </div>
+        <div className="gov-glass p-4">
+          <Globe className="text-amber-400" size={20} />
+          <h3 className="mt-2 font-bold text-white">Integrations</h3>
+          <ul className="mt-2 space-y-1.5 text-sm text-white/65">
+            <li>✓ NIRA KYC workflow</li>
+            <li>✓ KCCA property registry</li>
+            <li>✓ URA tax compliance reports</li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

@@ -112,7 +112,6 @@ export default function RegisterPage() {
         </div>
         <div className="md:col-span-2">
           <Select
-            className="select-auth"
             label="Sign up as"
             value={form.role}
             onChange={(e) => set("role", e.target.value)}

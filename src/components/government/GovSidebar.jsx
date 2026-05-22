@@ -32,7 +32,7 @@ const ICONS = {
 };
 
 function roleLabel(role) {
-  if (isSystemAdministrator(role)) return "System Administrator";
+  if (isSystemAdministrator(role)) return "Super Admin";
   const map = { gov_nira: "NIRA Officer", gov_kcca: "KCCA Officer", gov_ura: "URA Officer" };
   return map[role] || "Government Officer";
 }
@@ -46,23 +46,24 @@ function initials(name) {
     .toUpperCase();
 }
 
-export default function GovSidebar({ role, user }) {
+export default function GovSidebar({ role, user, onNavigate }) {
   const items = navItemsForRole(role);
 
   return (
-    <aside className="gov-sidebar flex shrink-0 flex-col">
-      <div className="border-b border-white/10 px-4 py-4">
+    <aside className="gov-sidebar">
+      <div className="gov-sidebar__header">
         <GovBrandMark />
-        <p className="mt-3 text-[10px] leading-snug text-white/40">National Rental Infrastructure System</p>
+        <p className="gov-sidebar__tagline">National Rental Infrastructure System</p>
       </div>
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
+      <nav className="gov-sidebar__nav" aria-label="Government portal">
         {items.map((item) => {
           const Icon = ICONS[item.id] || LayoutDashboard;
           return (
             <NavLink
               key={item.id}
               to={item.path}
+              onClick={onNavigate}
               className={({ isActive }) =>
                 `gov-sidebar__nav-link ${isActive ? "gov-sidebar__nav-link--active" : ""}`
               }
@@ -83,7 +84,6 @@ export default function GovSidebar({ role, user }) {
           </div>
           <span className="gov-sidebar__online" title="Online" />
         </div>
-        <p className="mt-2 text-[10px] text-white/35">Secure session · Web only</p>
       </div>
     </aside>
   );

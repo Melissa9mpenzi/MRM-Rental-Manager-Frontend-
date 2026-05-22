@@ -32,8 +32,21 @@ import GovApprovalsPage from "./pages/government/GovApprovalsPage";
 import GovInspectionsPage from "./pages/government/GovInspectionsPage";
 import GovAnalyticsPage from "./pages/government/GovAnalyticsPage";
 import GovSettingsPage from "./pages/government/GovSettingsPage";
+import SystemPortalLayout from "./layouts/SystemPortalLayout";
 import { GOVERNMENT_PORTAL_ROLES } from "./config/governmentAccess";
+import GovOrSystemPortalLayout from "./layouts/GovOrSystemPortalLayout";
+import GovernmentRouteGuard from "./components/government/GovernmentRouteGuard";
+import GovernmentPortalRedirect from "./pages/government/GovernmentPortalRedirect";
 import SystemDashboardPage from "./pages/system/SystemDashboardPage";
+import SystemDashboardsPage from "./pages/system/SystemDashboardsPage";
+import SystemPropertiesPage from "./pages/system/SystemPropertiesPage";
+import SystemContractsPage from "./pages/system/SystemContractsPage";
+import SystemPaymentsPage from "./pages/system/SystemPaymentsPage";
+import SystemWalletsPage from "./pages/system/SystemWalletsPage";
+import SystemMessagesPage from "./pages/system/SystemMessagesPage";
+import SystemSettingsPage from "./pages/system/SystemSettingsPage";
+import SystemAnnouncementsPage from "./pages/system/SystemAnnouncementsPage";
+import SystemSupportPage from "./pages/system/SystemSupportPage";
 import PendingApprovalPage from "./pages/auth/PendingApprovalPage";
 import RoleHomeRedirect from "./pages/auth/RoleHomeRedirect";
 
@@ -141,19 +154,55 @@ export default function App() {
 
           {/* ── Authenticated app (JWT) + role-prefixed modules ── */}
           <Route element={<ProtectedRoute />}>
+            <Route path="/government/verify-2fa" element={<GovernmentTwoFaPage />} />
             <Route element={<AuthLayout />}>
               <Route path="/auth/admin-2fa" element={<GovernmentTwoFaPage />} />
               <Route path="/auth/government-2fa" element={<GovernmentTwoFaPage />} />
             </Route>
+
+            {/* Super Admin — one sidebar, no main app shell */}
+            <Route element={<RoleGuard allowed={[API_ROLES.system_admin]} />}>
+              <Route element={<SystemPortalLayout />}>
+                <Route path="/system" element={<Navigate to="/system/dashboard" replace />} />
+                <Route path="/system/dashboard" element={<SystemDashboardPage />} />
+                <Route path="/system/dashboards" element={<SystemDashboardsPage />} />
+                <Route path="/system/users" element={<AdminUsersListPage embedded />} />
+                <Route path="/system/properties" element={<SystemPropertiesPage />} />
+                <Route path="/system/contracts" element={<SystemContractsPage />} />
+                <Route path="/system/payments" element={<SystemPaymentsPage />} />
+                <Route path="/system/wallets" element={<SystemWalletsPage />} />
+                <Route path="/system/messages" element={<SystemMessagesPage />} />
+                <Route path="/system/settings" element={<SystemSettingsPage />} />
+                <Route path="/system/announcements" element={<SystemAnnouncementsPage />} />
+                <Route path="/system/support" element={<SystemSupportPage />} />
+                <Route path="/admin/*" element={<Navigate to="/system/dashboard" replace />} />
+              </Route>
+            </Route>
+
+            {/* Government routes — same super-admin sidebar for system_admin; gov sidebar for officers */}
+            <Route element={<RoleGuard allowed={GOVERNMENT_PORTAL_ROLES} />}>
+              <Route element={<GovOrSystemPortalLayout />}>
+                <Route element={<GovernmentRouteGuard />}>
+                  <Route path="/government" element={<GovernmentPortalRedirect />} />
+                  <Route path="/government/overview" element={<GovernmentOverviewPage />} />
+                  <Route path="/government/nira" element={<NiraDashboardPage />} />
+                  <Route path="/government/kcca" element={<KccaDashboardPage />} />
+                  <Route path="/government/ura" element={<UraDashboardPage />} />
+                  <Route path="/government/fraud" element={<GovFraudPage />} />
+                  <Route path="/government/approvals" element={<GovApprovalsPage />} />
+                  <Route path="/government/inspections" element={<GovInspectionsPage />} />
+                  <Route path="/government/audit" element={<GovAuditPage />} />
+                  <Route path="/government/analytics" element={<GovAnalyticsPage />} />
+                  <Route path="/government/settings" element={<GovSettingsPage />} />
+                  <Route path="/government/officers" element={<GovOfficersPage />} />
+                  <Route path="/government/users" element={<AdminUsersListPage />} />
+                </Route>
+              </Route>
+            </Route>
+
             <Route element={<AppLayout />}>
               <Route path="/verification-pending" element={<PendingApprovalPage />} />
               <Route path="/dashboard" element={<RoleHomeRedirect />} />
-
-              {/* System administrator (seed-only) */}
-              <Route element={<RoleGuard allowed={[API_ROLES.system_admin]} />}>
-                <Route path="/system" element={<Navigate to="/system/dashboard" replace />} />
-                <Route path="/system/dashboard" element={<SystemDashboardPage />} />
-              </Route>
 
               {/* Tenant */}
               <Route element={<RoleGuard allowed={[API_ROLES.tenant]} />}>
@@ -208,28 +257,6 @@ export default function App() {
                 <Route path="/agent/messages" element={<MessagesPage />} />
                 <Route path="/agent/settings" element={<SettingsPage />} />
               </Route>
-
-              {/* Government portal (web-only — NIRA / KCCA / URA / super) */}
-              <Route element={<RoleGuard allowed={GOVERNMENT_PORTAL_ROLES} />}>
-                <Route element={<GovernmentPortalLayout />}>
-                  <Route path="/government" element={<Navigate to="/government/overview" replace />} />
-                  <Route path="/government/overview" element={<GovernmentOverviewPage />} />
-                  <Route path="/government/nira" element={<NiraDashboardPage />} />
-                  <Route path="/government/kcca" element={<KccaDashboardPage />} />
-                  <Route path="/government/ura" element={<UraDashboardPage />} />
-                  <Route path="/government/fraud" element={<GovFraudPage />} />
-                  <Route path="/government/approvals" element={<GovApprovalsPage />} />
-                  <Route path="/government/inspections" element={<GovInspectionsPage />} />
-                  <Route path="/government/audit" element={<GovAuditPage />} />
-                  <Route path="/government/analytics" element={<GovAnalyticsPage />} />
-                  <Route path="/government/settings" element={<GovSettingsPage />} />
-                  <Route path="/government/officers" element={<GovOfficersPage />} />
-                  <Route path="/government/users" element={<AdminUsersListPage />} />
-                </Route>
-              </Route>
-
-              {/* Legacy /admin URLs → government portal */}
-              <Route path="/admin/*" element={<Navigate to="/government/overview" replace />} />
 
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>

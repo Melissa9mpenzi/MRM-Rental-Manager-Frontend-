@@ -15,7 +15,7 @@ const ROLE_OPTIONS = [
   { value: "gov_ura", label: "URA officer" },
 ];
 
-export default function AdminUsersListPage() {
+export default function AdminUsersListPage({ embedded = false }) {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [page, setPage] = useState(0);
@@ -43,13 +43,8 @@ export default function AdminUsersListPage() {
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  return (
-    <AppPageScaffold
-      variant="command"
-      icon={Users}
-      title="Users"
-      description={`${total} account${total === 1 ? "" : "s"} · search and filter by role`}
-    >
+  const body = (
+    <>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="relative max-w-md flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
@@ -64,7 +59,7 @@ export default function AdminUsersListPage() {
           />
         </div>
         <select
-          className="rounded-xl border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-sm text-white"
+          className="select-field !w-auto min-w-[10rem]"
           value={role}
           onChange={(e) => {
             setRole(e.target.value);
@@ -181,6 +176,31 @@ export default function AdminUsersListPage() {
           )}
         </div>
       )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-white">Users & Roles</h2>
+          <p className="text-sm text-white/50">
+            {total} account{total === 1 ? "" : "s"} · search, filter, and KYC moderation
+          </p>
+        </div>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <AppPageScaffold
+      variant="command"
+      icon={Users}
+      title="Users"
+      description={`${total} account${total === 1 ? "" : "s"} · search and filter by role`}
+    >
+      {body}
     </AppPageScaffold>
   );
 }

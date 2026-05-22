@@ -8,6 +8,7 @@ import { GOVERNMENT_API_URL } from "./config";
 const govApi = createApiClient({
   baseUrl: GOVERNMENT_API_URL,
   loginPath: "/government/login",
+  timeout: 45_000,
 });
 
 export default govApi;

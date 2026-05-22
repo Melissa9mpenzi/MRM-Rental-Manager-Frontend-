@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import GovSidebar from "../components/government/GovSidebar";
@@ -11,6 +11,7 @@ export default function GovernmentPortalLayout({ systemStatus = "operational" })
   const user = useAuthStore((s) => s.user);
   const role = user?.role || "system_admin";
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (canAccessGovernmentPortal(role) && sessionStorage.getItem("rd_gov_2fa_verified") !== "1") {
@@ -19,13 +20,25 @@ export default function GovernmentPortalLayout({ systemStatus = "operational" })
   }, [role, navigate]);
 
   return (
-    <div className="gov-portal flex min-h-screen">
-      <GovSidebar role={role} user={user} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <GovTopbar role={role} systemStatus={systemStatus} />
-        <main className="flex-1 overflow-y-auto bg-[#0b0e14] p-5">
+    <div className="gov-portal">
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="gov-sidebar-backdrop lg:hidden"
+          aria-label="Close menu"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div className={`gov-sidebar-shell ${sidebarOpen ? "gov-sidebar-shell--open" : ""}`}>
+        <GovSidebar role={role} user={user} onNavigate={() => setSidebarOpen(false)} />
+      </div>
+
+      <div className="gov-portal__main">
+        <GovTopbar role={role} systemStatus={systemStatus} onMenuClick={() => setSidebarOpen((o) => !o)} />
+        <div className="gov-portal__scroll">
           <Outlet />
-        </main>
+        </div>
       </div>
     </div>
   );

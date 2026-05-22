@@ -122,20 +122,58 @@
   }
 
   /**
-   * Native <select> on dark auth cards: closed state stays on-brand; option list is often OS-white,
-   * so options need dark text (many browsers honor `option { color }`).
+   * Dark-theme native selects — consistent closed state + dropdown list (color-scheme: dark).
+   * Use on auth, government portal, super admin, and any dark form.
    */
+  .select-field,
   .select-auth {
-    @apply w-full rounded-xl border border-white/[0.18] bg-white/[0.1] px-3.5 py-2.5 text-sm font-medium
-           text-white shadow-inner
+    @apply w-full rounded-xl border border-white/[0.14] px-3.5 py-2.5 text-sm font-medium text-white
+           shadow-inner
            focus:outline-none focus:ring-2 focus:ring-brand-teal/40 focus:border-brand-teal/55
            transition-all duration-150;
     color-scheme: dark;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: rgba(15, 20, 28, 0.95);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.35rem;
+    cursor: pointer;
   }
+
+  .select-field:hover,
+  .select-auth:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(17, 24, 39, 0.98);
+  }
+
+  .select-field option,
+  .select-field optgroup,
   .select-auth option,
-  .select-auth optgroup {
-    color: #0a1210;
-    background-color: #f0f7f4;
+  .select-auth optgroup,
+  select.input-field option,
+  select.input-field optgroup {
+    background-color: #111827;
+    color: #e2e8f0;
+  }
+
+  /* App-wide: dark dropdown list where the OS/browser supports color-scheme */
+  select {
+    color-scheme: dark;
+  }
+
+  select.input-field {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: rgba(255, 255, 255, 0.06);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.9rem;
+    padding-right: 2.1rem;
+    cursor: pointer;
   }
 
   .badge-paid {

@@ -28,10 +28,27 @@ export default function GovOfficersPage() {
 
   const createMut = useMutation({
     mutationFn: (body) => governmentAuthApi.createInvitation(body),
-    onSuccess: (res) => {
-      toast.success(res?.message || "Invitation sent.");
-      if (res?.dev_invite_token) {
-        toast(`Dev invite link token: ${res.dev_invite_token}`, { duration: 8000 });
+    onSuccess: (payload) => {
+      const emailSent = payload?.email_sent === true || payload?.email_sent === 1;
+      const apiMessage = payload?._message;
+      if (emailSent) {
+        toast.success(
+          apiMessage || `Invitation email sent to ${payload?.email || "the officer"}.`
+        );
+      } else if (payload?.email_sent === false) {
+        toast.error(
+          apiMessage ||
+            "Invitation saved, but the server could not confirm the email was sent. Check SMTP in .env.",
+          { duration: 9000 }
+        );
+        if (payload?.invite_url) {
+          toast(`Share this link manually: ${payload.invite_url}`, { duration: 14000 });
+        }
+      } else {
+        toast.success(apiMessage || "Invitation created.");
+      }
+      if (payload?.dev_invite_token && payload?.email_sent === false) {
+        toast(`Dev invite token: ${payload.dev_invite_token}`, { duration: 8000 });
       }
       qc.invalidateQueries({ queryKey: ["gov-invitations"] });
       setForm({ full_name: "", email: "", phone: "", role: "gov_nira", work_id: "" });
@@ -101,7 +118,7 @@ export default function GovOfficersPage() {
         <label className="block text-xs font-semibold text-white/70 md:col-span-2">
           Agency & role
           <select
-            className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+            className="select-field mt-1"
             value={form.role}
             onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
           >

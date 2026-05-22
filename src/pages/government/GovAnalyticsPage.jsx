@@ -1,10 +1,14 @@
+import GovModuleHeader from "../../components/government/GovModuleHeader";
 import GovernmentOverviewPage from "./GovernmentOverviewPage";
 
-/** National analytics — same data layer as overview until dedicated URA reports ship. */
+/** National analytics — reuses overview charts and KPIs per mockup Reports & Analytics view. */
 export default function GovAnalyticsPage() {
   return (
-    <div>
-      <h2 className="mb-4 text-lg font-bold text-white">Reports & Analytics</h2>
+    <div className="space-y-5">
+      <GovModuleHeader
+        title="Reports & Analytics"
+        subtitle="National rental infrastructure metrics, compliance trends, and regional performance."
+      />
       <GovernmentOverviewPage />
     </div>
   );

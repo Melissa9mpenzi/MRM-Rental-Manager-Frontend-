@@ -4,13 +4,14 @@ import axios from "axios";
  * @param {object} options
  * @param {string} options.baseUrl - API origin without /api/v1 (e.g. http://localhost:8000)
  * @param {string} [options.loginPath='/login'] - where to send user after session expiry
+ * @param {number} [options.timeout=15000] - request timeout in ms
  */
-export function createApiClient({ baseUrl, loginPath = "/login" }) {
+export function createApiClient({ baseUrl, loginPath = "/login", timeout = 15_000 }) {
   const origin = baseUrl.replace(/\/$/, "");
   const client = axios.create({
     baseURL: `${origin}/api/v1`,
     headers: { "Content-Type": "application/json" },
-    timeout: 15000,
+    timeout,
   });
 
   let isRefreshing = false;
@@ -61,7 +62,12 @@ export function createApiClient({ baseUrl, loginPath = "/login" }) {
         d.success === true &&
         Object.prototype.hasOwnProperty.call(d, "data")
       ) {
-        response.data = d.data;
+        const payload = d.data;
+        if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+          response.data = { ...payload, _message: d.message ?? null };
+        } else {
+          response.data = payload;
+        }
       }
       return response;
     },

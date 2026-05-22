@@ -8,6 +8,9 @@ export const workspaceApi = {
   adminUsers: (params = {}) =>
     api.get("/workspace/admin/users", { params }).then((r) => r.data),
 
+  adminProperties: (params = {}) =>
+    api.get("/workspace/admin/properties", { params }).then((r) => r.data),
+
   adminKycReview: (userId, body) =>
     api.patch(`/workspace/admin/users/${userId}/kyc-review`, body).then((r) => r.data),
 

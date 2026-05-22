@@ -107,12 +107,15 @@ export function ConfirmDialog({ open, title, message, confirmLabel = "Confirm", 
 
 // ── SELECT ────────────────────────────────────────────────────────
 export function Select({ label, options = [], error, className = "", ...props }) {
+  const selectClass = ["select-field", className].filter(Boolean).join(" ");
   return (
     <div className="w-full">
       {label && <label className="input-label">{label}</label>}
-      <select className={(className && className.trim()) || "input-field"} {...props}>
-        {options.map(o => (
-          <option key={o.value} value={o.value}>{o.label}</option>
+      <select className={selectClass} {...props}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
         ))}
       </select>
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}

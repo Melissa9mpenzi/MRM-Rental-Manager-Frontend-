@@ -29,7 +29,16 @@ export default function GovernmentLoginPage() {
         toast.error("Use the main RentDirect login for system administrators.");
         return;
       }
-      toast.success("Signed in. Complete two-factor verification.");
+      if (data?.dev_gov_2fa_otp) {
+        toast.error(
+          `Email not sent (configure SMTP). Dev code: ${data.dev_gov_2fa_otp}`,
+          { duration: 12_000 }
+        );
+      } else if (data?.otp_email_sent !== false) {
+        toast.success(`Verification code sent to ${email.trim()}. Check your inbox.`);
+      } else {
+        toast.success("Signed in. Enter the verification code from your email.");
+      }
       navigate(GOV_PORTAL.verify2fa, { replace: true });
     } catch (err) {
       toast.error(err.message || "Sign-in failed.");

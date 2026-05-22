@@ -1,5 +1,45 @@
+export function isRequestTimeout(err) {
+  if (!err) return false;
+  const code = err.code || "";
+  const msg = String(err.message || "");
+  return !err.response && (code === "ECONNABORTED" || msg.toLowerCase().includes("timeout"));
+}
+
+/** True when the browser could not complete HTTP (server down, reload, CORS block). */
+export function isNetworkFailure(err) {
+  if (!err) return false;
+  if (isRequestTimeout(err)) return false;
+  const code = err.code || "";
+  const msg = String(err.message || "");
+  return (
+    !err.response &&
+    (code === "ERR_NETWORK" ||
+      msg.includes("Network Error") ||
+      msg.includes("ERR_CONNECTION_RESET") ||
+      msg.includes("Failed to fetch"))
+  );
+}
+
+import { GOVERNMENT_API_URL, PLATFORM_API_URL } from "../api/config";
+
+function apiOriginForError(err) {
+  const url = String(err?.config?.url || err?.request?.responseURL || "");
+  if (url.includes("/government/")) {
+    return GOVERNMENT_API_URL;
+  }
+  return PLATFORM_API_URL;
+}
+
 /** Normalize FastAPI `detail` (string or `{ success, message }`) for toasts / thrown Errors. */
 export function apiErrorMessage(err, fallback = "Something went wrong.") {
+  if (isRequestTimeout(err)) {
+    const base = apiOriginForError(err);
+    return `The server at ${base} took too long to respond. Wait a few seconds and try again. If this keeps happening, check that the backend and database are running.`;
+  }
+  if (isNetworkFailure(err)) {
+    const base = apiOriginForError(err);
+    return `Cannot reach the API at ${base}. Start the backend (uvicorn on port 8000) and refresh. If it was running, it may have restarted — try again.`;
+  }
   const d = err?.response?.data?.detail;
   if (typeof d === "string") return d;
   if (d && typeof d === "object" && typeof d.message === "string") return d.message;
