@@ -20,7 +20,12 @@ export function isNetworkFailure(err) {
   );
 }
 
-import { GOVERNMENT_API_URL, PLATFORM_API_URL } from "../api/config";
+import { GOVERNMENT_API_URL, PLATFORM_API_URL, PRODUCTION_BACKEND_URL } from "../api/config";
+
+function looksLikeLocalDevUrl(url) {
+  if (!url) return true;
+  return /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(url);
+}
 
 function apiOriginForError(err) {
   const url = String(err?.config?.url || err?.request?.responseURL || "");
