@@ -11,8 +11,26 @@ export const PRODUCTION_BACKEND_URL =
 export const PRODUCTION_FRONTEND_URL =
   "https://mrm-rental-manager-frontend-pink.vercel.app";
 
+function isDeployedSpa() {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    return host.endsWith(".vercel.app") || host.endsWith(".vercel.app.");
+  }
+  return Boolean(import.meta.env.PROD);
+}
+
+function looksLikeLocalDevUrl(url) {
+  if (!url) return true;
+  return /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(url);
+}
+
 function resolveApiUrl(explicit, fallback) {
   const raw = explicit?.replace(/\/$/, "");
+  // Hosted on Vercel: never call localhost from the user's browser.
+  if (isDeployedSpa()) {
+    if (!raw || looksLikeLocalDevUrl(raw)) return fallback;
+    return raw;
+  }
   if (raw) return raw;
   if (import.meta.env.PROD) return fallback;
   return "http://localhost:8000";
