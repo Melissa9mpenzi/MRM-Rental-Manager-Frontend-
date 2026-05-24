@@ -10,6 +10,7 @@ export const SYSTEM_NAV_SECTIONS = [
       { id: "properties", label: "Properties", path: "/system/properties", icon: "properties" },
       { id: "contracts", label: "Contracts", path: "/system/contracts", icon: "contracts" },
       { id: "payments", label: "Payments & Escrow", path: "/system/payments", icon: "payments" },
+      { id: "receipts", label: "Receipt center", path: "/system/receipts", icon: "contracts" },
       { id: "wallets", label: "Wallets", path: "/system/wallets", icon: "wallets" },
       { id: "messages", label: "Messages", path: "/system/messages", icon: "messages" },
     ],

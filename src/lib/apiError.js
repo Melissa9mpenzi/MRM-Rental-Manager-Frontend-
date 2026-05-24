@@ -43,7 +43,13 @@ export function apiErrorMessage(err, fallback = "Something went wrong.") {
   }
   if (isNetworkFailure(err)) {
     const base = apiOriginForError(err);
-    return `Cannot reach the API at ${base}. Start the backend (uvicorn on port 8000) and refresh. If it was running, it may have restarted — try again.`;
+    if (looksLikeLocalDevUrl(base) && typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app")) {
+      return `This site is calling ${base}, which only works on your PC. In Vercel → Frontend project → Environment Variables, set VITE_API_URL to ${PRODUCTION_BACKEND_URL} and redeploy.`;
+    }
+    if (looksLikeLocalDevUrl(base)) {
+      return `Cannot reach the API at ${base}. Start the backend (uvicorn on port 8000) and refresh.`;
+    }
+    return `Cannot reach the API at ${base}. The server may be waking up — wait 30s and retry. Open ${PRODUCTION_BACKEND_URL}/health/db in your browser.`;
   }
   const d = err?.response?.data?.detail;
   if (typeof d === "string") return d;

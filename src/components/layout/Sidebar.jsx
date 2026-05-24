@@ -31,6 +31,7 @@ import {
   ScrollText,
   Server,
   Plus,
+  Link2,
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import mrmLogo from "../../assets/MRM-LOGO.png";
@@ -43,11 +44,13 @@ const LANDLORD_NAV = [
   { to: "/landlord/tenants", icon: Users, label: "Tenants" },
   { to: "/landlord/contracts", icon: FileText, label: "Contracts" },
   { to: "/landlord/payments", icon: CreditCard, label: "Payments" },
+  { to: "/landlord/receipts", icon: FileText, label: "Receipts" },
   { to: "/landlord/analytics", icon: LineChart, label: "Analytics" },
   { to: "/landlord/reports", icon: PieChart, label: "Reports" },
   { to: "/landlord/messages", icon: MessageSquare, label: "Messages" },
   { to: "/landlord/notifications", icon: Bell, label: "Notifications" },
   { to: "/landlord/wallet", icon: Wallet, label: "Wallet" },
+  { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
   { to: "/landlord/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -58,7 +61,9 @@ const TENANT_NAV = [
   { to: "/tenant/applications", icon: ClipboardList, label: "Applications" },
   { to: "/tenant/contract", icon: FileText, label: "Lease contracts" },
   { to: "/tenant/pay", icon: CreditCard, label: "Payments" },
+  { to: "/tenant/receipts", icon: FileText, label: "Receipts" },
   { to: "/tenant/wallet", icon: Wallet, label: "Wallet" },
+  { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
   { to: "/tenant/messages", icon: MessageSquare, label: "Messages" },
   { to: "/tenant/notifications", icon: Bell, label: "Notifications" },
   { to: "/tenant/profile", icon: UserCircle, label: "Profile" },
@@ -76,6 +81,7 @@ const AGENT_NAV = [
   { to: "/agent/analytics", icon: BarChart2, label: "Analytics" },
   { to: "/agent/messages", icon: MessageSquare, label: "Messages" },
   { to: "/agent/notifications", icon: Bell, label: "Notifications" },
+  { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
   { to: "/agent/settings", icon: Settings, label: "Settings" },
 ];
 

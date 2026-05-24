@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Wallet, ArrowDownLeft, Plus } from "lucide-react";
@@ -9,6 +8,9 @@ import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import PaymentMethodBadge from "../../components/payments/PaymentMethodBadge";
 import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import { paymentsApi } from "../../api/paymentsApi";
+import { blockchainApi } from "../../api/blockchainApi";
+import BlockchainReceiptCard from "../../components/blockchain/BlockchainReceiptCard";
+import EscrowStatusPanel from "../../components/blockchain/EscrowStatusPanel";
 
 function fmt(n) {
   return `UGX ${Number(n || 0).toLocaleString()}`;
@@ -27,6 +29,20 @@ export default function TenantWalletPage() {
   const walletQuery = useQuery({
     queryKey: ["wallet-summary"],
     queryFn: () => paymentsApi.walletSummary(),
+    enabled: !!user,
+    retry: false,
+  });
+
+  const receiptsQuery = useQuery({
+    queryKey: ["blockchain-receipts"],
+    queryFn: () => blockchainApi.receipts(),
+    enabled: !!user,
+    retry: false,
+  });
+
+  const escrowsQuery = useQuery({
+    queryKey: ["blockchain-escrows"],
+    queryFn: () => blockchainApi.escrows(),
     enabled: !!user,
     retry: false,
   });
@@ -70,13 +86,12 @@ export default function TenantWalletPage() {
       title="Wallet"
       description="Rent recorded by your landlord and invoice balances from the API."
       actions={
-        <button
-          type="button"
-          onClick={() => toast("Top-up is not available until a wallet service is connected to the API.")}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-teal px-4 py-2.5 text-sm font-bold text-[#041208] transition hover:brightness-110"
+        <Link
+          to="/sui/dashboard"
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/15 px-4 py-2.5 text-sm font-bold text-violet-200 transition hover:bg-violet-500/25"
         >
-          <Plus size={18} /> Add money
-        </button>
+          Sui Portal
+        </Link>
       }
     >
       {noProfile && (
@@ -126,6 +141,20 @@ export default function TenantWalletPage() {
           <p className="mt-2 text-xs text-white/45">From open invoices on your account.</p>
         </div>
       </div>
+
+      {(receiptsQuery.data?.length > 0 || escrowsQuery.data?.length > 0) && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {Array.isArray(receiptsQuery.data) && receiptsQuery.data.length > 0 && (
+            <div className="card-glass space-y-3 p-5">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-white/40">Blockchain receipts</h2>
+              {receiptsQuery.data.slice(0, 5).map((r) => (
+                <BlockchainReceiptCard key={r.id} receipt={r} />
+              ))}
+            </div>
+          )}
+          <EscrowStatusPanel escrows={Array.isArray(escrowsQuery.data) ? escrowsQuery.data : []} />
+        </div>
+      )}
 
       <div className="card-glass overflow-hidden">
         <div className="border-b border-white/[0.08] px-5 py-4">

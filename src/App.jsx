@@ -47,6 +47,20 @@ import SystemMessagesPage from "./pages/system/SystemMessagesPage";
 import SystemSettingsPage from "./pages/system/SystemSettingsPage";
 import SystemAnnouncementsPage from "./pages/system/SystemAnnouncementsPage";
 import SystemSupportPage from "./pages/system/SystemSupportPage";
+import ReceiptVerifyPage from "./pages/receipts/ReceiptVerifyPage";
+import ReceiptsListPage from "./pages/receipts/ReceiptsListPage";
+import ReceiptDetailPage from "./pages/receipts/ReceiptDetailPage";
+import AdminReceiptsPage from "./pages/system/AdminReceiptsPage";
+import SuiPortalLayout from "./layouts/SuiPortalLayout";
+import SuiDashboardPage from "./pages/sui/SuiDashboardPage";
+import SuiTransactionsPage from "./pages/sui/SuiTransactionsPage";
+import SuiEscrowPage from "./pages/sui/SuiEscrowPage";
+import SuiContractsPage from "./pages/sui/SuiContractsPage";
+import SuiWalletsPage from "./pages/sui/SuiWalletsPage";
+import SuiReceiptsPage from "./pages/sui/SuiReceiptsPage";
+import SuiReceiptDetailPage from "./pages/sui/SuiReceiptDetailPage";
+import SuiAnalyticsPage from "./pages/sui/SuiAnalyticsPage";
+import SuiSettingsPage from "./pages/sui/SuiSettingsPage";
 import PendingApprovalPage from "./pages/auth/PendingApprovalPage";
 import RoleHomeRedirect from "./pages/auth/RoleHomeRedirect";
 
@@ -142,6 +156,8 @@ export default function App() {
             <Route path="/government/accept-invite" element={<GovernmentAcceptInvitePage />} />
           </Route>
 
+          <Route path="/verify/receipt/:token" element={<ReceiptVerifyPage />} />
+
           {/* ── Public auth (tenant / landlord / agent) ── */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
@@ -170,6 +186,8 @@ export default function App() {
                 <Route path="/system/properties" element={<SystemPropertiesPage />} />
                 <Route path="/system/contracts" element={<SystemContractsPage />} />
                 <Route path="/system/payments" element={<SystemPaymentsPage />} />
+                <Route path="/system/receipts" element={<AdminReceiptsPage />} />
+                <Route path="/system/receipts/:id" element={<ReceiptDetailPage basePath="/system/receipts" />} />
                 <Route path="/system/wallets" element={<SystemWalletsPage />} />
                 <Route path="/system/messages" element={<SystemMessagesPage />} />
                 <Route path="/system/settings" element={<SystemSettingsPage />} />
@@ -211,6 +229,8 @@ export default function App() {
                 <Route path="/tenant/saved" element={<TenantSavedPage />} />
                 <Route path="/tenant/applications" element={<TenantApplicationsPage />} />
                 <Route path="/tenant/wallet" element={<TenantWalletPage />} />
+                <Route path="/tenant/receipts" element={<ReceiptsListPage basePath="/tenant/receipts" />} />
+                <Route path="/tenant/receipts/:id" element={<ReceiptDetailPage basePath="/tenant/receipts" />} />
                 <Route path="/tenant/notifications" element={<SharedInAppNotificationsPage />} />
                 <Route path="/tenant/profile" element={<TenantProfilePage />} />
                 <Route path="/tenant/pay" element={<PaymentFlowPage />} />
@@ -236,6 +256,8 @@ export default function App() {
                 <Route path="/landlord/tenants/new" element={<AddTenantPage />} />
                 <Route path="/landlord/tenants/:id" element={<TenantDetailPage />} />
                 <Route path="/landlord/payments" element={<PaymentsPage />} />
+                <Route path="/landlord/receipts" element={<ReceiptsListPage basePath="/landlord/receipts" />} />
+                <Route path="/landlord/receipts/:id" element={<ReceiptDetailPage basePath="/landlord/receipts" />} />
                 <Route path="/landlord/payments/new" element={<RecordPaymentPage />} />
                 <Route path="/landlord/maintenance" element={<MaintenancePage />} />
                 <Route path="/landlord/reports/arrears" element={<ArrearsReportPage />} />
@@ -256,6 +278,34 @@ export default function App() {
                 <Route path="/agent/notifications" element={<SharedInAppNotificationsPage />} />
                 <Route path="/agent/messages" element={<MessagesPage />} />
                 <Route path="/agent/settings" element={<SettingsPage />} />
+              </Route>
+
+              {/* Sui blockchain portal — tenant, landlord, agent, system admin */}
+              <Route
+                element={
+                  <RoleGuard
+                    allowed={[
+                      API_ROLES.tenant,
+                      API_ROLES.landlord,
+                      API_ROLES.staff,
+                      API_ROLES.agent,
+                      API_ROLES.system_admin,
+                    ]}
+                  />
+                }
+              >
+                <Route element={<SuiPortalLayout />}>
+                  <Route path="/sui" element={<Navigate to="/sui/dashboard" replace />} />
+                  <Route path="/sui/dashboard" element={<SuiDashboardPage />} />
+                  <Route path="/sui/transactions" element={<SuiTransactionsPage />} />
+                  <Route path="/sui/escrow" element={<SuiEscrowPage />} />
+                  <Route path="/sui/contracts" element={<SuiContractsPage />} />
+                  <Route path="/sui/wallets" element={<SuiWalletsPage />} />
+                  <Route path="/sui/receipts" element={<SuiReceiptsPage />} />
+                  <Route path="/sui/receipts/:id" element={<SuiReceiptDetailPage />} />
+                  <Route path="/sui/analytics" element={<SuiAnalyticsPage />} />
+                  <Route path="/sui/settings" element={<SuiSettingsPage />} />
+                </Route>
               </Route>
 
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
