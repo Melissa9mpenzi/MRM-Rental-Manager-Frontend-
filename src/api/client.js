@@ -8,6 +8,7 @@ import { PLATFORM_API_URL } from "./config";
 const api = createApiClient({
   baseUrl: PLATFORM_API_URL,
   loginPath: "/login",
+  timeout: 60_000,
 });
 
 export default api;
