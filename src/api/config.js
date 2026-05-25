@@ -14,7 +14,7 @@ export const PRODUCTION_FRONTEND_URL =
 function isDeployedSpa() {
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
-    return host.endsWith(".vercel.app");
+    return host.endsWith(".vercel.app") || host.endsWith(".vercel.app.");
   }
   return Boolean(import.meta.env.PROD);
 }
@@ -36,6 +36,7 @@ function resolveApiUrl(explicit, fallback) {
     }
   }
 
+  // Hosted on Vercel: never call localhost from the user's browser
   if (isDeployedSpa()) {
     if (!raw || looksLikeLocalDevUrl(raw)) return fallback;
     return raw;

@@ -49,7 +49,7 @@ export function apiErrorMessage(err, fallback = "Something went wrong.") {
     if (looksLikeLocalDevUrl(base)) {
       return `Cannot reach the API at ${base}. Start the backend (uvicorn on port 8000) and refresh.`;
     }
-    return `Cannot reach the API at ${base}. The server may be waking up — wait 30s and retry. Open ${PRODUCTION_BACKEND_URL}/health/db in your browser.`;
+    return `Cannot reach the API at ${base}. The server may be waking up (Vercel cold start) — wait 30 seconds and retry. Check ${PRODUCTION_BACKEND_URL}/health/db in your browser.`;
   }
   const d = err?.response?.data?.detail;
   if (typeof d === "string") return d;
