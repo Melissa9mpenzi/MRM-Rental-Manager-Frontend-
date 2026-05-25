@@ -2,62 +2,80 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { propertiesApi } from "../../api/propertiesApi";
+import { CATEGORY_TO_UNIT_TYPE } from "../../config/listingFilters";
+import ListingDetailsFields from "./ListingDetailsFields";
 import { Modal } from "../ui/index.jsx";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 
-const UNIT_TYPES = [
-  { value: "bedsitter",     label: "Bedsitter" },
-  { value: "studio",        label: "Studio" },
-  { value: "one_bedroom",   label: "1 Bedroom" },
-  { value: "two_bedroom",   label: "2 Bedroom" },
-  { value: "three_bedroom", label: "3 Bedroom" },
-  { value: "shop",          label: "Shop / Commercial" },
-  { value: "office",        label: "Office" },
-  { value: "other",         label: "Other" },
-];
-
-const AMENITIES = [
-  "Water included", "Electricity included", "Parking",
-  "Generator", "Security", "WiFi", "Balcony", "Servant quarters",
-];
-
 export default function AddUnitModal({ open, onClose, propertyId }) {
   const qc = useQueryClient();
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm({
-    defaultValues: { unit_type: "one_bedroom", floor_number: 0, amenities: [], status: "vacant" },
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      unit_type: "one_bedroom",
+      floor_number: 0,
+      amenities: [],
+      status: "vacant",
+      bedrooms: 1,
+      bathrooms: 1,
+      listing_category: "",
+    },
   });
 
   const selectedAmenities = watch("amenities") || [];
 
-  const toggleAmenity = (amenity) => {
+  const toggleAmenity = (id) => {
     const current = selectedAmenities;
-    const updated = current.includes(amenity)
-      ? current.filter((a) => a !== amenity)
-      : [...current, amenity];
-    setValue("amenities", updated);
+    const updated = current.includes(id) ? current.filter((a) => a !== id) : [...current, id];
+    setValue("amenities", updated, { shouldValidate: true });
   };
 
   const mutation = useMutation({
-    mutationFn: (data) =>
-      propertiesApi.createUnit(propertyId, {
+    mutationFn: (data) => {
+      if (!data.amenities?.length) {
+        throw new Error("Select at least one amenity.");
+      }
+      const unitType =
+        data.unit_type || CATEGORY_TO_UNIT_TYPE[data.listing_category] || "one_bedroom";
+      return propertiesApi.createUnit(propertyId, {
         ...data,
+        unit_type: unitType,
         rent_amount: parseFloat(data.rent_amount),
-        floor_number: parseInt(data.floor_number) || 0,
+        floor_number: parseInt(data.floor_number, 10) || 0,
+        bedrooms: parseInt(data.bedrooms, 10),
+        bathrooms: parseInt(data.bathrooms, 10),
+        area_sqm: parseFloat(data.area_sqm),
         status: data.status || "vacant",
-      }),
+      });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["property", propertyId] });
-      toast.success("Unit added!");
+      qc.invalidateQueries({ queryKey: ["marketplace-listings"] });
+      toast.success("Listing published — visible in search when vacant.");
       reset();
       onClose();
     },
-    onError: (err) => toast.error(err.response?.data?.detail || "Failed to add unit."),
+    onError: (err) => toast.error(err.message || err.response?.data?.detail || "Failed to add unit."),
   });
 
+  const onSubmit = (d) => {
+    if (!d.amenities?.length) {
+      toast.error("Select at least one amenity.");
+      return;
+    }
+    mutation.mutate(d);
+  };
+
   return (
-    <Modal open={open} onClose={onClose} title="Add Unit" size="lg">
-      <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-4" noValidate>
+    <Modal open={open} onClose={onClose} title="Add listing (unit)" size="lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-3">
           <Input
             label="Unit number"
@@ -66,94 +84,50 @@ export default function AddUnitModal({ open, onClose, propertyId }) {
             error={errors.unit_number?.message}
             {...register("unit_number", { required: "Unit number is required" })}
           />
-          <Input
-            label="Floor"
-            type="number"
-            placeholder="0 = Ground floor"
-            {...register("floor_number")}
-          />
+          <Input label="Floor" type="number" placeholder="0 = ground" {...register("floor_number")} />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="w-full">
-            <label className="input-label">Unit type</label>
-            <select className="input-field" {...register("unit_type")}>
-              {UNIT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
-          </div>
-          <Input
-            label="Monthly rent (UGX)"
-            type="number"
-            placeholder="e.g. 350000"
-            required
-            error={errors.rent_amount?.message}
-            {...register("rent_amount", {
-              required: "Rent is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-          />
-        </div>
+        <ListingDetailsFields
+          register={register}
+          errors={errors}
+          watch={watch}
+          setValue={setValue}
+          selectedAmenities={selectedAmenities}
+          onToggleAmenity={toggleAmenity}
+        />
 
-        {/* Status */}
         <div className="w-full">
           <label className="input-label">Initial status</label>
-          <div className="grid grid-cols-3 gap-2 mt-1">
-            {[
-              { value: "vacant",      label: "Vacant",      color: "border-gray-300 text-gray-600",   active: "border-brand-teal bg-brand-tealLt text-brand-teal" },
-              { value: "occupied",    label: "Occupied",    color: "border-gray-300 text-gray-600",   active: "border-brand-teal bg-brand-tealLt text-brand-teal" },
-              { value: "maintenance", label: "Maintenance", color: "border-gray-300 text-gray-600",   active: "border-amber-400 bg-amber-50 text-amber-700" },
-            ].map((s) => {
-              const selected = watch("status") === s.value;
+          <div className="mt-1 grid grid-cols-3 gap-2">
+            {["vacant", "occupied", "maintenance"].map((s) => {
+              const selected = watch("status") === s;
               return (
                 <button
-                  key={s.value}
+                  key={s}
                   type="button"
-                  onClick={() => setValue("status", s.value)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold border-2 transition-colors ${selected ? s.active : s.color + " hover:border-brand-teal"}`}
+                  onClick={() => setValue("status", s)}
+                  className={`rounded-lg border-2 px-3 py-2 text-xs font-bold capitalize transition ${
+                    selected
+                      ? "border-brand-teal bg-brand-tealLt text-brand-teal"
+                      : "border-gray-300 text-gray-600 hover:border-brand-teal"
+                  }`}
                 >
-                  {s.label}
+                  {s}
                 </button>
               );
             })}
           </div>
           <input type="hidden" {...register("status")} />
-        </div>
-
-        {/* Amenities */}
-        <div>
-          <label className="input-label">Amenities <span className="text-brand-mid font-normal">(optional)</span></label>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {AMENITIES.map((a) => (
-              <button
-                key={a}
-                type="button"
-                onClick={() => toggleAmenity(a)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors
-                  ${selectedAmenities.includes(a)
-                    ? "border-brand-teal bg-brand-teal/20 text-brand-teal"
-                    : "border border-white/12 bg-white/[0.06] text-white/70 hover:border-brand-teal/45 hover:text-brand-teal"
-                  }`}
-              >
-                {a}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="w-full">
-          <label className="input-label">Notes <span className="text-brand-mid font-normal">(optional)</span></label>
-          <textarea
-            className="input-field resize-none min-h-[60px]"
-            placeholder="Any notes about this unit..."
-            {...register("description")}
-          />
+          <p className="mt-1 text-[11px] text-brand-mid">Only <strong>vacant</strong> units appear on the public marketplace.</p>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button type="button" variant="ghost" fullWidth onClick={onClose}>Cancel</Button>
-          <Button type="submit" fullWidth loading={mutation.isPending}>Add Unit</Button>
+          <Button type="button" variant="ghost" fullWidth onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" fullWidth loading={mutation.isPending}>
+            Publish unit
+          </Button>
         </div>
       </form>
     </Modal>

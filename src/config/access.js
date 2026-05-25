@@ -51,12 +51,49 @@ export function notificationsPathForRole(role) {
     case API_ROLES.agent:
       return "/agent/notifications";
     case API_ROLES.system_admin:
+      return "/system/notifications";
     case API_ROLES.gov_nira:
     case API_ROLES.gov_kcca:
     case API_ROLES.gov_ura:
-      return "/government/overview";
+      return "/government/notifications";
     default:
       return "/landlord/notifications";
+  }
+}
+
+export function profilePathForRole(role) {
+  switch (role) {
+    case API_ROLES.tenant:
+      return "/tenant/profile";
+    case API_ROLES.landlord:
+      return "/landlord/profile";
+    case API_ROLES.staff:
+    case API_ROLES.agent:
+      return "/agent/profile";
+    case API_ROLES.system_admin:
+      return "/system/settings";
+    case API_ROLES.gov_nira:
+    case API_ROLES.gov_kcca:
+    case API_ROLES.gov_ura:
+      return "/government/settings";
+    default:
+      return null;
+  }
+}
+
+export function settingsPathForRole(role) {
+  switch (role) {
+    case API_ROLES.tenant:
+      return "/tenant/settings";
+    case API_ROLES.landlord:
+      return "/landlord/settings";
+    case API_ROLES.staff:
+    case API_ROLES.agent:
+      return "/agent/settings";
+    case API_ROLES.system_admin:
+      return "/system/settings";
+    default:
+      return "/landlord/settings";
   }
 }
 
@@ -82,6 +119,7 @@ const PREFIX = {
   agent: "/agent",
   system: "/system",
   government: "/government",
+  sui: "/sui",
 };
 
 export function pathAllowedForRole(pathname, role) {
@@ -91,19 +129,36 @@ export function pathAllowedForRole(pathname, role) {
   if (pathname.startsWith("/browse-properties") || pathname.startsWith("/property/")) return true;
 
   if (role === API_ROLES.tenant) {
-    return pathname === PREFIX.tenant || pathname.startsWith(`${PREFIX.tenant}/`);
+    return (
+      pathname === PREFIX.tenant ||
+      pathname.startsWith(`${PREFIX.tenant}/`) ||
+      pathname === PREFIX.sui ||
+      pathname.startsWith(`${PREFIX.sui}/`)
+    );
   }
   if (role === API_ROLES.landlord) {
-    return pathname === PREFIX.landlord || pathname.startsWith(`${PREFIX.landlord}/`);
+    return (
+      pathname === PREFIX.landlord ||
+      pathname.startsWith(`${PREFIX.landlord}/`) ||
+      pathname === PREFIX.sui ||
+      pathname.startsWith(`${PREFIX.sui}/`)
+    );
   }
   if (role === API_ROLES.staff || role === API_ROLES.agent) {
-    return pathname === PREFIX.agent || pathname.startsWith(`${PREFIX.agent}/`);
+    return (
+      pathname === PREFIX.agent ||
+      pathname.startsWith(`${PREFIX.agent}/`) ||
+      pathname === PREFIX.sui ||
+      pathname.startsWith(`${PREFIX.sui}/`)
+    );
   }
   if (isSystemAdministrator(role)) {
     return (
       pathname === PREFIX.system ||
       pathname.startsWith(`${PREFIX.system}/`) ||
-      pathname.startsWith(PREFIX.government)
+      pathname.startsWith(PREFIX.government) ||
+      pathname === PREFIX.sui ||
+      pathname.startsWith(`${PREFIX.sui}/`)
     );
   }
   if (canAccessGovernmentPortal(role)) {

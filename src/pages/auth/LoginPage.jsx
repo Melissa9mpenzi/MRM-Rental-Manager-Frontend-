@@ -5,8 +5,8 @@ import toast from "react-hot-toast";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import useAuthStore from "../../store/authStore";
-import { defaultDashboardPath, pathAllowedForRole } from "../../config/access";
-import { postLoginDestination } from "../../lib/onboardingAuth";
+import { pathAllowedForRole } from "../../config/access";
+import { mustCompleteKycBeforeApp, postLoginDestination } from "../../lib/onboardingAuth";
 import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 
 export default function LoginPage() {
@@ -14,7 +14,15 @@ export default function LoginPage() {
   const location = useLocation();
   const login = useAuthStore((s) => s.login);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
   const from = location.state?.from?.pathname;
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      navigate(postLoginDestination(user), { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -49,17 +57,17 @@ export default function LoginPage() {
     try {
       await login(data);
       const user = useAuthStore.getState().user;
-      const next = postLoginDestination(user);
-      const home = defaultDashboardPath(user?.role);
-      const needsOnboarding = next !== home;
-      if (!needsOnboarding && from && pathAllowedForRole(from, user?.role)) {
-        toast.success("Welcome back!");
+      toast.success("Welcome back!");
+      if (
+        from &&
+        pathAllowedForRole(from, user?.role) &&
+        from !== "/auth/kyc" &&
+        !mustCompleteKycBeforeApp(user)
+      ) {
         navigate(from, { replace: true });
         return;
       }
-      if (from && needsOnboarding) toast.success("Welcome back! Complete the next step to continue.");
-      else toast.success("Welcome back!");
-      navigate(next, { replace: true });
+      navigate(postLoginDestination(user), { replace: true });
     } catch (err) {
       toast.error(err.message || "Invalid email or password.");
     }

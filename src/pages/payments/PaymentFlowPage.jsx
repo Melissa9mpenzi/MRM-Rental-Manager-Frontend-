@@ -3,12 +3,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { CreditCard } from "lucide-react";
 import toast from "react-hot-toast";
+import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
+import ConnectWalletButton from "../../components/blockchain/ConnectWalletButton";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
+import { fetchBlockchainStatus, runSuiCheckout } from "../../lib/suiCheckout";
 import useAuthStore from "../../store/authStore";
+import { receiptsApi } from "../../api/receiptsApi";
+import PaymentReceiptSuccess from "../../components/receipts/PaymentReceiptSuccess";
+import "../../styles/receipt-portal.css";
 
 function fmt(n) {
   return `UGX ${Number(n || 0).toLocaleString()}`;
@@ -22,6 +28,9 @@ export default function PaymentFlowPage() {
   const [method, setMethod] = useState("mtn_momo");
   const [phone, setPhone] = useState(user?.phone || "");
   const [paying, setPaying] = useState(false);
+  const [successReceipt, setSuccessReceipt] = useState(null);
+  const account = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const invoicesQuery = useQuery({
     queryKey: ["tenant-my-invoices-pay"],
@@ -32,6 +41,12 @@ export default function PaymentFlowPage() {
   const gatewayQuery = useQuery({
     queryKey: ["payment-gateway-status"],
     queryFn: fetchGatewayStatus,
+    staleTime: 60_000,
+  });
+
+  const blockchainQuery = useQuery({
+    queryKey: ["blockchain-status"],
+    queryFn: fetchBlockchainStatus,
     staleTime: 60_000,
   });
 
@@ -58,13 +73,29 @@ export default function PaymentFlowPage() {
       .slice(0, 8);
   }, [paymentsQuery.data]);
 
+  async function showLatestReceipt() {
+    try {
+      const rows = await receiptsApi.list({ limit: 1 });
+      if (rows?.[0]) setSuccessReceipt(rows[0]);
+    } catch {
+      /* receipt may lag slightly */
+      setTimeout(async () => {
+        try {
+          const rows = await receiptsApi.list({ limit: 1 });
+          if (rows?.[0]) setSuccessReceipt(rows[0]);
+        } catch { /* ignore */ }
+      }, 1500);
+    }
+  }
+
   useEffect(() => {
     if (!returnRef) return;
-    pollCheckoutUntilDone(returnRef).then((result) => {
+    pollCheckoutUntilDone(returnRef).then(async (result) => {
       if (result.done) {
-        toast.success("Payment confirmed!");
         qc.invalidateQueries({ queryKey: ["tenant-my-invoices-pay"] });
         qc.invalidateQueries({ queryKey: ["tenant-my-payments-pay"] });
+        qc.invalidateQueries({ queryKey: ["receipts-list"] });
+        await showLatestReceipt();
       }
     });
   }, [returnRef, qc]);
@@ -74,22 +105,39 @@ export default function PaymentFlowPage() {
       toast.error("No open invoice to pay.");
       return;
     }
-    if (!phone.trim()) {
+    if (method !== "sui" && !phone.trim()) {
       toast.error("Enter your Mobile Money phone (256…).");
+      return;
+    }
+    if (method === "sui" && !account?.address) {
+      toast.error("Connect your Sui wallet first (Slush, Nightly, Suiet, etc.).");
       return;
     }
     setPaying(true);
     try {
-      await runTenantCheckoutUi({
-        invoiceId: openInvoice.id,
-        methodId: method,
-        phone,
-        onCompleted: () => {
-          qc.invalidateQueries({ queryKey: ["tenant-my-invoices-pay"] });
-          qc.invalidateQueries({ queryKey: ["tenant-my-payments-pay"] });
-          qc.invalidateQueries({ queryKey: ["wallet-summary"] });
-        },
-      });
+      const onDone = async () => {
+        qc.invalidateQueries({ queryKey: ["tenant-my-invoices-pay"] });
+        qc.invalidateQueries({ queryKey: ["tenant-my-payments-pay"] });
+        qc.invalidateQueries({ queryKey: ["receipts-list"] });
+        qc.invalidateQueries({ queryKey: ["wallet-summary"] });
+        qc.invalidateQueries({ queryKey: ["blockchain-receipts"] });
+        await showLatestReceipt();
+      };
+      if (method === "sui") {
+        await runSuiCheckout({
+          invoiceId: openInvoice.id,
+          signAndExecuteTransaction,
+          accountAddress: account.address,
+          onCompleted: onDone,
+        });
+      } else {
+        await runTenantCheckoutUi({
+          invoiceId: openInvoice.id,
+          methodId: method,
+          phone,
+          onCompleted: onDone,
+        });
+      }
     } finally {
       setPaying(false);
     }
@@ -98,11 +146,15 @@ export default function PaymentFlowPage() {
   const noProfile = invoicesQuery.isError && invoicesQuery.error?.response?.status === 404;
 
   return (
+    <>
+      {successReceipt && (
+        <PaymentReceiptSuccess receipt={successReceipt} onClose={() => setSuccessReceipt(null)} />
+      )}
     <AppPageScaffold
       variant="ledger"
       icon={CreditCard}
       title="Pay rent"
-      description="Uganda payments via MTN MoMo API or Pesapal (not Flutterwave)."
+      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui wallet with on-chain receipts."
     >
       {gatewayQuery.data && !gatewayQuery.data.configured && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -118,6 +170,12 @@ export default function PaymentFlowPage() {
               Airtel/card: set <code className="text-xs">PAYMENT_GATEWAY_PROVIDER=pesapal</code> on the API.
             </span>
           )}
+        </div>
+      )}
+      {blockchainQuery.data?.enabled && (
+        <div className="mb-4 rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-3 text-sm text-violet-100">
+          <strong>Sui blockchain</strong> active on {blockchainQuery.data.network}. Fiat payments can
+          generate immutable receipts; wallet payments use on-chain settlement.
         </div>
       )}
       {noProfile && (
@@ -145,15 +203,25 @@ export default function PaymentFlowPage() {
             <p className="text-sm text-white/50">No open invoices with a balance due.</p>
           )}
 
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-white/60">MoMo phone</label>
-            <input
-              className="input-field w-full"
-              placeholder="256700000000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
+          {method === "sui" ? (
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-white/60">Sui wallet</label>
+              <ConnectWalletButton />
+              <p className="mt-2 text-xs text-white/45">
+                Supports Slush, Nightly, Suiet, and other Sui wallets via dApp Kit.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-white/60">MoMo phone</label>
+              <input
+                className="input-field w-full"
+                placeholder="256700000000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+          )}
 
           <div>
             <h3 className="mb-1 text-sm font-bold text-white">Payment methods</h3>
@@ -204,6 +272,7 @@ export default function PaymentFlowPage() {
         </div>
       </div>
     </AppPageScaffold>
+    </>
   );
 }
 

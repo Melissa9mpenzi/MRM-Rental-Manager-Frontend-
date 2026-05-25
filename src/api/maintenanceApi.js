@@ -1,8 +1,12 @@
 import api from "./client";
 
+function asList(data) {
+  return Array.isArray(data) ? data : [];
+}
+
 export const maintenanceApi = {
   list: (params = {}) =>
-    api.get("/maintenance", { params }).then((r) => r.data),
+    api.get("/maintenance", { params }).then((r) => asList(r.data)),
 
   get: (id) =>
     api.get(`/maintenance/${id}`).then((r) => r.data),

@@ -3,9 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search,
-  Bell,
   Shield,
-  User,
   LogOut,
   LayoutGrid,
   Menu,
@@ -21,6 +19,8 @@ import {
 } from "../../config/governmentAccess";
 import { AGENCY_HOME_PATH, AGENCY_LABELS } from "../../config/govTopbarConfig";
 import { governmentApi } from "../../api/governmentApi";
+import NotificationBell from "../layout/NotificationBell";
+import UserProfileMenu from "../layout/UserProfileMenu";
 import GovCommandPalette from "./GovCommandPalette";
 import GovTopbarDropdown from "./GovTopbarDropdown";
 
@@ -51,8 +51,6 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [modulesOpen, setModulesOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [agencyView, setAgencyView] = useState(agency || "all");
 
   const { data: alerts = [] } = useQuery({
@@ -67,7 +65,14 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
     staleTime: 60_000,
   });
 
-  const notifCount = Math.min(99, (alerts?.length || 0) + (overview?.pending_kyc || 0) + (overview?.pending_inspections || 0));
+  const govBadgeExtra = Math.max(
+    0,
+    Number(overview?.pending_kyc || 0) + Number(overview?.pending_inspections || 0)
+  );
+  const govAlertItems = (alerts || []).map((a) => ({
+    ...a,
+    to: "/government/fraud",
+  }));
 
   const openPalette = useCallback(() => setPaletteOpen(true), []);
   const closePalette = useCallback(() => setPaletteOpen(false), []);
@@ -88,7 +93,6 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
   }, [agency]);
 
   const handleLogout = async () => {
-    setProfileOpen(false);
     await logout();
     navigate("/government/login");
   };
@@ -102,8 +106,6 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
 
   const closeMenus = () => {
     setModulesOpen(false);
-    setNotifOpen(false);
-    setProfileOpen(false);
   };
 
   const agencyLabel = AGENCY_LABELS[agencyView] || AGENCY_LABELS[agency] || AGENCY_LABELS.all;
@@ -175,11 +177,7 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
                 title="Modules"
                 aria-expanded={modulesOpen}
                 aria-haspopup="menu"
-                onClick={() => {
-                  setModulesOpen((o) => !o);
-                  setNotifOpen(false);
-                  setProfileOpen(false);
-                }}
+                onClick={() => setModulesOpen((o) => !o)}
               >
                 <LayoutGrid size={18} />
               </button>
@@ -199,56 +197,12 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
               </GovTopbarDropdown>
             </div>
 
-            <div className="relative">
-              <button
-                type="button"
-                className={`gov-icon-btn ${notifOpen ? "gov-icon-btn--active" : ""}`}
-                title="Notifications"
-                aria-expanded={notifOpen}
-                aria-haspopup="menu"
-                onClick={() => {
-                  setNotifOpen((o) => !o);
-                  setModulesOpen(false);
-                  setProfileOpen(false);
-                }}
-              >
-                <Bell size={18} />
-                {notifCount > 0 && (
-                  <span className="gov-icon-btn__badge">{notifCount > 9 ? "9+" : notifCount}</span>
-                )}
-              </button>
-              <GovTopbarDropdown open={notifOpen} onClose={() => setNotifOpen(false)} className="gov-topbar-menu--wide">
-                <p className="gov-topbar-menu__title">Notifications</p>
-                {alerts.length === 0 && (
-                  <p className="gov-topbar-menu__empty">No active alerts right now.</p>
-                )}
-                {alerts.slice(0, 6).map((a) => (
-                  <button
-                    key={a.id}
-                    type="button"
-                    role="menuitem"
-                    className="gov-topbar-menu__alert"
-                    onClick={() => {
-                      setNotifOpen(false);
-                      navigate("/government/fraud");
-                    }}
-                  >
-                    <span className={`gov-topbar-menu__dot gov-topbar-menu__dot--${a.severity}`} />
-                    <span>
-                      <span className="block font-medium text-white/90">{a.title}</span>
-                      <span className="block text-[11px] text-white/50">{a.subject}</span>
-                    </span>
-                  </button>
-                ))}
-                <Link
-                  to="/government/fraud"
-                  className="gov-topbar-menu__footer"
-                  onClick={() => setNotifOpen(false)}
-                >
-                  View fraud center →
-                </Link>
-              </GovTopbarDropdown>
-            </div>
+            <NotificationBell
+              variant="gov"
+              govAlerts={govAlertItems}
+              govBadgeExtra={govBadgeExtra}
+              onOpenChange={() => setModulesOpen(false)}
+            />
 
             <button
               type="button"
@@ -262,51 +216,14 @@ export default function GovTopbar({ role, systemStatus, onMenuClick }) {
               <Shield size={18} />
             </button>
 
-            <div className="relative">
-              <button
-                type="button"
-                className={`gov-icon-btn ${profileOpen ? "gov-icon-btn--active" : ""}`}
-                title="Profile"
-                aria-expanded={profileOpen}
-                aria-haspopup="menu"
-                onClick={() => {
-                  setProfileOpen((o) => !o);
-                  setModulesOpen(false);
-                  setNotifOpen(false);
-                }}
-              >
-                <User size={18} />
-              </button>
-              <GovTopbarDropdown open={profileOpen} onClose={() => setProfileOpen(false)}>
-                <div className="gov-topbar-menu__profile">
-                  <p className="font-semibold text-white">{user?.full_name || "Officer"}</p>
-                  <p className="text-xs text-emerald-400/90">{roleLabel(role)}</p>
-                  <p className="mt-1 text-[11px] text-white/45">{user?.email}</p>
-                </div>
-                <Link
-                  to="/government/settings"
-                  role="menuitem"
-                  className="gov-topbar-menu__link"
-                  onClick={() => setProfileOpen(false)}
-                >
-                  <Settings size={16} />
-                  Portal settings
-                </Link>
-                <Link
-                  to="/government/audit"
-                  role="menuitem"
-                  className="gov-topbar-menu__link"
-                  onClick={() => setProfileOpen(false)}
-                >
-                  <ScrollText size={16} />
-                  My activity (audit)
-                </Link>
-                <button type="button" role="menuitem" className="gov-topbar-menu__link gov-topbar-menu__link--danger" onClick={handleLogout}>
-                  <LogOut size={16} />
-                  Sign out
-                </button>
-              </GovTopbarDropdown>
-            </div>
+            <UserProfileMenu
+              variant="gov"
+              subtitle={roleLabel(role)}
+              showName={false}
+              extraLinks={[
+                { to: "/government/audit", label: "My activity (audit)", icon: ScrollText },
+              ]}
+            />
 
             <button type="button" onClick={handleLogout} className="gov-icon-btn lg:hidden" title="Sign out">
               <LogOut size={18} />

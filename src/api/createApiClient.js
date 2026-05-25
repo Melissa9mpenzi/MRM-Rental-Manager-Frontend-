@@ -102,6 +102,9 @@ export function createApiClient({ baseUrl, loginPath = "/login", timeout = 15_00
           });
           const newToken = data.access_token;
           localStorage.setItem("access_token", newToken);
+          if (data.refresh_token) {
+            localStorage.setItem("refresh_token", data.refresh_token);
+          }
           refreshQueue.forEach(({ resolve }) => resolve(newToken));
           refreshQueue = [];
           originalRequest.headers.Authorization = `Bearer ${newToken}`;

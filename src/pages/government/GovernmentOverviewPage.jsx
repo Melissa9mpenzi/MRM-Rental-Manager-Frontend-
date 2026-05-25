@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { governmentApi } from "../../api/governmentApi";
 import useAuthStore from "../../store/authStore";
-import { UserPlus, Shield, Building2, Banknote, FileText, Megaphone } from "lucide-react";
+import { UserPlus, Shield, Building2, Banknote, FileText, Megaphone, ScrollText } from "lucide-react";
 import { governmentAgencyForRole, quickActionsForAgency, isSystemAdministrator } from "../../config/governmentAccess";
 import {
   overviewStatCards,
@@ -23,6 +23,7 @@ import {
   regionPanelTitle,
 } from "../../config/governmentOverviewConfig";
 import GovStatCard from "../../components/government/GovStatCard";
+import GovWorkflowBanner from "../../components/government/GovWorkflowBanner";
 import GovSystemStatusCard from "../../components/government/GovSystemStatusCard";
 import UgandaComplianceMap from "../../components/government/UgandaComplianceMap";
 import GovVerificationPieChart from "../../components/government/GovVerificationPieChart";
@@ -61,8 +62,19 @@ export default function GovernmentOverviewPage() {
   const mapHasNoData = !regions.some((r) => (r?.count ?? r?.properties ?? 0) > 0);
   const cards = overviewStatCards(agency, data, { isLoading, fmtFull, fmt });
   const trendLines = trendLinesForAgency(agency);
-  const ACTION_ICONS = { officers: UserPlus, nira: Shield, kcca: Building2, ura: Banknote, analytics: FileText, settings: Megaphone };
-  const quickActions = quickActionsForAgency(agency).map((a) => ({ ...a, icon: ACTION_ICONS[a.id] }));
+  const ACTION_ICONS = {
+    officers: UserPlus,
+    nira: Shield,
+    kcca: Building2,
+    ura: Banknote,
+    analytics: FileText,
+    charter: ScrollText,
+    settings: Megaphone,
+  };
+  const quickActions = quickActionsForAgency(agency).map((a) => ({
+    ...a,
+    icon: ACTION_ICONS[a.id] || FileText,
+  }));
   const alerts = fraudAlerts.slice(0, 5).map((a) => ({
     level: a.severity || "medium",
     text: a.title ? `${a.title}${a.subject ? ` — ${a.subject}` : ""}` : a.subject || "Alert",
@@ -74,11 +86,13 @@ export default function GovernmentOverviewPage() {
 
   return (
     <div className="space-y-5">
+      <GovWorkflowBanner highlightAgency={isAdmin ? undefined : agency} />
+
       {!isAdmin && (
         <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-100">
-          {agency === "nira" && "NIRA officer view — identity verification and national ID workflows only."}
-          {agency === "kcca" && "KCCA officer view — property verification and inspections only."}
-          {agency === "ura" && "URA officer view — rental tax compliance and revenue reporting only."}
+          {agency === "nira" && "NIRA officer — identity, KYC, fraud, and blacklist only (no payments or system config)."}
+          {agency === "kcca" && "KCCA officer — property verification, inspections, and GIS (no wallets or payments)."}
+          {agency === "ura" && "URA officer — tax, revenue, and transaction compliance (no KYC documents or passwords)."}
         </div>
       )}
 
@@ -109,8 +123,8 @@ export default function GovernmentOverviewPage() {
 
         <div className="gov-glass p-4 xl:col-span-8">
           <h2 className="gov-panel-title">{trendPanelTitle(agency)}</h2>
-          <div className="mt-4 h-56">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="mt-4 h-56 min-h-[224px] w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minHeight={224}>
               <LineChart data={trend}>
                 <CartesianGrid stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
                 <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 10 }} />
@@ -152,9 +166,9 @@ export default function GovernmentOverviewPage() {
               />
             </div>
             <div className="gov-region-list">
-              {regions.map((r) => (
+              {regions.map((r, idx) => (
                 <button
-                  key={r.district}
+                  key={`${r.district}-${idx}`}
                   type="button"
                   className={`gov-region-row w-full text-left transition ${
                     selectedDistrict === r.district ? "ring-1 ring-emerald-500/50" : ""

@@ -94,13 +94,26 @@ export function normalizeDistrictName(name) {
 }
 
 export function normalizeRegions(rows) {
-  return (Array.isArray(rows) ? rows : []).map((r) => ({
-    district: normalizeDistrictName(r.district),
-    score: Math.min(100, Math.max(0, Number(r.score) || 0)),
-    count: Math.max(0, Number(r.count ?? r.properties) || 0),
-    properties: Math.max(0, Number(r.properties ?? r.count) || 0),
-    pending: Math.max(0, Number(r.pending) || 0),
-  }));
+  const merged = new Map();
+  for (const r of Array.isArray(rows) ? rows : []) {
+    const district = normalizeDistrictName(r.district);
+    const count = Math.max(0, Number(r.count ?? r.properties) || 0);
+    const pending = Math.max(0, Number(r.pending) || 0);
+    const score = Math.min(100, Math.max(0, Number(r.score) || 0));
+    const prev = merged.get(district);
+    if (!prev) {
+      merged.set(district, { district, score, count, properties: count, pending });
+      continue;
+    }
+    const total = prev.count + count;
+    prev.score = total
+      ? Math.round((prev.score * prev.count + score * count) / total)
+      : score;
+    prev.count = total;
+    prev.properties = total;
+    prev.pending += pending;
+  }
+  return [...merged.values()];
 }
 
 export function resolveRegionalCompliance(apiRows) {

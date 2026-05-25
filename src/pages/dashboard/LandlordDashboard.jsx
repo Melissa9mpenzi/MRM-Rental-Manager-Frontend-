@@ -2,14 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   Building2, Users, DoorOpen, DoorClosed, Wrench,
-  AlertCircle, ChevronRight, CreditCard,
+  AlertCircle, ChevronRight, CreditCard, Sparkles,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { dashboardApi } from "../../api/dashboardApi";
 import { listingImageUrl } from "../../lib/mediaUrl";
 import useAuthStore from "../../store/authStore";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
+import KycStatusBanner from "../../components/domain/KycStatusBanner";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import ActivityTimeline from "../../components/enterprise/ActivityTimeline";
+import SystemStatusBar from "../../components/enterprise/SystemStatusBar";
+import { platformApi } from "../../api/platformApi";
 
 function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
   const colors = {
@@ -103,10 +107,16 @@ const fmtUGX = (n) => `UGX ${new Intl.NumberFormat("en-UG").format(Math.round(n 
 
 export default function LandlordDashboard() {
   const user = useAuthStore((s) => s.user);
-  const { data: stats, isLoading, isError } = useQuery({
+  const { data: stats, isLoading, isError, refetch } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: () => dashboardApi.getStats(),
     refetchInterval: 30000,
+  });
+
+  const { data: activity = [] } = useQuery({
+    queryKey: ["platform-activity"],
+    queryFn: () => platformApi.activity(10),
+    refetchInterval: 60000,
   });
 
   const sk = (h) => <div className={`card-glass animate-pulse border-white/[0.12] bg-white/[0.04] ${h}`} />;
@@ -120,31 +130,33 @@ export default function LandlordDashboard() {
         <p className="mt-0.5 text-sm text-white/55">Landlord overview — revenue, occupancy, and arrears</p>
       </div>
 
-      {!user?.trusted_for_commerce && (
-        <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          <strong className="font-bold">Limited mode.</strong> Complete KYC and wait for admin approval to publish new
-          listings and unlock payouts.{" "}
-          {!user?.kyc_submitted_at ? (
-            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              Submit KYC →
-            </Link>
-          ) : user?.kyc_review_status === "pending" ? (
-            <Link to="/verification-pending" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              View status →
-            </Link>
-          ) : user?.kyc_review_status === "rejected" ? (
-            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              Resubmit KYC →
-            </Link>
-          ) : null}
-        </div>
-      )}
+      <KycStatusBanner user={user} roleLabel="landlord" />
+
+      <SystemStatusBar />
 
       {isError && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-          Could not load dashboard stats. Check that the API is running and you are signed in.
+          Could not load dashboard stats.{" "}
+          <button type="button" className="ml-2 font-bold underline" onClick={() => refetch()}>
+            Retry
+          </button>
         </div>
       )}
+
+      <div className="enterprise-card flex flex-col gap-2 border-violet-500/20 bg-violet-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Sparkles className="mt-0.5 h-5 w-5 text-violet-300" />
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-violet-200/90">AI insights</p>
+            <p className="mt-1 text-sm text-white/65">
+              {stats?.tenants_in_arrears > 0
+                ? `${stats.tenants_in_arrears} tenant(s) in arrears — consider a payment reminder.`
+                : "Occupancy and collections look healthy. Suggested action: publish a vacant unit on the marketplace."}
+            </p>
+          </div>
+        </div>
+        <span className="text-[10px] font-semibold text-white/35">Powered by platform analytics</span>
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
@@ -282,6 +294,8 @@ export default function LandlordDashboard() {
           )}
         </div>
       </div>
+
+      <ActivityTimeline items={activity} title="Compliance & payments timeline" />
 
       {!isLoading && (stats?.maintenance_units || 0) > 0 && (
         <div className="flex items-center gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">

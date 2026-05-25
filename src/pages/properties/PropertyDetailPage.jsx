@@ -13,9 +13,7 @@ import EditPropertyModal from "../../components/domain/EditPropertyModal";
 import UnitCard from "../../components/domain/UnitCard";
 
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
-import { platformApiOrigin } from "../../api/config";
-
-const API_ORIGIN = platformApiOrigin();
+import { listingImageUrl, uploadMediaUrl } from "../../lib/mediaUrl";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -74,7 +72,7 @@ export default function PropertyDetailPage() {
       {property.photo_path ? (
         <div className="relative rounded-xl overflow-hidden h-52 w-full">
           <img
-            src={property.photo_path.startsWith("http") ? property.photo_path : `${API_ORIGIN}${property.photo_path}`}
+            src={listingImageUrl(property.photo_path)}
             alt={property.name}
             className="w-full h-full object-cover"
           />
@@ -99,7 +97,24 @@ export default function PropertyDetailPage() {
             </div>
           </div>
         </div>
-      ) : (
+      ) : null}
+
+      {property.video_path && (
+        <div className="card overflow-hidden p-0">
+          <p className="border-b border-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-white/45">
+            Property tour video
+          </p>
+          <video
+            src={uploadMediaUrl(property.video_path)}
+            controls
+            className="w-full max-h-80 bg-black"
+            playsInline
+            preload="metadata"
+          />
+        </div>
+      )}
+
+      {!property.photo_path ? (
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <h2 className="text-xl font-bold text-brand-dark">{property.name}</h2>
@@ -118,7 +133,7 @@ export default function PropertyDetailPage() {
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Description */}
       {property.description && (

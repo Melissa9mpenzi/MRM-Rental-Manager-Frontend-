@@ -1,43 +1,52 @@
 import { NavLink, Link } from "react-router-dom";
-import { Plus } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
-  Grid3X3,
+  KeyRound,
   Building2,
   FileText,
   Wallet,
-  MessageSquare,
   Shield,
   Landmark,
   Settings,
   ScrollText,
   Megaphone,
   LifeBuoy,
-  KeyRound,
+  CheckCircle2,
+  BarChart3,
+  ArrowLeftRight,
+  Percent,
+  LineChart,
+  Cpu,
+  Boxes,
+  ClipboardCheck,
 } from "lucide-react";
 import { SYSTEM_NAV_SECTIONS } from "../../config/systemAdminNav";
 import useAuthStore from "../../store/authStore";
 import SystemBrandMark from "./SystemBrandMark";
+import MiniSparkline from "./MiniSparkline";
 
 const ICONS = {
   overview: LayoutDashboard,
   users: Users,
-  dashboards: Grid3X3,
+  permissions: KeyRound,
   properties: Building2,
-  contracts: FileText,
+  moderation: ClipboardCheck,
   payments: Wallet,
   wallets: Wallet,
-  messages: MessageSquare,
+  transactions: ArrowLeftRight,
+  commissions: Percent,
+  revenue: LineChart,
+  settings: Settings,
+  fraud: Cpu,
+  blockchain: Boxes,
+  audit: ScrollText,
+  reports: BarChart3,
   nira: Shield,
   kcca: Building2,
   ura: Landmark,
   gov: Shield,
-  settings: Settings,
-  permissions: KeyRound,
-  audit: ScrollText,
-  security: Shield,
-  announcements: Megaphone,
+  messages: Megaphone,
   support: LifeBuoy,
 };
 
@@ -50,7 +59,7 @@ function initials(name) {
     .toUpperCase();
 }
 
-export default function SystemSidebar({ onNavigate }) {
+export default function SystemSidebar({ onNavigate, healthSpark = [98, 99, 99.5, 99.8, 99.9, 99.98] }) {
   const user = useAuthStore((s) => s.user);
 
   return (
@@ -77,6 +86,9 @@ export default function SystemSidebar({ onNavigate }) {
                 >
                   <Icon size={17} strokeWidth={2} className="shrink-0" />
                   <span className="truncate">{item.label}</span>
+                  {item.badge ? (
+                    <span className="sys-sidebar__ai-badge">{item.badge}</span>
+                  ) : null}
                 </NavLink>
               );
             })}
@@ -84,9 +96,20 @@ export default function SystemSidebar({ onNavigate }) {
         ))}
       </nav>
 
+      <div className="sys-sidebar__health-widget">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">System Health</p>
+            <p className="text-sm font-bold text-emerald-400">Excellent</p>
+            <p className="text-[10px] text-white/45">99.98% uptime</p>
+          </div>
+          <CheckCircle2 size={22} className="text-emerald-400/80" />
+        </div>
+        <MiniSparkline values={healthSpark} color="#00c896" />
+      </div>
+
       <footer className="sys-sidebar__footer">
         <Link to="/government/officers" className="sys-sidebar__create" onClick={onNavigate}>
-          <Plus size={16} strokeWidth={2.5} />
           Create New
         </Link>
 

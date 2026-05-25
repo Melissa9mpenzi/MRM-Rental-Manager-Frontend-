@@ -44,12 +44,12 @@ export function apiErrorMessage(err, fallback = "Something went wrong.") {
   if (isNetworkFailure(err)) {
     const base = apiOriginForError(err);
     if (looksLikeLocalDevUrl(base) && typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app")) {
-      return `This site is calling ${base}, which only works on your PC. In the Vercel frontend project, set VITE_API_URL to ${PRODUCTION_BACKEND_URL} and redeploy.`;
+      return `This site is calling ${base}, which only works on your PC. In Vercel → Frontend project → Environment Variables, set VITE_API_URL to ${PRODUCTION_BACKEND_URL} and redeploy.`;
     }
     if (looksLikeLocalDevUrl(base)) {
       return `Cannot reach the API at ${base}. Start the backend (uvicorn on port 8000) and refresh.`;
     }
-    return `Cannot reach the API at ${base}. The server may be waking up (Vercel cold start) — wait 30 seconds and try again. Check ${PRODUCTION_BACKEND_URL}/health in your browser.`;
+    return `Cannot reach the API at ${base}. The server may be waking up (Vercel cold start) — wait 30 seconds and retry. Check ${PRODUCTION_BACKEND_URL}/health/db in your browser.`;
   }
   const d = err?.response?.data?.detail;
   if (typeof d === "string") return d;

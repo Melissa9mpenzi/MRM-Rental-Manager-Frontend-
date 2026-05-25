@@ -16,8 +16,9 @@ export default function PendingApprovalPage() {
       </div>
       <h1 className="text-lg font-bold text-white sm:text-xl">Verification in progress</h1>
       <p className="mt-2 text-sm text-white/60">
-        Thanks for submitting KYC. Our team will review your documents before you can publish listings or receive
-        payouts. You can still explore your limited dashboard.
+        Thanks for submitting KYC. NIRA-linked identity checks and platform officers will review your documents.
+        You stay signed in and can use your dashboard while you wait — publishing listings and payouts unlock after
+        approval.
       </p>
       <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <Link

@@ -50,10 +50,23 @@ export default function RegisterPage() {
         password: form.password,
         role: form.role,
       });
-      toast.success("Account created! Check your email for a 6-digit code.");
+      const fallback = res?.verification_otp_fallback || res?.dev_verification_otp;
+      if (res?.email_sent === false) {
+        toast.error(
+          fallback
+            ? "Email could not be sent. Use the code shown on the next screen."
+            : "Email could not be sent. Tap Resend code on the next screen.",
+          { duration: 8000 }
+        );
+      } else {
+        toast.success("Account created! Check your email for a 6-digit code (and spam folder).");
+      }
       navigate(`/auth/verify-otp?email=${encodeURIComponent(form.email)}`, {
         replace: true,
-        state: res?.dev_verification_otp ? { devOtp: res.dev_verification_otp } : undefined,
+        state: {
+          devOtp: fallback,
+          emailSent: res?.email_sent !== false,
+        },
       });
     } catch (err) {
       const d = err.response?.data?.detail;

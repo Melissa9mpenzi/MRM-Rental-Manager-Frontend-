@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { notificationsApi } from "../../api/notificationsApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import { ErrorPanel } from "../../components/ui/StatePanel";
 
 const KIND = {
   success: { Icon: CreditCard, wrap: "bg-emerald-500/20 text-emerald-300" },
@@ -51,6 +52,8 @@ export default function SharedInAppNotificationsPage() {
   const { data: raw, isLoading, isError } = useQuery({
     queryKey: ["notifications", role],
     queryFn: () => notificationsApi.list(),
+    refetchInterval: 25_000,
+    refetchOnWindowFocus: true,
   });
 
   const items = useMemo(() => (Array.isArray(raw) ? raw : []).map(normalizeItem), [raw]);
@@ -112,7 +115,12 @@ export default function SharedInAppNotificationsPage() {
         {isLoading ? (
           <div className="p-10 text-center text-sm text-white/45">Loading…</div>
         ) : isError ? (
-          <div className="p-10 text-center text-sm text-red-300">Could not load notifications.</div>
+          <div className="p-4">
+            <ErrorPanel
+              title="Could not load notifications"
+              description="Check your connection and try again."
+            />
+          </div>
         ) : effective.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-16 text-white/45">
             <Bell size={28} className="opacity-40" />

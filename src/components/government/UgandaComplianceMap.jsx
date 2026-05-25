@@ -70,11 +70,11 @@ export default function UgandaComplianceMap({
                 style={{ cursor: onSelectDistrict ? "pointer" : "default" }}
                 role="button"
                 tabIndex={0}
-                aria-label={`${f.id}: ${f.score}% compliance`}
+                aria-label={`${f.label || f.id}: ${f.score}% compliance`}
               >
                 {f.paths.map((d, i) => (
                   <path
-                    key={`${f.id}-${i}`}
+                    key={`${f.id}-path-${i}`}
                     d={d}
                     fill={f.fill}
                     stroke={isActive ? "#fff" : "rgba(11, 14, 20, 0.55)"}
@@ -82,7 +82,7 @@ export default function UgandaComplianceMap({
                   />
                 ))}
                 <title>
-                  {f.id} ({f.district}): {f.score}% · {f.count} records
+                  {f.label || f.id} ({f.district}): {f.score}% · {f.count} records
                 </title>
               </g>
             );

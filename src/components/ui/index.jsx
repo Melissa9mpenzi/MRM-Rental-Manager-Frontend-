@@ -1,14 +1,26 @@
 import { X, AlertCircle } from "lucide-react";
 
 // ── MODAL ─────────────────────────────────────────────────────────
-export function Modal({ open, onClose, title, children }) {
+const MODAL_SIZES = {
+  md: "max-w-lg",
+  lg: "max-w-2xl",
+  xl: "max-w-3xl",
+};
+
+export function Modal({ open, onClose, title, children, size = "md" }) {
   if (!open) return null;
+  const maxW = MODAL_SIZES[size] || MODAL_SIZES.md;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden />
+      <div
+        className={`relative max-h-[90vh] w-full ${maxW} overflow-y-auto rounded-3xl border border-white/12 bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? "modal-title" : undefined}
+      >
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">{title}</h3>
+          <h3 id="modal-title" className="text-lg font-bold text-white">{title}</h3>
           <button type="button" onClick={onClose} className="text-white/45 transition-colors hover:text-white">
             <X size={20} />
           </button>
@@ -38,18 +50,16 @@ export function Badge({ children, color = "teal" }) {
 // ── EMPTY STATE ───────────────────────────────────────────────────
 export function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      {Icon && (
-        <div className="w-14 h-14 rounded-full bg-brand-tealLt flex items-center justify-center mb-4">
-          <Icon size={26} className="text-brand-teal" />
-        </div>
-      )}
-      <h3 className="font-bold text-brand-dark mb-1">{title}</h3>
-      {description && <p className="text-brand-mid text-sm mb-4 max-w-xs">{description}</p>}
-      {action && <div>{action}</div>}
+    <div className="state-panel state-panel--empty !py-12">
+      {Icon && <Icon size={28} className="state-panel__icon text-brand-teal/80" />}
+      <h3 className="state-panel__title">{title}</h3>
+      {description && <p className="state-panel__desc">{description}</p>}
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
+
+export { ErrorPanel, EmptyPanel, LoadingPanel } from "./StatePanel";
 
 // ── STAT CARD ─────────────────────────────────────────────────────
 export function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
@@ -61,13 +71,13 @@ export function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
   };
   return (
     <div className="card flex items-start gap-3">
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${colors[color]}`}>
+      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${colors[color]}`}>
         <Icon size={18} />
       </div>
       <div className="min-w-0">
-        <div className="text-2xl font-bold text-brand-dark leading-tight truncate">{value}</div>
-        <div className="text-xs font-semibold text-brand-mid mt-0.5">{label}</div>
-        {sub && <div className="text-xs text-brand-mid/70 mt-0.5">{sub}</div>}
+        <div className="truncate text-2xl font-bold leading-tight text-white">{value}</div>
+        <div className="mt-0.5 text-xs font-semibold text-white/55">{label}</div>
+        {sub && <div className="mt-0.5 text-xs text-white/40">{sub}</div>}
       </div>
     </div>
   );

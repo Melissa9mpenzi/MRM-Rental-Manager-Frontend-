@@ -5,6 +5,7 @@ import { Users, Plus, Search } from "lucide-react";
 import { tenantsApi } from "../../api/tenantsApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import ArrearsBadge from "../../components/domain/ArrearsBadge";
+import { ErrorPanel, EmptyPanel, LoadingPanel } from "../../components/ui/StatePanel";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -22,7 +23,7 @@ export default function TenantsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
-  const { data: tenants = [], isLoading, isError } = useQuery({
+  const { data: rawTenants = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ["tenants", search, status],
     queryFn: () =>
       tenantsApi.list({
@@ -30,6 +31,14 @@ export default function TenantsPage() {
         ...(search.trim() ? { search: search.trim() } : {}),
       }),
   });
+
+  const tenants = Array.isArray(rawTenants) ? rawTenants : [];
+
+  const errorDetail =
+    error?.response?.data?.message ||
+    error?.response?.data?.detail?.message ||
+    (typeof error?.response?.data?.detail === "string" ? error.response.data.detail : null) ||
+    error?.message;
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -50,7 +59,7 @@ export default function TenantsPage() {
       variant="ledger"
       icon={Users}
       title="Tenants"
-      description={`${rows.length} record${rows.length === 1 ? "" : "s"} · search, filter, open a profile`}
+      description={`${rows.length} tenant profile${rows.length === 1 ? "" : "s"} for your properties · rent balances include MoMo/Pesapal and recorded payments (see Payments for cash ledger)`}
       actions={
         <Link
           to="/landlord/tenants/new"
@@ -68,7 +77,7 @@ export default function TenantsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, phone, email…"
-            className="input w-full pl-9"
+            className="input-field w-full pl-9"
             aria-label="Search tenants"
           />
         </div>
@@ -80,8 +89,8 @@ export default function TenantsPage() {
               onClick={() => setStatus(o.value)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition ${
                 status === o.value
-                  ? "border-brand-teal bg-brand-teal/15 text-brand-dark"
-                  : "border-brand-tealLt bg-white/60 text-brand-mid hover:border-brand-teal/50"
+                  ? "border-brand-teal/40 bg-brand-teal/15 text-[#00C896]"
+                  : "border-white/10 bg-white/[0.04] text-white/50 hover:border-white/20 hover:text-white/70"
               }`}
             >
               {o.label}
@@ -91,26 +100,32 @@ export default function TenantsPage() {
       </div>
 
       {isLoading ? (
-        <div className="card h-40 animate-pulse bg-brand-tealLt/30" />
+        <LoadingPanel />
       ) : isError ? (
-        <div className="card py-14 text-center">
-          <h3 className="font-bold text-brand-dark">Could not load tenants</h3>
-          <p className="mt-1 text-sm text-brand-mid">Check your connection and that the API is running, then try again.</p>
-        </div>
+        <ErrorPanel
+          title="Could not load tenants"
+          description={
+            errorDetail ||
+            "Check your connection and that the API is running, then try again."
+          }
+          onRetry={() => refetch()}
+        />
       ) : rows.length === 0 ? (
-        <div className="card py-14 text-center">
-          <Users className="mx-auto mb-2 h-10 w-10 text-brand-mid opacity-60" />
-          <h3 className="font-bold text-brand-dark">No tenants match</h3>
-          <p className="mt-1 text-sm text-brand-mid">Try another search or add your first tenant.</p>
-          <Link to="/landlord/tenants/new" className="btn-primary mt-4 inline-block rounded-lg px-5 py-2 text-sm font-bold">
-            Add tenant
-          </Link>
-        </div>
+        <EmptyPanel
+          icon={Users}
+          title="No tenants match"
+          description="Try another search or add your first tenant."
+          action={
+            <Link to="/landlord/tenants/new" className="btn-primary inline-flex rounded-lg px-5 py-2 text-sm font-bold">
+              Add tenant
+            </Link>
+          }
+        />
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-brand-tealLt text-left text-xs text-brand-mid">
+              <tr className="border-b border-white/10 text-left text-xs text-white/50">
                 <th className="pb-3 pr-4 font-semibold">Tenant</th>
                 <th className="pb-3 pr-4 font-semibold">Property / unit</th>
                 <th className="pb-3 pr-4 text-right font-semibold">Rent</th>
@@ -118,13 +133,13 @@ export default function TenantsPage() {
                 <th className="pb-3 font-semibold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-brand-tealLt/60">
+            <tbody className="divide-y divide-white/[0.08]">
               {rows.map((t) => (
-                <tr key={t.id} className="hover:bg-brand-tealLt/20">
+                <tr key={t.id} className="transition-colors hover:bg-white/[0.04]">
                   <td className="py-3 pr-4">
                     <Link
                       to={`/landlord/tenants/${t.id}`}
-                      className="font-semibold text-brand-dark hover:text-brand-teal"
+                      className="font-semibold text-white hover:text-[#00C896]"
                     >
                       {t.full_name}
                     </Link>

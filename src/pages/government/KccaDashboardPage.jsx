@@ -4,8 +4,10 @@ import { Building2, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 import { governmentApi } from "../../api/governmentApi";
 import GovModuleHeader from "../../components/government/GovModuleHeader";
+import GovWorkflowBanner from "../../components/government/GovWorkflowBanner";
 import GovModuleKpis from "../../components/government/GovModuleKpis";
 import GovTablePagination from "../../components/government/GovTablePagination";
+import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
 
 function statusBadge(status) {
   const s = String(status || "pending").toLowerCase();
@@ -52,9 +54,10 @@ export default function KccaDashboardPage() {
     <div className="space-y-5">
       <GovModuleHeader
         title="KCCA — Property Verification"
-        subtitle="Validate listings, plot numbers, building compliance, and landlord licensing."
+        subtitle="Property compliance authority: permits, inspections, GIS, and illegal listing removal. No wallet or payment admin access."
       />
 
+      <GovWorkflowBanner highlightAgency="kcca" />
       <GovModuleKpis items={kpis} />
 
       <div className="flex flex-wrap gap-2">
@@ -84,13 +87,14 @@ export default function KccaDashboardPage() {
               <th>Location</th>
               <th>Status</th>
               <th>Submitted On</th>
+              <th>Walrus</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={6} className="py-10 text-center text-white/45">
+                <td colSpan={7} className="py-10 text-center text-white/45">
                   Loading…
                 </td>
               </tr>
@@ -108,6 +112,14 @@ export default function KccaDashboardPage() {
                 </td>
                 <td className="text-white/45">{r.submitted_at?.slice(0, 10) || "—"}</td>
                 <td>
+                  <WalrusProofBadge
+                    blobId={r.walrus_blob_id}
+                    url={r.walrus_url}
+                    demoMode={r.walrus_demo_mode}
+                    label="Packet"
+                  />
+                </td>
+                <td>
                   <div className="flex flex-wrap gap-1">
                     <button
                       type="button"
@@ -124,6 +136,22 @@ export default function KccaDashboardPage() {
                       className="rounded-lg bg-cyan-600/80 px-2 py-1 text-[10px] font-bold text-white"
                     >
                       Inspect
+                    </button>
+                    <button
+                      type="button"
+                      disabled={decide.isPending}
+                      onClick={() => decide.mutate({ property_id: r.property_id, decision: "rejected" })}
+                      className="rounded-lg bg-amber-600/80 px-2 py-1 text-[10px] font-bold text-white"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      type="button"
+                      disabled={decide.isPending}
+                      onClick={() => decide.mutate({ property_id: r.property_id, decision: "illegal" })}
+                      className="rounded-lg bg-red-600/90 px-2 py-1 text-[10px] font-bold text-white"
+                    >
+                      Illegal
                     </button>
                   </div>
                 </td>

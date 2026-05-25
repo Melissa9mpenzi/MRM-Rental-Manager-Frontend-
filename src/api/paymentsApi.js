@@ -13,6 +13,8 @@ export const paymentsApi = {
   update:      (id, data)    => api.patch(`/payments/${id}`, data).then((r) => r.data),
   delete:      (id)          => api.delete(`/payments/${id}`),
   receiptUrl:  (id)          => `${api.defaults.baseURL}/payments/${id}/receipt`,
+  confirmSuiTx: (reference, data) =>
+    api.post(`/payments/checkout/${reference}/confirm-sui`, data).then((r) => r.data),
   uploadProof: (id, formData) =>
     api.post(`/payments/${id}/proof`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
