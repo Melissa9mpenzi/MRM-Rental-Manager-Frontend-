@@ -34,7 +34,7 @@ import {
   Link2,
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
-import mrmLogo from "../../assets/MRM-LOGO.png";
+import BrandMark from "../brand/BrandMark";
 
 const LANDLORD_NAV = [
   { to: "/landlord/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -47,7 +47,7 @@ const LANDLORD_NAV = [
   { to: "/landlord/receipts", icon: FileText, label: "Receipts" },
   { to: "/landlord/analytics", icon: LineChart, label: "Analytics" },
   { to: "/landlord/reports", icon: PieChart, label: "Reports" },
-  { to: "/landlord/messages", icon: MessageSquare, label: "Messages" },
+  { to: "/landlord/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/landlord/notifications", icon: Bell, label: "Notifications" },
   { to: "/landlord/wallet", icon: Wallet, label: "Wallet" },
   { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
@@ -64,7 +64,7 @@ const TENANT_NAV = [
   { to: "/tenant/receipts", icon: FileText, label: "Receipts" },
   { to: "/tenant/wallet", icon: Wallet, label: "Wallet" },
   { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
-  { to: "/tenant/messages", icon: MessageSquare, label: "Messages" },
+  { to: "/tenant/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/tenant/notifications", icon: Bell, label: "Notifications" },
   { to: "/tenant/profile", icon: UserCircle, label: "Profile" },
   { to: "/tenant/settings", icon: Settings, label: "Settings" },
@@ -79,7 +79,7 @@ const AGENT_NAV = [
   { to: "/agent/deals", icon: Briefcase, label: "Deals" },
   { to: "/agent/commissions", icon: Coins, label: "Commissions" },
   { to: "/agent/analytics", icon: BarChart2, label: "Analytics" },
-  { to: "/agent/messages", icon: MessageSquare, label: "Messages" },
+  { to: "/agent/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/agent/notifications", icon: Bell, label: "Notifications" },
   { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
   { to: "/agent/settings", icon: Settings, label: "Settings" },
@@ -126,16 +126,9 @@ export default function Sidebar({ open, onClose }) {
         `}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-brand-teal/30 bg-brand-teal/15">
-              <img src={mrmLogo} alt="" className="h-6 w-auto object-contain opacity-95" />
-            </div>
-            <div>
-              <div className="text-base font-extrabold leading-none tracking-tight text-white">
-                RentDirect <span className="text-brand-teal">UG</span>
-              </div>
-              <div className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-brand-teal/90">{role}</div>
-            </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <BrandMark imgClassName="h-9 w-auto max-w-[170px] object-contain" />
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-brand-teal/90">{role}</div>
           </div>
           <button
             type="button"

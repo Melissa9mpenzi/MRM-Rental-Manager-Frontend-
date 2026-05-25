@@ -39,20 +39,28 @@ export default function AgentDashboardRd() {
 
       {!user?.trusted_for_commerce && (
         <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          <strong className="font-bold">Limited mode.</strong> Complete KYC and wait for admin approval for full agent
-          capabilities.{" "}
           {!user?.kyc_submitted_at ? (
-            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              Submit KYC →
-            </Link>
+            <>
+              <strong className="font-bold">Action required.</strong> Submit KYC to unlock full agent features.{" "}
+              <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
+                Complete KYC →
+              </Link>
+            </>
           ) : user?.kyc_review_status === "pending" ? (
-            <Link to="/verification-pending" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              View status →
-            </Link>
+            <>
+              <strong className="font-bold">Verification in progress.</strong> NIRA and platform officers are reviewing
+              your documents. Keep using this dashboard while you wait.{" "}
+              <Link to="/verification-pending" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
+                Details →
+              </Link>
+            </>
           ) : user?.kyc_review_status === "rejected" ? (
-            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              Resubmit KYC →
-            </Link>
+            <>
+              <strong className="font-bold">KYC needs attention.</strong>{" "}
+              <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
+                Resubmit KYC →
+              </Link>
+            </>
           ) : null}
         </div>
       )}

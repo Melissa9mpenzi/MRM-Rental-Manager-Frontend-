@@ -1,3 +1,10 @@
 {
+  "build": {
+    "env": {
+      "VITE_SUI_NETWORK": "testnet",
+      "VITE_API_URL": "https://mrm-rental-manager-backend.vercel.app",
+      "VITE_GOV_API_URL": "https://mrm-rental-manager-backend.vercel.app"
+    }
+  },
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

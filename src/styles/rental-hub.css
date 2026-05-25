@@ -1,0 +1,119 @@
+.rental-hub-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  height: calc(100dvh - 11rem);
+  min-height: 480px;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(6, 10, 14, 0.95), rgba(4, 8, 12, 0.98));
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  .rental-hub-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .rental-hub-context {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .rental-hub-shell {
+    grid-template-columns: 1fr;
+  }
+  .rental-hub-sidebar {
+    display: none;
+  }
+  .rental-hub-sidebar.mobile-open {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.rental-hub-sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+.rental-hub-folder {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  border-left: 2px solid transparent;
+}
+
+.rental-hub-folder.active {
+  color: #00c896;
+  background: rgba(0, 200, 150, 0.08);
+  border-left-color: #00c896;
+}
+
+.rental-hub-thread {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s;
+}
+
+.rental-hub-thread:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rental-hub-thread.active {
+  background: rgba(0, 200, 150, 0.1);
+  border-left: 2px solid #00c896;
+}
+
+.rental-hub-bubble-system {
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px dashed rgba(96, 165, 250, 0.35);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+
+.rental-hub-trust-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(0, 200, 150, 0.15);
+  color: #00c896;
+}
+
+.rental-hub-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.rental-hub-context {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+  padding: 1rem;
+}

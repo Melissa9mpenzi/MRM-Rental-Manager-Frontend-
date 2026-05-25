@@ -1,4 +1,4 @@
-import mrmLogo from "../../assets/MRM-LOGO.png";
+import BrandMark from "../brand/BrandMark";
 import PaymentMethodIcon from "../payments/PaymentMethodIcon";
 import { methodLabel, qrImageUrl, receiptTypeConfig } from "../../lib/receiptTheme";
 
@@ -39,13 +39,7 @@ export default function ReceiptDocument({ receipt, className = "" }) {
     >
       <header className="receipt-doc__header">
         <div className="receipt-doc__brand">
-          <img src={mrmLogo} alt="RentDirect UG" className="receipt-doc__logo" />
-          <div>
-            <p className="receipt-doc__brand-name">
-              RentDirect <span>UG</span>
-            </p>
-            <p className="receipt-doc__tagline">Smart Rentals. Secure Payments.</p>
-          </div>
+          <BrandMark imgClassName="receipt-doc__logo h-12 w-auto max-w-[200px] object-contain" />
         </div>
         <span className={`receipt-doc__badge receipt-doc__badge--${theme.badgeClass}`}>{theme.badge}</span>
       </header>

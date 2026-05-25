@@ -13,7 +13,7 @@ import {
   Cpu,
   Check,
 } from "lucide-react";
-import mrmLogo from "../../assets/MRM-LOGO.png";
+import BrandMark from "../../components/brand/BrandMark";
 
 /** Mockup primary — emerald green */
 const AC = "#10B981";
@@ -39,10 +39,26 @@ const PLATFORM_DISTRIBUTION = [
 const HERO_BG = "/images/hero-villa.jpg";
 
 const TRUST_PILLS = [
-  { icon: Shield, title: "Blockchain Secured", subtitle: "Transparent records & verification-ready" },
-  { icon: CheckCircle2, title: "Verified Properties", subtitle: "KYC-backed owners & listings" },
-  { icon: CreditCard, title: "Secure Payments", subtitle: "MoMo, bank & cards in one flow" },
-  { icon: Sparkles, title: "AI Powered", subtitle: "Smart search & assistant-ready UX" },
+  { icon: Shield, title: "NIRA Verified", subtitle: "National ID & anti-fraud compliance" },
+  { icon: Building2, title: "KCCA Approved", subtitle: "Property legality & inspections" },
+  { icon: CreditCard, title: "URA Compliant", subtitle: "Rental tax & revenue tracking" },
+  { icon: Sparkles, title: "Sui Escrow + AI", subtitle: "Blockchain receipts & smart insights" },
+];
+
+const GOV_FLOW = [
+  { agency: "NIRA", desc: "Identity verification for every landlord, tenant, and agent." },
+  { agency: "KCCA", desc: "Property approval before listings go live on the marketplace." },
+  { agency: "URA", desc: "Tax monitoring when rent flows through the platform." },
+];
+
+const DEMO_STEPS = [
+  "Tenant registers",
+  "NIRA verifies identity",
+  "Landlord lists property",
+  "KCCA approves listing",
+  "Tenant books & pays (MTN / Sui)",
+  "Escrow + receipt",
+  "URA compliance updates",
 ];
 
 export default function LandingPage() {
@@ -53,21 +69,8 @@ export default function LandingPage() {
       {/* ── Sticky glass navbar ── */}
       <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#060a0e]/70 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5 lg:px-6">
-          <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-            <div
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/12 bg-white/[0.08] shadow-[0_0_24px_rgba(16,185,129,0.12)]"
-              style={{ boxShadow: `0 0 28px ${AC}22` }}
-            >
-              <img src={mrmLogo} alt="" className="h-6 w-auto opacity-95" />
-            </div>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-extrabold tracking-tight sm:text-base">
-                RentDirect <span style={{ color: AC }}>UG</span>
-              </div>
-              <div className="hidden text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40 sm:block">
-                Find · Rent · Pay
-              </div>
-            </div>
+          <Link to="/" className="flex min-w-0 items-center">
+            <BrandMark imgClassName="h-10 w-auto max-w-[220px] object-contain sm:h-11" />
           </Link>
 
           <nav className="hidden items-center gap-5 text-[13px] font-semibold text-white/65 lg:flex">
@@ -164,7 +167,7 @@ export default function LandingPage() {
             style={{ borderColor: `${AC}55` }}
           >
             <Sparkles size={14} style={{ color: AC }} />
-            Blockchain-powered real estate
+            DeFi & Payments · Walrus · GovTech on Sui Testnet
           </div>
 
           <h1 className="text-balance text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.06]">
@@ -175,8 +178,9 @@ export default function LandingPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
-            Connect tenants, landlords, and agents on a secure, transparent platform — with verified listings,
-            digital contracts, and payments built for real-world adoption in Uganda and beyond.
+            <strong className="text-white">Africa&apos;s trusted rental infrastructure</strong> — government-enabled
+            PropTech with NIRA, KCCA, and URA compliance, Sui escrow, and hybrid MTN + wallet payments for Kampala and
+            beyond.
           </p>
 
           <div className="mt-10 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
@@ -314,6 +318,64 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Government-enabled infrastructure ── */}
+      <section className="border-t border-white/[0.06] bg-[#060a0e] py-16 lg:py-20">
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-2xl font-extrabold sm:text-3xl">Government-enabled PropTech</h2>
+            <p className="mt-3 text-sm text-white/55">
+              NIRA, KCCA, and URA officers are compliance authorities — not ordinary admins. Listings earn trust badges
+              only after each agency approves its lane.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {GOV_FLOW.map((g) => (
+              <div
+                key={g.agency}
+                className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 transition hover:border-emerald-500/30"
+              >
+                <div className="text-lg font-black text-emerald-400">{g.agency}</div>
+                <p className="mt-2 text-sm text-white/55">{g.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Demo narrative (judges) ── */}
+      <section className="border-t border-white/[0.06] bg-gradient-to-b from-[#080d12] to-[#060a0e] py-16">
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <h2 className="text-center text-2xl font-extrabold">End-to-end demo flow</h2>
+          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-white/50">
+            Run seed data, then walk this story in under five minutes.
+          </p>
+          <ol className="mx-auto mt-10 flex max-w-3xl flex-col gap-2">
+            {DEMO_STEPS.map((label, i) => (
+              <li
+                key={label}
+                className="flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3"
+              >
+                <span
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-black text-[#041208]"
+                  style={{ backgroundColor: AC }}
+                >
+                  {i + 1}
+                </span>
+                <span className="text-sm font-semibold text-white/85">{label}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link to="/register" className="enterprise-btn-primary rounded-2xl px-6 py-3">
+              Get started
+            </Link>
+            <Link to="/browse-properties" className="enterprise-btn-ghost rounded-2xl px-6 py-3">
+              Browse Kampala listings
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── Agents CTA ── */}
       <section id="agents" className="border-t border-white/[0.06] py-16 lg:py-20">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 text-center lg:flex-row lg:items-center lg:justify-between lg:px-6 lg:text-left">
@@ -367,6 +429,9 @@ export default function LandingPage() {
         <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs font-semibold">
           <Link to="/browse-properties" className="text-[#10B981] hover:underline">
             Browse
+          </Link>
+          <Link to="/demo" className="text-white/50 hover:text-[#10B981]">
+            Demo guide
           </Link>
           <Link to="/pricing" className="text-white/50 hover:text-[#10B981]">
             Pricing

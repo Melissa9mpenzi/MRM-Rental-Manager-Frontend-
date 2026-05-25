@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Upload, IdCard, Camera, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { usersApi } from "../../api/usersApi";
-import { postLoginDestination } from "../../lib/onboardingAuth";
+import { defaultDashboardPath } from "../../config/access";
 import { validateKycFile, KYC_MAX_BYTES } from "../../lib/kycClientValidators";
+import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
 
 function DropZone({ label, icon: Icon, fileName, error, onFile }) {
   return (
@@ -47,6 +48,12 @@ export default function KycPage() {
 
   const needsDocs = user?.role === "landlord" || user?.role === "staff";
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login", { replace: true, state: { from: { pathname: "/auth/kyc" } } });
+    }
+  }, [isAuthenticated, navigate]);
+
   const setFile = async (kind, file) => {
     if (!file) return;
     const err = await validateKycFile(file, kind);
@@ -58,8 +65,8 @@ export default function KycPage() {
 
   const submit = async () => {
     if (!isAuthenticated) {
-      toast.error("Sign in first, then complete KYC from your account.");
-      navigate("/login");
+      toast.error("Sign in first, then complete KYC.");
+      navigate("/login", { state: { from: { pathname: "/auth/kyc" } } });
       return;
     }
 
@@ -82,17 +89,30 @@ export default function KycPage() {
 
     setBusy(true);
     try {
+      let u;
       if (needsDocs) {
         const fd = new FormData();
         fd.append("id_front", files.id_front);
         fd.append("id_back", files.id_back);
         fd.append("selfie", files.selfie);
-        await usersApi.uploadKycDocuments(fd);
+        u = await usersApi.uploadKycDocuments(fd);
+      } else {
+        u = await usersApi.kycSubmit();
       }
-      const u = await usersApi.kycSubmit();
-      updateUser(u);
-      toast.success(needsDocs ? "Documents saved and submitted for review." : "KYC step recorded.");
-      navigate(postLoginDestination(u));
+      let fresh = u;
+      try {
+        fresh = await usersApi.getMe();
+      } catch {
+        /* use upload response */
+      }
+      if (fresh) updateUser(fresh);
+      toast.success(
+        needsDocs
+          ? "Submitted for verification. Your dashboard is ready while NIRA reviews your documents."
+          : "KYC step recorded.",
+      );
+      const home = defaultDashboardPath(fresh?.role || user?.role);
+      navigate(home, { replace: true });
     } catch (err) {
       const d = err.response?.data?.detail;
       const msg = typeof d === "string" ? d : Array.isArray(d) ? d.map((x) => x.msg || x).join(" ") : err.message;
@@ -111,6 +131,16 @@ export default function KycPage() {
             ? "Upload your national ID (both sides, landscape) and a portrait selfie. The system checks file type, size, and framing — wrong slots (e.g. selfie as ID) are rejected before submit."
             : "If you reached this step as a tenant, you can continue. Landlords and agents must upload ID and selfie."}
         </p>
+        {needsDocs && (
+          <p className="mx-auto mt-2 max-w-md text-[10px] text-cyan-200/80">
+            On submit, a privacy-safe hash manifest (not raw photos) is anchored on Walrus for NIRA review.
+          </p>
+        )}
+        {user?.kyc_walrus_blob_id ? (
+          <div className="mt-2 flex justify-center">
+            <WalrusProofBadge blobId={user.kyc_walrus_blob_id} label="KYC manifest" />
+          </div>
+        ) : null}
       </div>
 
       {needsDocs && (

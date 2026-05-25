@@ -26,6 +26,16 @@ function looksLikeLocalDevUrl(url) {
 
 function resolveApiUrl(explicit, fallback) {
   const raw = explicit?.replace(/\/$/, "");
+
+  // Vite on localhost — default to local API unless .env explicitly points elsewhere
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      if (!raw || looksLikeLocalDevUrl(raw)) return "http://localhost:8000";
+      return raw;
+    }
+  }
+
   if (isDeployedSpa()) {
     if (!raw || looksLikeLocalDevUrl(raw)) return fallback;
     return raw;

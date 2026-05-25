@@ -11,11 +11,20 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 import { useSuiDashboard, fmtSui, shortHash } from "../../lib/useSuiDashboard";
 import SuiStatusBadge from "../../components/sui/SuiStatusBadge";
+import WalrusUseCasesPanel from "../../components/sui/WalrusUseCasesPanel";
+import { blockchainApi } from "../../api/blockchainApi";
+import { HACKATHON_TRACKS, ELEVATOR_PITCH } from "../../config/hackathonPositioning";
 
 export default function SuiDashboardPage() {
   const { data, isLoading } = useSuiDashboard();
+  const { data: chainStatus } = useQuery({
+    queryKey: ["blockchain-status"],
+    queryFn: () => blockchainApi.status(),
+    staleTime: 60_000,
+  });
   const totals = data?.totals || {};
   const net = data?.network_status || {};
   const volume = data?.volume_by_day || [];
@@ -33,6 +42,18 @@ export default function SuiDashboardPage() {
 
   return (
     <div className="space-y-5">
+      <div className="rounded-2xl border border-violet-500/25 bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-4 py-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-violet-300/90">
+          {HACKATHON_TRACKS.primary.badge} — {HACKATHON_TRACKS.primary.label}
+        </p>
+        <p className="mt-1 text-sm text-white/70">{ELEVATOR_PITCH}</p>
+      </div>
+
+      <WalrusUseCasesPanel
+        walrusConfigured={Boolean(chainStatus?.walrus_configured ?? chainStatus?.supports?.walrus_publisher_live)}
+        inventory={chainStatus?.walrus_inventory}
+      />
+
       <div className="sui-kpi-grid">
         {kpis.map((k) => (
           <div key={k.label} className="sui-kpi">

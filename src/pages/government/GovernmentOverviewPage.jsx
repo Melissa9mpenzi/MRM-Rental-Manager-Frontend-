@@ -23,6 +23,7 @@ import {
   regionPanelTitle,
 } from "../../config/governmentOverviewConfig";
 import GovStatCard from "../../components/government/GovStatCard";
+import GovWorkflowBanner from "../../components/government/GovWorkflowBanner";
 import GovSystemStatusCard from "../../components/government/GovSystemStatusCard";
 import UgandaComplianceMap from "../../components/government/UgandaComplianceMap";
 import GovVerificationPieChart from "../../components/government/GovVerificationPieChart";
@@ -74,11 +75,13 @@ export default function GovernmentOverviewPage() {
 
   return (
     <div className="space-y-5">
+      <GovWorkflowBanner highlightAgency={isAdmin ? undefined : agency} />
+
       {!isAdmin && (
         <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-100">
-          {agency === "nira" && "NIRA officer view — identity verification and national ID workflows only."}
-          {agency === "kcca" && "KCCA officer view — property verification and inspections only."}
-          {agency === "ura" && "URA officer view — rental tax compliance and revenue reporting only."}
+          {agency === "nira" && "NIRA officer — identity, KYC, fraud, and blacklist only (no payments or system config)."}
+          {agency === "kcca" && "KCCA officer — property verification, inspections, and GIS (no wallets or payments)."}
+          {agency === "ura" && "URA officer — tax, revenue, and transaction compliance (no KYC documents or passwords)."}
         </div>
       )}
 

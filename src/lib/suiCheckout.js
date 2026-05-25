@@ -62,7 +62,7 @@ export async function fetchBlockchainStatus() {
 
 export function explorerTxUrl(network, digest) {
   if (!digest) return null;
-  const net = network || "devnet";
+  const net = network || "testnet";
   return `https://suiscan.xyz/${net}/tx/${digest}`;
 }
 

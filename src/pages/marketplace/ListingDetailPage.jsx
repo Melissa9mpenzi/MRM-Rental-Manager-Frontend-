@@ -19,6 +19,7 @@ import ViewingScheduleModal from "../../components/domain/ViewingScheduleModal";
 import ListingSaveButton from "../../components/domain/ListingSaveButton";
 import { marketplaceApi } from "../../api/marketplaceApi";
 import { listingImageUrl } from "../../lib/mediaUrl";
+import GovernmentComplianceBadges from "../../components/government/GovernmentComplianceBadges";
 
 function BedIcon(props) {
   return <BedDouble {...props} />;
@@ -38,6 +39,7 @@ export default function ListingDetailPage() {
   const user = useAuthStore((s) => s.user);
   const loginState = { from: { pathname: location.pathname } };
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["marketplace-listing", unitId],
@@ -128,7 +130,7 @@ export default function ListingDetailPage() {
         <div className="space-y-4">
           <div className="overflow-hidden rounded-3xl border border-white/[0.1] bg-[#0a1018]">
             <div className="relative aspect-[21/9] lg:aspect-[2/1]">
-              <img src={hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <img src={gallery[heroIndex] || hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#060a0e]/70 via-transparent to-transparent" />
               {p.verified && (
                 <div className="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#00C896]/35 bg-black/55 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-[#00C896] backdrop-blur-md">
@@ -147,7 +149,12 @@ export default function ListingDetailPage() {
               <button
                 key={`${src}-${i}`}
                 type="button"
-                className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg border border-white/10 opacity-90 ring-offset-2 ring-offset-[#0a1018] transition hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#00C896]/50"
+                aria-label={`Show image ${i + 1}`}
+                aria-pressed={heroIndex === i}
+                onClick={() => setHeroIndex(i)}
+                className={`relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg border ring-offset-2 ring-offset-[#0a1018] transition focus:outline-none focus:ring-2 focus:ring-[#00C896]/50 ${
+                  heroIndex === i ? "border-[#00C896]/60 opacity-100 ring-2 ring-[#00C896]/40" : "border-white/10 opacity-90 hover:opacity-100"
+                }`}
               >
                 <img src={src} alt="" className="h-full w-full object-cover" />
               </button>
@@ -156,11 +163,7 @@ export default function ListingDetailPage() {
           <div className="card-glass p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <h1 className="text-2xl font-extrabold text-white">{p.title}</h1>
-              {p.verified && (
-                <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-[#00C896]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#00C896]">
-                  <CheckCircle2 size={12} /> Verified
-                </span>
-              )}
+              <GovernmentComplianceBadges compliance={p.compliance} className="flex-shrink-0" />
             </div>
             <p className="mt-2 flex items-center gap-2 text-sm text-white/50">
               <MapPin size={16} className="text-[#00C896]" /> {p.address}

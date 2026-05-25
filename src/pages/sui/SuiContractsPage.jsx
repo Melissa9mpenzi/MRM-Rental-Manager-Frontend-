@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useSuiDashboard } from "../../lib/useSuiDashboard";
 import SuiStatusBadge from "../../components/sui/SuiStatusBadge";
 
@@ -26,7 +27,20 @@ export default function SuiContractsPage() {
             </div>
           ))}
         </div>
-        <button type="button" className="sui-btn-primary">+ Deploy Contract</button>
+        <button
+          type="button"
+          className="sui-btn-primary opacity-90"
+          title="Deploy from CI with SUI_PACKAGE_ID"
+          onClick={() =>
+            toast(
+              data?.package_id
+                ? `Package deployed: ${data.package_id.slice(0, 12)}…`
+                : "Set SUI_PACKAGE_ID on the API to show live Move package.",
+            )
+          }
+        >
+          + Deploy Contract
+        </button>
       </div>
       <article className="sui-panel sui-table-wrap">
         <table className="sui-table">

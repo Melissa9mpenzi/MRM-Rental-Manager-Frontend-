@@ -10,9 +10,10 @@ import {
   ExternalLink,
   BookOpen,
   LifeBuoy,
-  Hexagon,
 } from "lucide-react";
+import BrandMark from "../brand/BrandMark";
 import { SUI_NAV } from "../../config/suiPortalNav";
+import { settingsPathForRole } from "../../config/access";
 import useAuthStore from "../../store/authStore";
 import { fmtSui } from "../../lib/useSuiDashboard";
 
@@ -41,15 +42,14 @@ function initials(name) {
 
 export default function SuiSidebar({ onNavigate, wallet }) {
   const user = useAuthStore((s) => s.user);
+  const role = user?.role || "tenant";
+  const settingsPath = settingsPathForRole(role);
 
   return (
     <aside className="sui-sidebar">
       <header className="sui-sidebar__header">
-        <Link to="/" className="sui-sidebar__brand" onClick={onNavigate}>
-          <span className="sui-sidebar__brand-mark">
-            <Hexagon size={16} />
-          </span>
-          RentDirect UG
+        <Link to="/" className="sui-sidebar__brand block" onClick={onNavigate}>
+          <BrandMark imgClassName="h-9 w-auto max-w-[160px] object-contain" />
         </Link>
         <p className="mt-1 text-[11px] text-white/40">Sui Blockchain Portal</p>
       </header>
@@ -76,11 +76,12 @@ export default function SuiSidebar({ onNavigate, wallet }) {
                   </a>
                 );
               }
+              const to = item.path === "__role_settings__" ? settingsPath : item.path;
               return (
                 <NavLink
                   key={item.id}
-                  to={item.path}
-                  end={item.path === "/sui/dashboard"}
+                  to={to}
+                  end={to === "/sui/dashboard"}
                   onClick={onNavigate}
                   className={({ isActive }) =>
                     `sui-sidebar__link ${isActive ? "sui-sidebar__link--active" : ""}`

@@ -1,0 +1,45 @@
+/**
+ * Enterprise design tokens — shared across landlord, tenant, gov, system portals.
+ */
+:root {
+  --rd-space-page: 1.5rem;
+  --rd-radius-card: 1rem;
+  --rd-radius-btn: 0.75rem;
+  --rd-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.28);
+  --rd-shadow-hover: 0 8px 32px rgba(0, 200, 150, 0.12);
+  --rd-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.enterprise-card {
+  @apply rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-[var(--rd-shadow-card)] backdrop-blur-sm transition-[box-shadow,border-color] duration-200;
+}
+.enterprise-card:hover {
+  @apply border-white/[0.12];
+}
+
+.enterprise-btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-200 disabled:opacity-50;
+}
+.enterprise-btn-primary {
+  @apply enterprise-btn bg-[#00C896] text-[#041208] hover:brightness-110;
+}
+.enterprise-btn-ghost {
+  @apply enterprise-btn border border-white/15 bg-white/5 text-white hover:bg-white/10;
+}
+
+.enterprise-skeleton {
+  @apply animate-pulse rounded-xl bg-white/[0.06];
+}
+
+.enterprise-empty {
+  @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-14 text-center;
+}
+
+.enterprise-retry {
+  @apply enterprise-btn-ghost mt-4 text-xs;
+}
+
+/* Align government portal glass with platform cards */
+.gov-glass {
+  @apply rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-[var(--rd-shadow-card)] backdrop-blur-sm;
+}

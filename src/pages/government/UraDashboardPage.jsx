@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Landmark, CheckCircle2, Clock, Banknote } from "lucide-react";
 import { governmentApi } from "../../api/governmentApi";
 import GovModuleHeader from "../../components/government/GovModuleHeader";
+import GovWorkflowBanner from "../../components/government/GovWorkflowBanner";
 import GovModuleKpis from "../../components/government/GovModuleKpis";
 import GovTablePagination from "../../components/government/GovTablePagination";
 
@@ -58,9 +59,10 @@ export default function UraDashboardPage() {
     <div className="space-y-5">
       <GovModuleHeader
         title="URA — Rental Tax Compliance"
-        subtitle="Monitor rental income, landlord tax profiles, and transaction compliance from platform payments."
+        subtitle="Tax and financial compliance authority: rental income, revenue analytics, and transaction monitoring — not KYC images or system passwords."
       />
 
+      <GovWorkflowBanner highlightAgency="ura" />
       <GovModuleKpis items={kpis} />
 
       <div className="gov-glass gov-table-wrap">

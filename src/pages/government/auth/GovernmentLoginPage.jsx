@@ -5,13 +5,16 @@ import toast from "react-hot-toast";
 import { Input } from "../../../components/ui/Input";
 import useAuthStore from "../../../store/authStore";
 import { GOV_PORTAL } from "../../../config/governmentPortal";
-import { isGovernmentOfficer } from "../../../config/governmentAccess";
+import { defaultGovernmentPath, isGovernmentOfficer } from "../../../config/governmentAccess";
 
 export default function GovernmentLoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const governmentLogin = useAuthStore((s) => s.governmentLogin);
+  const logout = useAuthStore((s) => s.logout);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -20,12 +23,21 @@ export default function GovernmentLoginPage() {
     if (em) setEmail(decodeURIComponent(em));
   }, [params]);
 
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    if (isGovernmentOfficer(user.role)) {
+      const verified = sessionStorage.getItem("rd_gov_2fa_verified") === "1";
+      navigate(verified ? defaultGovernmentPath(user.role) : GOV_PORTAL.verify2fa, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
       const data = await governmentLogin({ email, password });
       const role = data?.user?.role;
       if (!isGovernmentOfficer(role)) {
+        await logout();
         toast.error("Use the main RentDirect login for system administrators.");
         return;
       }

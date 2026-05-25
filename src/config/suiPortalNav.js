@@ -17,14 +17,15 @@ export const SUI_NAV = [
     title: "Resources",
     items: [
       { id: "explorer", label: "Sui Explorer", path: "https://suiscan.xyz/", external: true, icon: "explorer" },
-      { id: "docs", label: "Documentation", path: "/sui/settings", icon: "docs" },
-      { id: "support", label: "Support Center", path: "/system/support", icon: "support" },
+      { id: "docs", label: "Sui settings", path: "/sui/settings", icon: "docs" },
+      { id: "support", label: "Help & settings", path: "__role_settings__", icon: "support" },
     ],
   },
 ];
 
+/** Testnet first — recommended for hackathon demos */
 export const SUI_NETWORKS = [
+  { id: "testnet", label: "Sui Testnet", recommended: true },
   { id: "devnet", label: "Sui Devnet" },
-  { id: "testnet", label: "Sui Testnet" },
   { id: "mainnet", label: "Sui Mainnet" },
 ];

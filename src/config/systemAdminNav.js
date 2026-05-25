@@ -1,38 +1,39 @@
-/** Super Admin / Global Administrator navigation (matches platform mockup). */
+/** Super Admin Console navigation — mockup-aligned sections */
 
 export const SYSTEM_NAV_SECTIONS = [
   {
-    title: "Platform Management",
+    title: "Dashboard",
+    items: [{ id: "dashboard", label: "Dashboard", path: "/system/dashboard", icon: "overview" }],
+  },
+  {
+    title: "Core Management",
     items: [
-      { id: "overview", label: "Global Overview", path: "/system/dashboard", icon: "overview" },
-      { id: "users", label: "Users & Roles", path: "/system/users", icon: "users" },
-      { id: "dashboards", label: "All Dashboards", path: "/system/dashboards", icon: "dashboards" },
-      { id: "properties", label: "Properties", path: "/system/properties", icon: "properties" },
-      { id: "contracts", label: "Contracts", path: "/system/contracts", icon: "contracts" },
+      { id: "users", label: "User Management", path: "/system/users", icon: "users" },
+      { id: "roles", label: "Role & Permissions", path: "/system/users", icon: "permissions" },
+      { id: "gov-agencies", label: "Government Agencies", path: "/government/overview", icon: "gov" },
+      { id: "verification", label: "Verification Center", path: "/government/nira", icon: "nira" },
+      { id: "properties", label: "Property Oversight", path: "/system/properties", icon: "properties" },
+      { id: "moderation", label: "Approvals & Moderation", path: "/system/users", icon: "moderation" },
+    ],
+  },
+  {
+    title: "Financial Control",
+    items: [
       { id: "payments", label: "Payments & Escrow", path: "/system/payments", icon: "payments" },
-      { id: "receipts", label: "Receipt center", path: "/system/receipts", icon: "contracts" },
-      { id: "wallets", label: "Wallets", path: "/system/wallets", icon: "wallets" },
-      { id: "messages", label: "Messages", path: "/system/messages", icon: "messages" },
+      { id: "wallets", label: "Wallets & Settlements", path: "/system/wallets", icon: "wallets" },
+      { id: "transactions", label: "Transactions Monitor", path: "/system/payments", icon: "transactions" },
+      { id: "commissions", label: "Commissions & Fees", path: "/system/payments", icon: "commissions" },
+      { id: "revenue", label: "Revenue Analytics", path: "/system/dashboard", icon: "revenue" },
     ],
   },
   {
-    title: "Government Integration",
+    title: "System Control",
     items: [
-      { id: "nira", label: "NIRA (KYC)", path: "/government/nira", icon: "nira" },
-      { id: "kcca", label: "KCCA (Properties)", path: "/government/kcca", icon: "kcca" },
-      { id: "ura", label: "URA (Tax Compliance)", path: "/government/ura", icon: "ura" },
-      { id: "gov-overview", label: "All Agencies", path: "/government/overview", icon: "gov" },
-    ],
-  },
-  {
-    title: "System Administration",
-    items: [
-      { id: "settings", label: "System Settings", path: "/system/settings", icon: "settings" },
-      { id: "permissions", label: "Permissions & Roles", path: "/system/users", icon: "permissions" },
+      { id: "settings", label: "Platform Settings", path: "/system/settings", icon: "settings" },
+      { id: "fraud", label: "AI & Fraud Detection", path: "/government/fraud", icon: "fraud", badge: "AI" },
+      { id: "blockchain", label: "Blockchain & Storage", path: "/sui/dashboard", icon: "blockchain" },
       { id: "audit", label: "Audit Logs", path: "/government/audit", icon: "audit" },
-      { id: "security", label: "Security Center", path: "/government/fraud", icon: "security" },
-      { id: "announcements", label: "Announcements", path: "/system/announcements", icon: "announcements" },
-      { id: "support", label: "Support Tickets", path: "/system/support", icon: "support" },
+      { id: "reports", label: "Reports & Analytics", path: "/system/dashboards", icon: "reports" },
     ],
   },
 ];

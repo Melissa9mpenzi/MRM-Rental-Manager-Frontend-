@@ -16,6 +16,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 import Sidebar from "./Sidebar";
+import GlobalSearch from "../enterprise/GlobalSearch";
+import SystemStatusBar from "../enterprise/SystemStatusBar";
 import { notificationsApi } from "../../api/notificationsApi";
 import { notificationsPathForRole } from "../../config/access";
 import useAuthStore from "../../store/authStore";
@@ -273,16 +275,7 @@ export default function AuthenticatedAppShell({ children }) {
             <Menu size={20} />
           </button>
 
-          <div className="mx-2 hidden min-w-0 max-w-md flex-1 md:block">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
-              <input
-                type="search"
-                placeholder="Search properties, tenants, messages…"
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.06] py-2 pl-9 pr-3 text-xs text-white outline-none placeholder:text-white/35 focus:border-[#00C896]/35"
-              />
-            </div>
-          </div>
+          <GlobalSearch />
 
           <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
             {crumbs.map((c, i) => (
@@ -316,6 +309,9 @@ export default function AuthenticatedAppShell({ children }) {
           </div>
         </header>
 
+        <div className="hidden border-b border-white/[0.06] bg-black/20 px-4 py-1.5 lg:flex lg:justify-end">
+          <SystemStatusBar compact />
+        </div>
         <main
           className="overflow-panel-y min-h-0 flex-1 bg-rd-gradient bg-rd-mesh p-4 lg:p-6"
           data-app-role={role}

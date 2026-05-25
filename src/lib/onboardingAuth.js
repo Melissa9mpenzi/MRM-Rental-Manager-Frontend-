@@ -15,15 +15,7 @@ export function postLoginDestination(user) {
     return GOV_PORTAL.login;
   }
 
-  if ((role === "landlord" || role === "staff") && user.email_verified) {
-    const trusted = Boolean(user.trusted_for_commerce);
-    const kycStatus = user.kyc_review_status || "none";
-    if (!trusted && kycStatus !== "approved") {
-      if (!user.kyc_submitted_at) return "/auth/kyc";
-      if (kycStatus === "pending") return "/verification-pending";
-      if (kycStatus === "rejected") return "/auth/kyc";
-    }
-  }
-
+  // Landlord / agent: always open the dashboard after login.
+  // KYC is optional from the dashboard banner (not forced on every sign-in).
   return defaultDashboardPath(role);
 }

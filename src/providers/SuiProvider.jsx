@@ -13,7 +13,7 @@ const { networkConfig } = createNetworkConfig({
   mainnet: { url: SUI_RPC.mainnet },
 });
 
-const defaultNetwork = import.meta.env.VITE_SUI_NETWORK || "devnet";
+const defaultNetwork = import.meta.env.VITE_SUI_NETWORK || "testnet";
 
 export default function SuiProvider({ children }) {
   return (

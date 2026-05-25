@@ -11,7 +11,10 @@ export default function GovApprovalsPage() {
   const [page, setPage] = useState(1);
   const [nira, kcca, ura] = useQueries({
     queries: [
-      { queryKey: ["gov-nira", "pending"], queryFn: () => governmentApi.niraQueue({ status: "pending" }) },
+      {
+        queryKey: ["gov-nira", "pending"],
+        queryFn: async () => (await governmentApi.niraQueue({ status: "pending" })).items,
+      },
       { queryKey: ["gov-kcca", "pending"], queryFn: () => governmentApi.kccaProperties({ status: "pending" }) },
       {
         queryKey: ["gov-ura", "pending"],
@@ -60,7 +63,7 @@ export default function GovApprovalsPage() {
       id: `nira-${r.user_id}`,
       agency: "NIRA",
       subject: r.full_name,
-      detail: r.nin || "National ID review",
+      detail: r.email || r.nin || "National ID review",
       status: r.verification_status,
       submitted: r.submitted_at,
       to: "/government/nira",
@@ -83,7 +86,11 @@ export default function GovApprovalsPage() {
       submitted: r.paid_at,
       to: "/government/ura",
     })),
-  ];
+  ].sort((a, b) => {
+    const ta = a.submitted ? Date.parse(a.submitted) : 0;
+    const tb = b.submitted ? Date.parse(b.submitted) : 0;
+    return ta - tb;
+  });
 
   return (
     <div className="space-y-5">

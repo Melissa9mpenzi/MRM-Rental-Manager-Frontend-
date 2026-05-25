@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import ConnectWalletButton from "../../components/blockchain/ConnectWalletButton";
 import { useSuiDashboard, fmtSui } from "../../lib/useSuiDashboard";
 import { useQuery } from "@tanstack/react-query";
@@ -21,9 +23,31 @@ export default function SuiWalletsPage() {
         </p>
         <p className="mt-1 text-sm text-white/45">Escrow held: {fmtSui(data?.wallet?.escrow_balance ?? 0)}</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <button type="button" className="sui-btn-primary">Send</button>
-          <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-white">Receive</button>
-          <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-white">History</button>
+          <button
+            type="button"
+            className="sui-btn-primary"
+            onClick={() =>
+              walletQ.data?.linked
+                ? toast("Use your connected wallet extension to sign transfers.")
+                : toast.error("Connect your Sui wallet below first.")
+            }
+          >
+            Send
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-white"
+            onClick={() =>
+              walletQ.data?.linked
+                ? toast("Share your linked address with the payer.", { icon: "📋" })
+                : toast.error("Connect your Sui wallet below first.")
+            }
+          >
+            Receive
+          </button>
+          <Link to="/sui/transactions" className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-white hover:bg-white/5">
+            History
+          </Link>
         </div>
       </article>
 

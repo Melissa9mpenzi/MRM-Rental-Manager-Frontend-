@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import SuiProvider from "./providers/SuiProvider";
 
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
@@ -32,6 +33,8 @@ import GovApprovalsPage from "./pages/government/GovApprovalsPage";
 import GovInspectionsPage from "./pages/government/GovInspectionsPage";
 import GovAnalyticsPage from "./pages/government/GovAnalyticsPage";
 import GovSettingsPage from "./pages/government/GovSettingsPage";
+import GovBlacklistPage from "./pages/government/GovBlacklistPage";
+import GovCharterPage from "./pages/government/GovCharterPage";
 import SystemPortalLayout from "./layouts/SystemPortalLayout";
 import { GOVERNMENT_PORTAL_ROLES } from "./config/governmentAccess";
 import GovOrSystemPortalLayout from "./layouts/GovOrSystemPortalLayout";
@@ -65,6 +68,7 @@ import PendingApprovalPage from "./pages/auth/PendingApprovalPage";
 import RoleHomeRedirect from "./pages/auth/RoleHomeRedirect";
 
 import LandingPage from "./pages/marketing/LandingPage";
+import DemoGuidePage from "./pages/marketing/DemoGuidePage";
 import StaticInfoPage from "./pages/marketing/StaticInfoPage";
 import PropertySearchPage from "./pages/marketplace/PropertySearchPage";
 import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
@@ -80,6 +84,7 @@ import TenantProfilePage from "./pages/tenant/TenantProfilePage";
 import TenantWalletPage from "./pages/tenant/TenantWalletPage";
 import TenantApplicationsPage from "./pages/tenant/TenantApplicationsPage";
 import TenantSavedPage from "./pages/tenant/TenantSavedPage";
+import TenantMaintenanceSubmitPage from "./pages/tenant/TenantMaintenanceSubmitPage";
 import PropertiesPage from "./pages/properties/PropertiesPage";
 import PropertyDetailPage from "./pages/properties/PropertyDetailPage";
 import TenantsPage from "./pages/tenants/TenantsPage";
@@ -109,14 +114,15 @@ import {
   AgentAnalyticsPage,
 } from "./pages/workspace/placeholders.jsx";
 
-const qc = new QueryClient({
+const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
 });
 
 export default function App() {
   return (
-    <QueryClientProvider client={qc}>
-      <BrowserRouter
+    <QueryClientProvider client={queryClient}>
+      <SuiProvider>
+        <BrowserRouter
         future={{
           v7_startTransition: true,
           v7_relativeSplatPath: true,
@@ -132,6 +138,7 @@ export default function App() {
         <Routes>
           {/* ── Public marketing ── */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/demo" element={<DemoGuidePage />} />
 
           {/* Legacy public URLs → canonical */}
           <Route path="/browse" element={<Navigate to="/browse-properties" replace />} />
@@ -165,13 +172,13 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/auth/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/auth/select-role" element={<SelectRolePage />} />
-            <Route path="/auth/kyc" element={<KycPage />} />
           </Route>
 
           {/* ── Authenticated app (JWT) + role-prefixed modules ── */}
           <Route element={<ProtectedRoute />}>
             <Route path="/government/verify-2fa" element={<GovernmentTwoFaPage />} />
             <Route element={<AuthLayout />}>
+              <Route path="/auth/kyc" element={<KycPage />} />
               <Route path="/auth/admin-2fa" element={<GovernmentTwoFaPage />} />
               <Route path="/auth/government-2fa" element={<GovernmentTwoFaPage />} />
             </Route>
@@ -207,6 +214,8 @@ export default function App() {
                   <Route path="/government/kcca" element={<KccaDashboardPage />} />
                   <Route path="/government/ura" element={<UraDashboardPage />} />
                   <Route path="/government/fraud" element={<GovFraudPage />} />
+                  <Route path="/government/blacklist" element={<GovBlacklistPage />} />
+                  <Route path="/government/charter" element={<GovCharterPage />} />
                   <Route path="/government/approvals" element={<GovApprovalsPage />} />
                   <Route path="/government/inspections" element={<GovInspectionsPage />} />
                   <Route path="/government/audit" element={<GovAuditPage />} />
@@ -236,6 +245,7 @@ export default function App() {
                 <Route path="/tenant/pay" element={<PaymentFlowPage />} />
                 <Route path="/tenant/contract" element={<ContractPage />} />
                 <Route path="/tenant/messages" element={<MessagesPage />} />
+                <Route path="/tenant/maintenance/submit" element={<TenantMaintenanceSubmitPage />} />
                 <Route path="/tenant/settings" element={<SettingsPage />} />
               </Route>
 
@@ -312,7 +322,8 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </SuiProvider>
     </QueryClientProvider>
   );
 }

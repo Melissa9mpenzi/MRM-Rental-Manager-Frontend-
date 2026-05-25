@@ -12,7 +12,7 @@ import {
   LayoutDashboard,
   LogOut,
 } from "lucide-react";
-import mrmLogo from "../../assets/MRM-LOGO.png";
+import BrandMark from "../brand/BrandMark";
 import useAuthStore from "../../store/authStore";
 
 const ACCENT = "#10B981";
@@ -74,16 +74,9 @@ export default function MarketingSidebar({ mobileOpen, setMobileOpen }) {
         </div>
 
         <div className="shrink-0 border-b border-white/[0.08] px-4 py-5">
-          <Link to="/" className="flex items-center gap-3" onClick={close}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-white/[0.06]">
-              <img src={mrmLogo} alt="" className="h-6 w-auto opacity-95" />
-            </div>
-            <div>
-              <div className="text-sm font-extrabold tracking-tight text-white">
-                RentDirect <span style={{ color: ACCENT }}>UG</span>
-              </div>
-              <div className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Public site</div>
-            </div>
+          <Link to="/" className="block" onClick={close}>
+            <BrandMark imgClassName="h-10 w-auto max-w-[200px] object-contain" />
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">Public site</div>
           </Link>
         </div>
 

@@ -11,7 +11,7 @@ export default function LandlordAddPropertyPage() {
       variant="registry"
       icon={Building2}
       title="Add property"
-      description="Register a new building or compound, then add units and invite tenants. The form matches the dashboard flow."
+      description="Step 1: building details. Step 2: listing fields that match marketplace filters (price, beds, type, amenities)."
     >
       <AddPropertyModal open onClose={() => navigate("/landlord/properties")} />
     </AppPageScaffold>

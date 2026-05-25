@@ -276,7 +276,7 @@ ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174,https://mrm-rental-m
 
 ## Branding & favicon
 
-Tab icon and PWA assets come from `src/assets/MRM-LOGO.png`, copied under `public/`:
+Brand logo and PWA assets use `src/assets/rentdirect-logo.png`, copied under `public/`:
 
 - `favicon.ico`, `favicon-16.png`, `favicon-32.png`
 - `apple-touch-icon.png`
