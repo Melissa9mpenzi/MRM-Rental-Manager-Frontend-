@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Search, Shield } from "lucide-react";
+import { Users, Search, Shield, UserX, UserCheck } from "lucide-react";
+import toast from "react-hot-toast";
+import useAuthStore from "../../store/authStore";
 import { workspaceApi } from "../../api/workspaceApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
@@ -21,13 +23,50 @@ export default function AdminUsersListPage({ embedded = false }) {
   const [page, setPage] = useState(0);
   const limit = 25;
   const qc = useQueryClient();
+  const me = useAuthStore((s) => s.user);
 
   const kycMutation = useMutation({
     mutationFn: ({ id, action }) => workspaceApi.adminKycReview(id, { action }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+      toast.success("KYC status updated");
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail?.message || err.response?.data?.detail || "KYC update failed");
     },
   });
+
+  const accountMutation = useMutation({
+    mutationFn: ({ id, action }) => workspaceApi.adminUserAccount(id, { action }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+      toast.success(data?.message || "Account updated");
+    },
+    onError: (err) => {
+      const d = err.response?.data?.detail;
+      toast.error(typeof d === "string" ? d : d?.message || "Could not update account");
+    },
+  });
+
+  function handleDisconnect(u) {
+    if (u.id === me?.id) {
+      toast.error("You cannot disconnect your own account.");
+      return;
+    }
+    const label = u.full_name || u.email;
+    if (
+      !window.confirm(
+        `Disconnect ${label}? They will be signed out and cannot log in until you reconnect the account.`
+      )
+    ) {
+      return;
+    }
+    accountMutation.mutate({ id: u.id, action: "disconnect" });
+  }
+
+  function handleReconnect(u) {
+    accountMutation.mutate({ id: u.id, action: "reconnect" });
+  }
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["workspace-admin-users", search, role, page],
@@ -113,35 +152,64 @@ export default function AdminUsersListPage({ embedded = false }) {
                       {u.is_active ? (
                         <span className="text-emerald-300">Active</span>
                       ) : (
-                        <span className="text-white/45">Inactive</span>
+                        <span className="text-red-300/90" title={u.gov_suspended ? "Suspended / disconnected" : ""}>
+                          Disconnected
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-3">{u.email_verified ? "Yes" : "No"}</td>
                     <td className="px-4 py-3 text-xs capitalize text-white/70">{u.kyc_review_status || "—"}</td>
                     <td className="px-4 py-3 text-xs">{u.trusted_for_commerce ? "Yes" : "No"}</td>
-                    <td className="px-4 py-3">
-                      {(u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending" ? (
-                        <div className="flex flex-wrap gap-1">
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex min-w-[10rem] flex-col gap-1.5">
+                        {(u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending" && (
+                          <div className="flex flex-wrap gap-1">
+                            <button
+                              type="button"
+                              disabled={kycMutation.isPending || accountMutation.isPending}
+                              onClick={() => kycMutation.mutate({ id: u.id, action: "approve" })}
+                              className="rounded-lg bg-emerald-600/90 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-500"
+                            >
+                              Approve KYC
+                            </button>
+                            <button
+                              type="button"
+                              disabled={kycMutation.isPending || accountMutation.isPending}
+                              onClick={() => kycMutation.mutate({ id: u.id, action: "reject" })}
+                              className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/10"
+                            >
+                              Reject KYC
+                            </button>
+                          </div>
+                        )}
+                        {u.is_active ? (
                           <button
                             type="button"
-                            disabled={kycMutation.isPending}
-                            onClick={() => kycMutation.mutate({ id: u.id, action: "approve" })}
-                            className="rounded-lg bg-emerald-600/90 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-500"
+                            disabled={accountMutation.isPending || u.id === me?.id}
+                            onClick={() => handleDisconnect(u)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/35 bg-red-500/10 px-2 py-1 text-[11px] font-bold text-red-200 hover:bg-red-500/20 disabled:opacity-40"
+                            title={u.id === me?.id ? "Cannot disconnect yourself" : "Revoke access and sign-out sessions"}
                           >
-                            Approve
+                            <UserX size={12} />
+                            Disconnect
                           </button>
+                        ) : (
                           <button
                             type="button"
-                            disabled={kycMutation.isPending}
-                            onClick={() => kycMutation.mutate({ id: u.id, action: "reject" })}
-                            className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/10"
+                            disabled={accountMutation.isPending}
+                            onClick={() => handleReconnect(u)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-2 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-500/20"
                           >
-                            Reject
+                            <UserCheck size={12} />
+                            Reconnect
                           </button>
-                        </div>
-                      ) : (
-                        <span className="text-white/35">—</span>
-                      )}
+                        )}
+                        {!((u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending") &&
+                          u.is_active &&
+                          u.id !== me?.id && (
+                            <span className="text-[10px] text-white/30">Revokes login sessions</span>
+                          )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-white/50">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}

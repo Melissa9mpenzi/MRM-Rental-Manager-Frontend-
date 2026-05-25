@@ -6,7 +6,7 @@ import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import useAuthStore from "../../store/authStore";
 import { pathAllowedForRole } from "../../config/access";
-import { postLoginDestination } from "../../lib/onboardingAuth";
+import { mustCompleteKycBeforeApp, postLoginDestination } from "../../lib/onboardingAuth";
 import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 
 export default function LoginPage() {
@@ -58,7 +58,12 @@ export default function LoginPage() {
       await login(data);
       const user = useAuthStore.getState().user;
       toast.success("Welcome back!");
-      if (from && pathAllowedForRole(from, user?.role) && from !== "/auth/kyc") {
+      if (
+        from &&
+        pathAllowedForRole(from, user?.role) &&
+        from !== "/auth/kyc" &&
+        !mustCompleteKycBeforeApp(user)
+      ) {
         navigate(from, { replace: true });
         return;
       }

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Wallet, ArrowDownLeft, Plus } from "lucide-react";
@@ -90,7 +91,7 @@ export default function TenantWalletPage() {
           to="/sui/dashboard"
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/15 px-4 py-2.5 text-sm font-bold text-violet-200 transition hover:bg-violet-500/25"
         >
-          Sui Portal
+          Blockchain
         </Link>
       }
     >

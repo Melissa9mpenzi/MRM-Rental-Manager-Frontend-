@@ -87,7 +87,7 @@ export default function SystemDashboardPage() {
     users: m.users || 0,
     properties: m.properties || 0,
     revenue: Math.round((m.payment_volume || 0) / 1_000_000),
-    contracts: data?.tenants_active ?? 0,
+    contracts: m.leases ?? 0,
   }));
 
   const usersTotal = data?.users_total ?? 0;
@@ -109,15 +109,10 @@ export default function SystemDashboardPage() {
     r.pct = Math.round((100 * r.value) / roleTotal);
   });
 
-  const revenueBars = monthly.map((m) => {
-    const rent = m.payment_volume || 0;
-    return {
-      month: m.month,
-      rentals: rent,
-      commissions: rent * 0.12,
-      taxes: rent * 0.1,
-    };
-  });
+  const revenueBars = monthly.map((m) => ({
+    month: m.month,
+    rentals: m.payment_volume || 0,
+  }));
 
   const kpis = [
     {
@@ -154,12 +149,18 @@ export default function SystemDashboardPage() {
     },
   ];
 
+  const verifiedUserPct =
+    usersTotal > 0 ? Math.round((100 * (gov?.verified_users ?? 0)) / usersTotal) : null;
+  const verifiedPropPct =
+    propsTotal > 0 ? Math.round((100 * (gov?.verified_properties ?? 0)) / propsTotal) : null;
+  const taxRevenueUgx = gov?.tax_revenue_ugx ?? revenueNum ?? 0;
+
   const govCards = [
     {
       code: "NIRA",
       title: "Identity Verification",
       today: gov?.verified_users ?? 0,
-      rate: usersTotal ? Math.min(99.9, 70 + (gov?.verified_users ?? 0) / Math.max(usersTotal, 1) * 25) : 98.7,
+      rate: verifiedUserPct,
       to: "/government/nira",
       className: "sys-gov-integ--nira",
     },
@@ -167,15 +168,15 @@ export default function SystemDashboardPage() {
       code: "KCCA",
       title: "Property Verification",
       today: gov?.verified_properties ?? 0,
-      rate: propsTotal ? Math.min(99, 60 + (gov?.verified_properties ?? 0) / Math.max(propsTotal, 1) * 35) : 96.2,
+      rate: verifiedPropPct,
       to: "/government/kcca",
       className: "sys-gov-integ--kcca",
     },
     {
       code: "URA",
       title: "Tax Compliance",
-      today: Math.round((gov?.tax_revenue_ugx ?? revenueNum) / 1000),
-      rate: 97.5,
+      today: Math.round(taxRevenueUgx),
+      rate: taxRevenueUgx > 0 ? 100 : 0,
       to: "/government/ura",
       className: "sys-gov-integ--ura",
     },
@@ -187,7 +188,7 @@ export default function SystemDashboardPage() {
     properties: fmtFull(propsTotal),
     payments: fmtMoney(revenueNum),
     alerts: fmtFull(gov?.flagged_accounts ?? fraudAlerts.length),
-    logs: fmtFull((data?.recent_audit ?? []).length * 1000 + 200000),
+    logs: fmtFull(data?.live_data?.payments_total ?? (data?.recent_audit ?? []).length),
   };
 
   return (
@@ -195,6 +196,15 @@ export default function SystemDashboardPage() {
       {isError && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           Could not load platform summary. Ensure the API is running.
+        </div>
+      )}
+
+      {!isLoading && data?.live_data && !data.live_data.has_rental_operations && (
+        <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
+          <strong className="font-semibold">Live data only — no demo seed.</strong> You have real sign-ups (
+          {fmtFull(data.live_data.users_total)} users, {fmtFull(data.live_data.properties)} properties) but no tenants,
+          leases, or rent payments yet. Add tenants and record payments in the landlord portal to populate revenue and
+          compliance dashboards.
         </div>
       )}
 
@@ -305,10 +315,19 @@ export default function SystemDashboardPage() {
                     </div>
                     <div className="mt-2 grid grid-cols-2 gap-2 text-[10px]">
                       <span className="text-white/45">
-                        Today: <strong className="text-white">{isLoading ? "…" : fmtFull(g.today)}</strong>
+                        {g.code === "URA" ? "Revenue (UGX)" : "Count"}:{" "}
+                        <strong className="text-white">
+                          {isLoading ? "…" : g.code === "URA" ? fmtMoney(g.today) : fmtFull(g.today)}
+                        </strong>
                       </span>
                       <span className="text-right text-white/45">
-                        Success: <strong className="text-emerald-400">{g.rate.toFixed(1)}%</strong>
+                        {g.rate != null ? (
+                          <>
+                            Rate: <strong className="text-emerald-400">{g.rate}%</strong>
+                          </>
+                        ) : (
+                          <span className="text-white/35">—</span>
+                        )}
                       </span>
                     </div>
                   </Link>

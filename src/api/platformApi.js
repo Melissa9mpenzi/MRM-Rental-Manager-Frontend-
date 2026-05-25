@@ -10,4 +10,6 @@ export const platformApi = {
     api.get("/platform/search", { params: { q } }).then((r) => r.data?.data ?? r.data ?? {}),
   systemStatus: () =>
     api.get("/platform/system-status").then((r) => r.data?.data ?? r.data ?? {}),
+  dataSummary: () =>
+    api.get("/platform/data-summary").then((r) => r.data?.data ?? r.data ?? {}),
 };

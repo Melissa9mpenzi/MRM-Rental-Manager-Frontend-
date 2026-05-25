@@ -25,7 +25,7 @@ export default function ListingDetailsFields({
             Property type (marketplace) <span className="text-red-400">*</span>
           </label>
           <select
-            className="input-field"
+            className="select-field w-full"
             {...register("listing_category", { required: "Property type is required" })}
           >
             <option value="">Select type…</option>
@@ -42,7 +42,7 @@ export default function ListingDetailsFields({
 
         <div className="w-full">
           <label className="input-label">Unit type (internal)</label>
-          <select className="input-field" {...register("unit_type")}>
+          <select className="select-field w-full" {...register("unit_type")}>
             {UNIT_TYPE_OPTIONS.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}

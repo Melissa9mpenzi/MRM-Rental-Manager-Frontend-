@@ -11,10 +11,11 @@ export default function VerifyOtpPage() {
   const location = useLocation();
   const [email, setEmail] = useState(() => decodeURIComponent(searchParams.get("email") || ""));
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
+  const [fallbackOtp, setFallbackOtp] = useState(location.state?.devOtp || null);
+  const [emailSent, setEmailSent] = useState(location.state?.emailSent !== false);
   const inputs = useRef([]);
-
-  const devOtp = location.state?.devOtp;
 
   useEffect(() => {
     const em = searchParams.get("email");
@@ -35,6 +36,35 @@ export default function VerifyOtpPage() {
 
   const onKeyDown = (i, e) => {
     if (e.key === "Backspace" && !digits[i] && i > 0) inputs.current[i - 1]?.focus();
+  };
+
+  const resendCode = async () => {
+    const addr = email.trim();
+    if (!addr) {
+      toast.error("Enter the email you registered with.");
+      return;
+    }
+    setResending(true);
+    try {
+      const res = await authApi.resendVerification({ email: addr });
+      if (res?.email_verified) {
+        toast.success("Email already verified. You can sign in.");
+        navigate("/login", { replace: true, state: { email: addr } });
+        return;
+      }
+      const fallback = res?.verification_otp_fallback || res?.dev_verification_otp;
+      if (fallback) setFallbackOtp(fallback);
+      setEmailSent(res?.email_sent !== false);
+      if (res?.email_sent === false && fallback) {
+        toast.error(`Email not sent. Use this code: ${fallback}`, { duration: 12_000 });
+      } else {
+        toast.success(res?.message || "New code sent. Check your inbox and spam folder.");
+      }
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Could not resend code."));
+    } finally {
+      setResending(false);
+    }
   };
 
   const verify = async () => {
@@ -79,9 +109,15 @@ export default function VerifyOtpPage() {
           )}
           . You can also open the verification link in the email.
         </p>
-        {devOtp && (
-          <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-200">
-            Dev mode: use code <strong>{devOtp}</strong>
+        {!emailSent && (
+          <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] leading-snug text-amber-200">
+            We could not deliver email from the server (SMTP may be missing on production). Tap{" "}
+            <strong>Resend code</strong> or use a one-time code below if shown.
+          </p>
+        )}
+        {fallbackOtp && (
+          <p className="mt-2 rounded-lg border border-[#00C896]/30 bg-[#00C896]/10 px-3 py-2 text-center text-sm font-bold tracking-widest text-[#00C896]">
+            {fallbackOtp}
           </p>
         )}
       </div>
@@ -123,7 +159,18 @@ export default function VerifyOtpPage() {
         {loading ? "Verifying…" : "Verify & continue"}
       </button>
 
+      <button
+        type="button"
+        disabled={resending || loading}
+        onClick={resendCode}
+        className="mt-3 w-full rounded-xl border border-white/15 py-2.5 text-sm font-bold text-white/80 transition hover:bg-white/10 disabled:opacity-50"
+      >
+        {resending ? "Sending…" : "Resend code"}
+      </button>
+
       <p className="mt-3 text-center text-[11px] text-white/50 sm:text-xs">
+        Check spam/junk. Codes expire in 15 minutes.
+        <br />
         <Link to="/register" className="font-semibold text-white/70 hover:text-brand-teal">
           Register with a different email
         </Link>

@@ -10,6 +10,7 @@ import ArrearsBadge from "../../components/domain/ArrearsBadge.jsx";
 import PaymentForm from "../../components/domain/PaymentForm.jsx";
 import { Button } from "../../components/ui/Button.jsx";
 import { ConfirmDialog } from "../../components/ui/index.jsx";
+import { ErrorPanel } from "../../components/ui/StatePanel";
 import PaymentMethodBadge from "../../components/payments/PaymentMethodBadge";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -74,7 +75,14 @@ export default function TenantDetailPage() {
   });
 
   if (isLoading) return <div className="card h-32 animate-pulse bg-brand-tealLt/30" />;
-  if (isError) return <div className="card text-center py-10 text-brand-mid">Could not load this tenant from the server.</div>;
+  if (isError) {
+    return (
+      <ErrorPanel
+        title="Could not load this tenant"
+        description="Check your connection and that the API is running, then try again."
+      />
+    );
+  }
   if (!tenant)   return <div className="card text-center py-10 text-brand-mid">Tenant not found</div>;
 
   const balance      = parseFloat(tenant.balance_due || 0);

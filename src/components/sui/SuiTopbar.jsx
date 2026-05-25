@@ -1,16 +1,12 @@
-import { useNavigate } from "react-router-dom";
-import { Menu, Bell, Moon } from "lucide-react";
+import { Menu, Moon } from "lucide-react";
 import { ConnectButton } from "@mysten/dapp-kit";
 import toast from "react-hot-toast";
 import { SUI_NETWORKS } from "../../config/suiPortalNav";
-import { notificationsPathForRole } from "../../config/access";
-import useAuthStore from "../../store/authStore";
+import NotificationBell from "../layout/NotificationBell";
+import UserProfileMenu from "../layout/UserProfileMenu";
 
 export default function SuiTopbar({ title, network, onMenuClick }) {
-  const navigate = useNavigate();
-  const role = useAuthStore((s) => s.user?.role) || "landlord";
   const netLabel = SUI_NETWORKS.find((n) => n.id === network)?.label || `Sui ${network || "testnet"}`;
-  const notifPath = notificationsPathForRole(role);
 
   return (
     <header className="sui-topbar">
@@ -24,15 +20,8 @@ export default function SuiTopbar({ title, network, onMenuClick }) {
         {netLabel}
       </span>
       <ConnectButton />
-      <button
-        type="button"
-        className="rounded-lg p-2 text-white/50 hover:text-white"
-        title="Notifications"
-        aria-label="Notifications"
-        onClick={() => navigate(notifPath)}
-      >
-        <Bell size={18} />
-      </button>
+      <NotificationBell variant="app" className="!h-10 !w-10" />
+      <UserProfileMenu variant="app" showName={false} />
       <button
         type="button"
         className="rounded-lg p-2 text-white/50 hover:text-white"

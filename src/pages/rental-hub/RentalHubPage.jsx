@@ -106,6 +106,7 @@ export default function RentalHubPage() {
   const appliedListingKey = useRef("");
 
   const listingId = searchParams.get("listing");
+  const threadParam = searchParams.get("thread");
   const intent = searchParams.get("intent");
   const title = searchParams.get("title") || "";
   const viewDate = searchParams.get("date") || "";
@@ -120,8 +121,13 @@ export default function RentalHubPage() {
   const threadList = Array.isArray(threads) ? threads : [];
 
   useEffect(() => {
+    if (threadParam) {
+      const id = Number(threadParam);
+      if (!Number.isNaN(id) && id > 0) setActive(id);
+      return;
+    }
     if (active == null && threadList.length > 0) setActive(threadList[0].id);
-  }, [active, threadList]);
+  }, [active, threadList, threadParam]);
 
   const { data: ctx } = useQuery({
     queryKey: ["rental-hub-context", active],

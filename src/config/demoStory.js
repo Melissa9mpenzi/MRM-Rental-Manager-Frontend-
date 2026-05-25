@@ -1,5 +1,6 @@
 /**
- * Judge demo script — credentials & narrative (run `python -m app.utils.seed_data` first).
+ * Local hackathon demo only — do NOT use in production.
+ * Production uses real registrations; run `python -m app.utils.seed_data --admin-only` for bootstrap.
  */
 export const DEMO_CREDENTIALS = [
   { role: "Tenant", email: "tenant.demo@rentdirect.ug", password: "tenant12", portal: "/login" },

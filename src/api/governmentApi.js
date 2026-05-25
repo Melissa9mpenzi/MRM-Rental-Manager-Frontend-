@@ -26,7 +26,8 @@ export const governmentApi = {
     govApi.get("/government/kcca/properties", { params }).then((r) => r.data?.data ?? r.data),
   kccaDecision: (body) => govApi.post("/government/kcca/decision", body).then((r) => r.data?.data ?? r.data),
   uraReports: (params) => govApi.get("/government/ura/reports", { params }).then((r) => r.data?.data ?? r.data),
-  fraudAlerts: () => govApi.get("/government/fraud/alerts").then((r) => r.data?.data ?? r.data),
+  fraudAlerts: (params) =>
+    govApi.get("/government/fraud/alerts", { params }).then((r) => r.data?.data ?? r.data ?? []),
   auditLogs: () => govApi.get("/government/audit-logs").then((r) => r.data?.data ?? r.data),
   exportAuditWalrus: (params) =>
     govApi.post("/government/audit/export-walrus", null, { params }).then((r) => r.data?.data ?? r.data),

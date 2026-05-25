@@ -66,7 +66,7 @@ export function buildChoroplethFeatures(geojson, apiRegions) {
   const regions = resolveRegionalCompliance(apiRegions);
   const byDistrict = Object.fromEntries(regions.map((r) => [r.district, r]));
 
-  return (geojson?.features ?? []).map((feature) => {
+  return (geojson?.features ?? []).map((feature, index) => {
     const name = feature.properties?.shapeName || "Region";
     const outer = feature.geometry?.type === "Polygon"
       ? feature.geometry.coordinates[0]
@@ -77,7 +77,8 @@ export function buildChoroplethFeatures(geojson, apiRegions) {
     const meta = byDistrict[district];
 
     return {
-      id: name,
+      id: `${name}-${index}`,
+      label: name,
       district,
       score,
       count: meta?.count ?? 0,

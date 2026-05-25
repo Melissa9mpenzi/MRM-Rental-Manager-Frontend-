@@ -46,7 +46,8 @@ export default function KycPage() {
   const [names, setNames] = useState({ id_front: "", id_back: "", selfie: "" });
   const [slotErrors, setSlotErrors] = useState({ id_front: "", id_back: "", selfie: "" });
 
-  const needsDocs = user?.role === "landlord" || user?.role === "staff";
+  const needsDocs =
+    user?.role === "landlord" || user?.role === "staff" || user?.role === "agent";
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -197,11 +198,20 @@ export default function KycPage() {
         {busy ? "Submitting…" : needsDocs ? "Upload & submit for review" : "Continue"}
       </button>
 
-      <p className="mt-3 text-center text-[11px] text-white/50 sm:text-xs">
-        <Link to="/login" className="font-semibold text-brand-teal hover:underline">
-          Skip for now
-        </Link>
-      </p>
+      {!needsDocs ? (
+        <p className="mt-3 text-center text-[11px] text-white/50 sm:text-xs">
+          <Link to="/login" className="font-semibold text-brand-teal hover:underline">
+            Back to sign in
+          </Link>
+        </p>
+      ) : (
+        <p className="mt-3 text-center text-[11px] text-white/45 sm:text-xs">
+          Landlords and agents must complete KYC before using the workspace. Need help?{" "}
+          <a href="mailto:support@rentdirect.ug" className="font-semibold text-brand-teal hover:underline">
+            Contact support
+          </a>
+        </p>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { governmentApi } from "../../api/governmentApi";
 import useAuthStore from "../../store/authStore";
@@ -15,10 +16,19 @@ function severityBadge(severity) {
 
 export default function GovFraudPage() {
   const agency = governmentAgencyForRole(useAuthStore((s) => s.user?.role)) || "all";
-  const { data: alerts = [], isLoading } = useQuery({
+  const { data: alerts = [], isLoading, isError } = useQuery({
     queryKey: ["gov-fraud", agency],
-    queryFn: () => governmentApi.fraudAlerts(),
+    queryFn: () => governmentApi.fraudAlerts({ limit: 80 }),
   });
+
+  const reviewHref =
+    agency === "nira"
+      ? "/government/nira"
+      : agency === "kcca"
+        ? "/government/kcca"
+        : agency === "ura"
+          ? "/government/ura"
+          : "/government";
 
   const riskData = useMemo(() => {
     const high = alerts.filter((a) => a.severity === "high").length;
@@ -82,8 +92,15 @@ export default function GovFraudPage() {
                 </div>
               </>
             ) : (
-              <p className="flex h-full items-center justify-center text-sm text-white/45">
-                {isLoading ? "Loading…" : "No fraud alerts in the system yet."}
+              <p className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center text-sm text-white/45">
+                {isLoading && "Loading…"}
+                {isError && "Could not load fraud alerts. Refresh or try again shortly."}
+                {!isLoading && !isError && "No fraud alerts in the system yet."}
+                {!isLoading && !isError && agency === "nira" && (
+                  <Link to={reviewHref} className="text-xs font-semibold text-emerald-300 hover:underline">
+                    Open NIRA verification queue →
+                  </Link>
+                )}
               </p>
             )}
           </div>
@@ -93,7 +110,18 @@ export default function GovFraudPage() {
           <h2 className="gov-panel-title">Recent High Risk Cases</h2>
           {isLoading && <p className="mt-4 text-sm text-white/45">Loading alerts…</p>}
           {!isLoading && !cases.length && (
-            <p className="mt-4 text-sm text-white/45">No cases to display. Flagged KYC or compliance issues will appear here.</p>
+            <p className="mt-4 text-sm text-white/45">
+              {isError
+                ? "Alerts could not be loaded."
+                : agency === "nira"
+                  ? "No high-risk cases yet. Pending KYC, rejected identity checks, and suspended accounts appear here automatically."
+                  : "No cases to display. Flagged KYC or compliance issues will appear here."}
+              {!isError && agency === "nira" && (
+                <Link to={reviewHref} className="mt-2 inline-block text-xs font-semibold text-emerald-300 hover:underline">
+                  Review KYC queue →
+                </Link>
+              )}
+            </p>
           )}
           <div className="mt-3 max-h-[420px] overflow-y-auto pr-1">
             {cases.map((a) => (

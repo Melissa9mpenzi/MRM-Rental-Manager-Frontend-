@@ -4,7 +4,6 @@ export const SUI_NAV = [
     title: "Main",
     items: [
       { id: "overview", label: "Overview", path: "/sui/dashboard", icon: "overview" },
-      { id: "dashboard", label: "Sui Dashboard", path: "/sui/dashboard", icon: "dashboard", badge: "New" },
       { id: "transactions", label: "Transactions", path: "/sui/transactions", icon: "transactions" },
       { id: "escrow", label: "Escrow Contracts", path: "/sui/escrow", icon: "escrow" },
       { id: "contracts", label: "Smart Contracts", path: "/sui/contracts", icon: "contracts" },

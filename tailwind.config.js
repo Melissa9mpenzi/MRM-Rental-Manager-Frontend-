@@ -14,8 +14,8 @@ export default {
       colors: {
         rd: {
           base: "#060a0e",
-          surface: "rgba(255,255,255,0.05)",
-          elevated: "rgba(18,26,34,0.88)",
+          surface: "#0f141c",
+          elevated: "#121a22",
           stroke: "rgba(255,255,255,0.1)",
           muted: "#8b9db0",
           ink: "#f4f4f5",

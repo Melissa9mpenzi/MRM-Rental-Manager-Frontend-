@@ -159,7 +159,7 @@ export default function NiraDashboardPage() {
               <th>Role</th>
               <th>NIN</th>
               <th>Status</th>
-              <th>Face Match %</th>
+              <th>Biometric</th>
               <th>Submitted</th>
               <th>Walrus</th>
               <th>Actions</th>
@@ -190,7 +190,9 @@ export default function NiraDashboardPage() {
                 <td>
                   <span className={badgeClass(r.verification_status)}>{r.verification_status}</span>
                 </td>
-                <td className="text-white/80">{r.face_match_pct ?? "—"}%</td>
+                <td className="text-white/80">
+                  {r.face_match_pct != null ? `${r.face_match_pct}%` : "—"}
+                </td>
                 <td className="text-white/45">{r.submitted_at?.slice(0, 10) || "—"}</td>
                 <td>
                   <WalrusProofBadge

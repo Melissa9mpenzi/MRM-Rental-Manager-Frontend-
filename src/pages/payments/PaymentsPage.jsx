@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { paymentsApi } from "../../api/paymentsApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import { EmptyPanel, ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
 import PaymentMethodBadge from "../../components/payments/PaymentMethodBadge";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -53,7 +54,7 @@ export default function PaymentsPage() {
       variant="ledger"
       icon={CreditCard}
       title="Payments"
-      description={`${filtered.length} records · Total UGX ${total.toLocaleString()}`}
+      description={`${filtered.length} payment transaction${filtered.length === 1 ? "" : "s"} · UGX ${total.toLocaleString()} — tenant profiles are under Tenants`}
       actions={
         <Link to="/landlord/payments/new" className="btn-primary">
           <Plus size={16} /> Record Payment
@@ -91,27 +92,27 @@ export default function PaymentsPage() {
 
       {/* Table */}
       {isLoading ? (
-        <div className="card h-48 animate-pulse bg-brand-tealLt/30" />
+        <LoadingPanel className="h-48" />
       ) : isError ? (
-        <div className="card py-12 text-center">
-          <p className="font-bold text-brand-dark">Could not load payments</p>
-          <p className="mt-1 text-sm text-brand-mid">Check your API connection and try again.</p>
-        </div>
+        <ErrorPanel
+          title="Could not load payments"
+          description="Check your API connection and try again."
+        />
       ) : filtered.length === 0 ? (
-        <div className="card text-center py-16 space-y-3">
-          <div className="w-14 h-14 rounded-full bg-brand-tealLt flex items-center justify-center mx-auto">
-            <CreditCard size={24} className="text-brand-teal" />
-          </div>
-          <p className="font-bold text-brand-dark">No payments found</p>
-          <p className="text-brand-mid text-sm">
-            {search || filterMethod ? "Try adjusting your filters." : "Record your first payment to get started."}
-          </p>
-          {!search && !filterMethod && (
-            <Link to="/landlord/payments/new" className="btn-primary mx-auto">
-              <Plus size={15} /> Record Payment
-            </Link>
-          )}
-        </div>
+        <EmptyPanel
+          icon={CreditCard}
+          title="No payments found"
+          description={
+            search || filterMethod ? "Try adjusting your filters." : "Record your first payment to get started."
+          }
+          action={
+            !search && !filterMethod ? (
+              <Link to="/landlord/payments/new" className="btn-primary inline-flex">
+                <Plus size={15} /> Record Payment
+              </Link>
+            ) : null
+          }
+        />
       ) : (
         <div className="card overflow-x-auto p-0">
           <table className="w-full text-sm">

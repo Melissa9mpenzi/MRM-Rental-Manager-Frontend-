@@ -11,7 +11,6 @@ import {
   Search,
   MessageSquare,
   FileText,
-  Shield,
   UserCircle,
   Heart,
   ClipboardList,
@@ -24,17 +23,13 @@ import {
   Calendar,
   Briefcase,
   Coins,
-  ListChecks,
-  Flag,
-  Activity,
-  LifeBuoy,
-  ScrollText,
-  Server,
   Plus,
-  Link2,
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import BrandMark from "../brand/BrandMark";
+import { SUI_SIDEBAR_ITEMS, SUI_SIDEBAR_EXTERNAL } from "../../config/suiSidebarNav";
+
+const SUI_ROLES = new Set(["tenant", "landlord", "staff", "agent", "system_admin"]);
 
 const LANDLORD_NAV = [
   { to: "/landlord/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -50,7 +45,7 @@ const LANDLORD_NAV = [
   { to: "/landlord/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/landlord/notifications", icon: Bell, label: "Notifications" },
   { to: "/landlord/wallet", icon: Wallet, label: "Wallet" },
-  { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
+  { to: "/landlord/profile", icon: UserCircle, label: "Profile" },
   { to: "/landlord/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -63,7 +58,6 @@ const TENANT_NAV = [
   { to: "/tenant/pay", icon: CreditCard, label: "Payments" },
   { to: "/tenant/receipts", icon: FileText, label: "Receipts" },
   { to: "/tenant/wallet", icon: Wallet, label: "Wallet" },
-  { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
   { to: "/tenant/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/tenant/notifications", icon: Bell, label: "Notifications" },
   { to: "/tenant/profile", icon: UserCircle, label: "Profile" },
@@ -81,7 +75,7 @@ const AGENT_NAV = [
   { to: "/agent/analytics", icon: BarChart2, label: "Analytics" },
   { to: "/agent/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/agent/notifications", icon: Bell, label: "Notifications" },
-  { to: "/sui/dashboard", icon: Link2, label: "Sui Portal" },
+  { to: "/agent/profile", icon: UserCircle, label: "Profile" },
   { to: "/agent/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -91,11 +85,27 @@ function navForRole(role) {
   return LANDLORD_NAV;
 }
 
+function navLinkClass(isActive, variant = "default") {
+  if (variant === "sui") {
+    return `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-150 group ${
+      isActive
+        ? "border border-violet-500/35 bg-violet-500/12 text-violet-200"
+        : "border border-transparent text-white/50 hover:bg-white/[0.06] hover:text-white/80"
+    }`;
+  }
+  return `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-150 group ${
+    isActive
+      ? "border border-brand-teal/30 bg-brand-teal/15 text-brand-teal"
+      : "border border-transparent text-white/55 hover:bg-white/[0.08] hover:text-white"
+  }`;
+}
+
 export default function Sidebar({ open, onClose }) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const role = user?.role ?? "landlord";
   const items = navForRole(role);
+  const showBlockchain = SUI_ROLES.has(role);
 
   const handleLogout = () => {
     logout();
@@ -109,6 +119,8 @@ export default function Sidebar({ open, onClose }) {
       .join("")
       .slice(0, 2)
       .toUpperCase() || "?";
+
+  const ExtIcon = SUI_SIDEBAR_EXTERNAL.icon;
 
   return (
     <>
@@ -145,24 +157,65 @@ export default function Sidebar({ open, onClose }) {
             <NavLink
               key={to}
               to={to}
-              onClick={onClose}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-150 group
-                ${
-                  isActive
-                    ? "border border-brand-teal/30 bg-brand-teal/15 text-brand-teal"
-                    : "border border-transparent text-white/55 hover:bg-white/[0.08] hover:text-white"
-                }`
+              end={
+                to === "/landlord/properties" ||
+                to === "/tenant/dashboard" ||
+                to === "/landlord/dashboard" ||
+                to === "/agent/dashboard"
               }
+              onClick={onClose}
+              className={({ isActive }) => navLinkClass(isActive)}
             >
               {({ isActive }) => (
                 <>
-                  <Icon size={17} className={`flex-shrink-0 ${isActive ? "text-brand-teal" : "text-white/45 group-hover:text-white/80"}`} />
+                  <Icon
+                    size={17}
+                    className={`flex-shrink-0 ${isActive ? "text-brand-teal" : "text-white/45 group-hover:text-white/80"}`}
+                  />
                   {label}
                 </>
               )}
             </NavLink>
           ))}
+
+          {showBlockchain && (
+            <>
+              <div className="mx-1 my-3 border-t border-white/[0.08]" />
+              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-violet-300/50">
+                Blockchain (Sui)
+              </div>
+              {SUI_SIDEBAR_ITEMS.map(({ to, icon: Icon, label, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  onClick={onClose}
+                  className={({ isActive }) => navLinkClass(isActive, "sui")}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon
+                        size={16}
+                        className={`flex-shrink-0 ${isActive ? "text-violet-300" : "text-white/40 group-hover:text-white/70"}`}
+                      />
+                      {label}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+              <a
+                href={SUI_SIDEBAR_EXTERNAL.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={navLinkClass(false, "sui")}
+                onClick={onClose}
+              >
+                <ExtIcon size={16} className="text-white/40" />
+                {SUI_SIDEBAR_EXTERNAL.label}
+                <ExtIcon size={11} className="ml-auto opacity-40" />
+              </a>
+            </>
+          )}
         </nav>
 
         <div className="shrink-0 space-y-3 border-t border-white/10 px-4 py-4">

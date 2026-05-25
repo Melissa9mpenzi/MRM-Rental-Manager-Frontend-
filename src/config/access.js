@@ -51,12 +51,33 @@ export function notificationsPathForRole(role) {
     case API_ROLES.agent:
       return "/agent/notifications";
     case API_ROLES.system_admin:
+      return "/system/notifications";
     case API_ROLES.gov_nira:
     case API_ROLES.gov_kcca:
     case API_ROLES.gov_ura:
-      return "/government/overview";
+      return "/government/notifications";
     default:
       return "/landlord/notifications";
+  }
+}
+
+export function profilePathForRole(role) {
+  switch (role) {
+    case API_ROLES.tenant:
+      return "/tenant/profile";
+    case API_ROLES.landlord:
+      return "/landlord/profile";
+    case API_ROLES.staff:
+    case API_ROLES.agent:
+      return "/agent/profile";
+    case API_ROLES.system_admin:
+      return "/system/settings";
+    case API_ROLES.gov_nira:
+    case API_ROLES.gov_kcca:
+    case API_ROLES.gov_ura:
+      return "/government/settings";
+    default:
+      return null;
   }
 }
 

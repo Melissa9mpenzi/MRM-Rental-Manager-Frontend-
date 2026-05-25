@@ -9,6 +9,7 @@ import { dashboardApi } from "../../api/dashboardApi";
 import { listingImageUrl } from "../../lib/mediaUrl";
 import useAuthStore from "../../store/authStore";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
+import KycStatusBanner from "../../components/domain/KycStatusBanner";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import ActivityTimeline from "../../components/enterprise/ActivityTimeline";
 import SystemStatusBar from "../../components/enterprise/SystemStatusBar";
@@ -129,41 +130,7 @@ export default function LandlordDashboard() {
         <p className="mt-0.5 text-sm text-white/55">Landlord overview — revenue, occupancy, and arrears</p>
       </div>
 
-      {!user?.trusted_for_commerce && (
-        <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          {!user?.kyc_submitted_at ? (
-            <>
-              <strong className="font-bold">Action required.</strong> Submit KYC to publish listings and receive payouts.{" "}
-              <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-                Complete KYC →
-              </Link>
-            </>
-          ) : user?.kyc_review_status === "pending" ? (
-            <>
-              <strong className="font-bold">Verification in progress.</strong> Your documents are queued for review
-              (including NIRA identity checks). You can use this dashboard while you wait — publishing and payouts unlock
-              after approval.{" "}
-              <Link to="/verification-pending" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-                Details →
-              </Link>
-            </>
-          ) : user?.kyc_review_status === "rejected" ? (
-            <>
-              <strong className="font-bold">KYC needs attention.</strong> Please resubmit your documents.{" "}
-              <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-                Resubmit KYC →
-              </Link>
-            </>
-          ) : (
-            <>
-              <strong className="font-bold">Limited mode.</strong> Complete verification to unlock full landlord features.{" "}
-              <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-                Submit KYC →
-              </Link>
-            </>
-          )}
-        </div>
-      )}
+      <KycStatusBanner user={user} roleLabel="landlord" />
 
       <SystemStatusBar />
 

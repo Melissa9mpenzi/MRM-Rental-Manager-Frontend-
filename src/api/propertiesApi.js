@@ -21,11 +21,24 @@ export const propertiesApi = {
     }).then((r) => r.data);
   },
 
+  uploadVideo: (id, file) => {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post(`/properties/${id}/video`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 120_000,
+    }).then((r) => r.data);
+  },
+
   archive: (id) =>
     api.post(`/properties/${id}/archive`).then((r) => r.data),
 
   restore: (id) =>
     api.post(`/properties/${id}/restore`).then((r) => r.data),
+
+  /** POST alias — Vercel/old deploys may return 405 on DELETE */
+  delete: (id) =>
+    api.post(`/properties/${id}/delete`).then((r) => r.data),
 
   listUnits: (propertyId) =>
     api.get(`/properties/${propertyId}/units`).then((r) => r.data),
