@@ -64,13 +64,27 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
+  refreshSessionUser: async () => {
+    try {
+      const user = await usersApi.getMe();
+      if (user?.id) {
+        get().updateUser(user);
+        return user;
+      }
+    } catch {
+      /* keep cached user if profile fetch fails */
+    }
+    return get().user;
+  },
+
   login: async ({ email, password }) => {
     set({ isLoading: true, error: null });
     const emailTrim = String(email ?? "").trim();
     try {
       const data = await authApi.login({ email: emailTrim, password });
       get()._setSession(data);
-      return data;
+      await get().refreshSessionUser();
+      return { ...data, user: get().user };
     } catch (err) {
       const message = apiErrorMessage(err, "Login failed. Check your credentials.");
       set({ error: message });
@@ -85,7 +99,8 @@ const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       get()._setSession(sessionData);
-      return sessionData;
+      await get().refreshSessionUser();
+      return { ...sessionData, user: get().user };
     } catch (err) {
       const message = apiErrorMessage(err, "Social sign-in failed.");
       set({ error: message });

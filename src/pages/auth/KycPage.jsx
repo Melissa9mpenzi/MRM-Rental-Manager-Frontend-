@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { usersApi } from "../../api/usersApi";
 import { defaultDashboardPath } from "../../config/access";
+import { hasPassedKycOnboarding, mustCompleteKycBeforeApp } from "../../lib/onboardingAuth";
 import { validateKycFile, KYC_MAX_BYTES } from "../../lib/kycClientValidators";
 import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
 
@@ -52,8 +53,12 @@ export default function KycPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login", { replace: true, state: { from: { pathname: "/auth/kyc" } } });
+      return;
     }
-  }, [isAuthenticated, navigate]);
+    if (user && !mustCompleteKycBeforeApp(user) && hasPassedKycOnboarding(user)) {
+      navigate(defaultDashboardPath(user.role), { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const setFile = async (kind, file) => {
     if (!file) return;
