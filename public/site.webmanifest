@@ -1,0 +1,23 @@
+{
+  "name": "RentDirect UG",
+  "short_name": "RentDirect",
+  "description": "Find, rent, and pay for property in Uganda.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#161D23",
+  "theme_color": "#10B981",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

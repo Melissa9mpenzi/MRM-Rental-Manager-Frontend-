@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import useAuthStore from "../../store/authStore";
 import { workspaceApi } from "../../api/workspaceApi";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
+import KycStatusBanner from "../../components/domain/KycStatusBanner";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 const fmtUGX = (n) =>
@@ -37,25 +38,7 @@ export default function AgentDashboardRd() {
         <p className="mt-0.5 text-sm text-white/55">Operations snapshot · CRM stages ship when lead data exists</p>
       </div>
 
-      {!user?.trusted_for_commerce && (
-        <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          <strong className="font-bold">Limited mode.</strong> Complete KYC and wait for admin approval for full agent
-          capabilities.{" "}
-          {!user?.kyc_submitted_at ? (
-            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              Submit KYC →
-            </Link>
-          ) : user?.kyc_review_status === "pending" ? (
-            <Link to="/verification-pending" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              View status →
-            </Link>
-          ) : user?.kyc_review_status === "rejected" ? (
-            <Link to="/auth/kyc" className="font-semibold text-brand-teal underline-offset-2 hover:underline">
-              Resubmit KYC →
-            </Link>
-          ) : null}
-        </div>
-      )}
+      <KycStatusBanner user={user} roleLabel="agent" />
 
       {isError && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -111,16 +94,17 @@ export default function AgentDashboardRd() {
             </div>
           ))}
         </div>
-        <Link to="/browse-properties" className="mt-4 inline-block text-xs font-semibold text-[#00C896] hover:underline">
-          Match clients to listings →
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold">
+          <Link to="/agent/leads" className="text-[#00C896] hover:underline">Manage leads →</Link>
+          <Link to="/browse-properties" className="text-white/55 hover:text-white">Browse listings →</Link>
+        </div>
       </div>
 
       <div className="card-glass overflow-hidden">
         <h3 className="mb-3 text-sm font-bold text-white">Recent leads</h3>
         {leads.length === 0 ? (
           <p className="py-8 text-center text-sm text-white/45">
-            No lead records in the API yet. Stages above will fill when CRM endpoints are added.
+            No leads yet. Add prospects from the Leads page.
           </p>
         ) : (
           <div className="-mx-1 max-h-[280px] overflow-auto">
@@ -161,7 +145,7 @@ export default function AgentDashboardRd() {
       </div>
 
       <div className="card-glass">
-        <h3 className="mb-4 text-sm font-bold text-white">Commission trend (placeholder UGX millions)</h3>
+        <h3 className="mb-4 text-sm font-bold text-white">Commission trend (UGX millions)</h3>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={trend}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />

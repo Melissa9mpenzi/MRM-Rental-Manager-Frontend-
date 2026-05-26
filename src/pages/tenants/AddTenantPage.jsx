@@ -10,7 +10,9 @@ import { propertiesApi } from "../../api/propertiesApi";
 import { tenantsApi } from "../../api/tenantsApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { platformApiOrigin } from "../../api/config";
+
+const BASE_URL = platformApiOrigin();
 
 function FieldGroup({ title, children }) {
   return (

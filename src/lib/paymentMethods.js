@@ -48,9 +48,9 @@ export const PAYMENT_METHODS = [
     id: "sui",
     label: "Sui Wallet",
     shortLabel: "Sui",
-    sub: "On-chain settlement (preview)",
+    sub: "Pay with Sui Wallet — on-chain receipt & escrow",
     logo: "sui",
-    apiValue: "other",
+    apiValue: "sui",
   },
   {
     id: "other",
@@ -62,7 +62,7 @@ export const PAYMENT_METHODS = [
   },
 ];
 
-/** Methods shown on tenant “Pay rent” (mobile money + cards). */
+/** Methods shown on tenant “Pay rent” (MoMo + Pesapal + Sui). */
 export const TENANT_PAY_METHODS = PAYMENT_METHODS.filter((m) =>
   ["mtn_momo", "airtel", "card", "sui"].includes(m.id),
 );

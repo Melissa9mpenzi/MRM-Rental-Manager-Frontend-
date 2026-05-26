@@ -1,0 +1,287 @@
+/* Government auth — two-column split layout */
+
+.gov-auth-split {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: 1fr;
+  background: #0b0e14;
+  color: #e2e8f0;
+}
+
+@media (min-width: 960px) {
+  .gov-auth-split {
+    grid-template-columns: minmax(380px, 1fr) minmax(420px, 1.05fr);
+  }
+}
+
+/* ── Left: branding ── */
+.gov-auth-split__brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(165deg, #0d1219 0%, #0b0e14 45%, #071a14 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  overflow: hidden;
+}
+
+.gov-auth-split__brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 20% 0%, rgba(0, 200, 150, 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+.gov-auth-split__brand-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  max-width: 400px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.gov-auth-split__crest-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.25rem 0;
+}
+
+.gov-auth-split__crest {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(168px, 42vw);
+  max-height: 180px;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
+}
+
+.gov-auth-split__republic {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.gov-auth-split__portal {
+  margin-top: 0.35rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.gov-auth-split__product {
+  margin-top: 0.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #00c896;
+  line-height: 1.15;
+}
+
+.gov-auth-split__tagline {
+  margin-top: 0.65rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.65);
+  max-width: 320px;
+}
+
+.gov-auth-split__warning {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: rgba(253, 230, 138, 0.92);
+}
+
+.gov-auth-split__brand-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.55);
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+/* Agency logos — left panel full width */
+.gov-auth-split__brand .gov-agency-logos {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.gov-auth-split__brand .gov-agency-logos__item {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Right: form ── */
+.gov-auth-split__form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: #0b0e14;
+  background-image: radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 200, 150, 0.04), transparent);
+}
+
+.gov-auth-split__form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+.gov-auth-form-card {
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.75rem;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+.gov-auth-form-card h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.gov-auth-form-card .gov-auth-form-sub {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.gov-auth-form-card .gov-auth-submit {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+
+.gov-auth-form-card .gov-auth-submit:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  transform: translateY(-1px);
+}
+
+.gov-auth-form-card .gov-auth-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.gov-auth-form-footer {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.6);
+}
+
+.gov-auth-form-footer a {
+  font-weight: 600;
+  color: #34d399;
+}
+
+.gov-auth-form-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile: stack — form first for usability, brand below */
+@media (max-width: 959px) {
+  .gov-auth-split {
+    grid-template-rows: auto 1fr;
+  }
+
+  .gov-auth-split__brand {
+    order: 2;
+    padding: 2rem 1.25rem 2.5rem;
+  }
+
+  .gov-auth-split__form {
+    order: 1;
+    min-height: auto;
+    padding: 2rem 1.25rem 1rem;
+  }
+
+  .gov-auth-split__brand-inner {
+    align-items: center;
+    text-align: center;
+  }
+
+  .gov-auth-split__brand .gov-agency-logos {
+    justify-content: center;
+  }
+
+  .gov-auth-split__warning {
+    text-align: left;
+  }
+
+  .gov-auth-split__brand-footer {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+/* Shared card (accept-invite, 2FA) */
+.gov-auth-card {
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Agency strip (shared) */
+.gov-agency-logos {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.gov-agency-logos__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.55);
+  min-width: 5rem;
+}
+
+.gov-agency-logos__badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--agency-color, #00c896);
+}
+
+.gov-agency-logos__sub {
+  font-size: 0.58rem;
+  color: rgba(148, 163, 184, 0.65);
+  margin-top: 0.1rem;
+}

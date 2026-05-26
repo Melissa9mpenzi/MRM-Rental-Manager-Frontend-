@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Upload, IdCard, Camera, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { usersApi } from "../../api/usersApi";
-import { postLoginDestination } from "../../lib/onboardingAuth";
+import { defaultDashboardPath } from "../../config/access";
+import { hasPassedKycOnboarding, mustCompleteKycBeforeApp } from "../../lib/onboardingAuth";
 import { validateKycFile, KYC_MAX_BYTES } from "../../lib/kycClientValidators";
+import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
 
 function DropZone({ label, icon: Icon, fileName, error, onFile }) {
   return (
@@ -13,7 +15,7 @@ function DropZone({ label, icon: Icon, fileName, error, onFile }) {
       <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.15] bg-white/[0.04] px-2 py-4 transition hover:border-brand-teal/40 hover:bg-white/[0.06] sm:py-5">
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/*"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
@@ -23,7 +25,7 @@ function DropZone({ label, icon: Icon, fileName, error, onFile }) {
         />
         <Icon className="mb-1 h-6 w-6 text-brand-teal/80 sm:h-7 sm:w-7" />
         <span className="text-center text-[11px] font-bold leading-tight text-white sm:text-xs">{label}</span>
-        <span className="mt-0.5 text-center text-[9px] text-white/45">JPEG / PNG / WebP · max {Math.round(KYC_MAX_BYTES / (1024 * 1024))} MB</span>
+        <span className="mt-0.5 text-center text-[9px] text-white/45">Any photo · max {Math.round(KYC_MAX_BYTES / (1024 * 1024))} MB</span>
         {fileName && (
           <span className="mt-1 max-w-full truncate px-1 text-[9px] font-semibold text-brand-teal" title={fileName}>
             {fileName}
@@ -45,18 +47,32 @@ export default function KycPage() {
   const [names, setNames] = useState({ id_front: "", id_back: "", selfie: "" });
   const [slotErrors, setSlotErrors] = useState({ id_front: "", id_back: "", selfie: "" });
 
-  const needsDocs = user?.role === "landlord" || user?.role === "staff";
+  const needsDocs =
+    user?.role === "landlord" || user?.role === "staff" || user?.role === "agent";
 
-  const setFile = (kind, file) => {
-    setFiles((f) => ({ ...f, [kind]: file }));
-    setNames((n) => ({ ...n, [kind]: file?.name || "" }));
-    setSlotErrors((e) => ({ ...e, [kind]: "" }));
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login", { replace: true, state: { from: { pathname: "/auth/kyc" } } });
+      return;
+    }
+    if (user && !mustCompleteKycBeforeApp(user) && hasPassedKycOnboarding(user)) {
+      navigate(defaultDashboardPath(user.role), { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const setFile = async (kind, file) => {
+    if (!file) return;
+    const err = await validateKycFile(file, kind);
+    setFiles((f) => ({ ...f, [kind]: err ? null : file }));
+    setNames((n) => ({ ...n, [kind]: err ? "" : file.name }));
+    setSlotErrors((e) => ({ ...e, [kind]: err || "" }));
+    if (err) toast.error(err);
   };
 
   const submit = async () => {
     if (!isAuthenticated) {
-      toast.error("Sign in first, then complete KYC from your account.");
-      navigate("/login");
+      toast.error("Sign in first, then complete KYC.");
+      navigate("/login", { state: { from: { pathname: "/auth/kyc" } } });
       return;
     }
 
@@ -79,17 +95,30 @@ export default function KycPage() {
 
     setBusy(true);
     try {
+      let u;
       if (needsDocs) {
         const fd = new FormData();
         fd.append("id_front", files.id_front);
         fd.append("id_back", files.id_back);
         fd.append("selfie", files.selfie);
-        await usersApi.uploadKycDocuments(fd);
+        u = await usersApi.uploadKycDocuments(fd);
+      } else {
+        u = await usersApi.kycSubmit();
       }
-      const u = await usersApi.kycSubmit();
-      updateUser(u);
-      toast.success(needsDocs ? "Documents saved and submitted for review." : "KYC step recorded.");
-      navigate(postLoginDestination(u));
+      let fresh = u;
+      try {
+        fresh = await usersApi.getMe();
+      } catch {
+        /* use upload response */
+      }
+      if (fresh) updateUser(fresh);
+      toast.success(
+        needsDocs
+          ? "Submitted for verification. Your dashboard is ready while NIRA reviews your documents."
+          : "KYC step recorded.",
+      );
+      const home = defaultDashboardPath(fresh?.role || user?.role);
+      navigate(home, { replace: true });
     } catch (err) {
       const d = err.response?.data?.detail;
       const msg = typeof d === "string" ? d : Array.isArray(d) ? d.map((x) => x.msg || x).join(" ") : err.message;
@@ -105,9 +134,19 @@ export default function KycPage() {
         <h1 className="text-lg font-bold text-white sm:text-xl">KYC verification</h1>
         <p className="mt-0.5 text-[11px] text-white/55 sm:text-xs">
           {needsDocs
-            ? "Upload a real national ID (both sides) and a portrait selfie. Random photos, tiny icons, or non-image files are rejected automatically — admins still review everything."
+            ? "Upload your national ID (both sides, landscape) and a portrait selfie. The system checks file type, size, and framing — wrong slots (e.g. selfie as ID) are rejected before submit."
             : "If you reached this step as a tenant, you can continue. Landlords and agents must upload ID and selfie."}
         </p>
+        {needsDocs && (
+          <p className="mx-auto mt-2 max-w-md text-[10px] text-cyan-200/80">
+            On submit, a privacy-safe hash manifest (not raw photos) is anchored on Walrus for NIRA review.
+          </p>
+        )}
+        {user?.kyc_walrus_blob_id ? (
+          <div className="mt-2 flex justify-center">
+            <WalrusProofBadge blobId={user.kyc_walrus_blob_id} label="KYC manifest" />
+          </div>
+        ) : null}
       </div>
 
       {needsDocs && (
@@ -127,21 +166,21 @@ export default function KycPage() {
             icon={IdCard}
             fileName={names.id_front}
             error={slotErrors.id_front}
-            onFile={(f) => setFile("id_front", f)}
+            onFile={(f) => void setFile("id_front", f)}
           />
           <DropZone
             label="ID back"
             icon={IdCard}
             fileName={names.id_back}
             error={slotErrors.id_back}
-            onFile={(f) => setFile("id_back", f)}
+            onFile={(f) => void setFile("id_back", f)}
           />
           <DropZone
             label="Selfie"
             icon={Camera}
             fileName={names.selfie}
             error={slotErrors.selfie}
-            onFile={(f) => setFile("selfie", f)}
+            onFile={(f) => void setFile("selfie", f)}
           />
         </div>
       )}
@@ -164,11 +203,20 @@ export default function KycPage() {
         {busy ? "Submitting…" : needsDocs ? "Upload & submit for review" : "Continue"}
       </button>
 
-      <p className="mt-3 text-center text-[11px] text-white/50 sm:text-xs">
-        <Link to="/login" className="font-semibold text-brand-teal hover:underline">
-          Skip for now
-        </Link>
-      </p>
+      {!needsDocs ? (
+        <p className="mt-3 text-center text-[11px] text-white/50 sm:text-xs">
+          <Link to="/login" className="font-semibold text-brand-teal hover:underline">
+            Back to sign in
+          </Link>
+        </p>
+      ) : (
+        <p className="mt-3 text-center text-[11px] text-white/45 sm:text-xs">
+          Landlords and agents must complete KYC before using the workspace. Need help?{" "}
+          <a href="mailto:support@rentdirect.ug" className="font-semibold text-brand-teal hover:underline">
+            Contact support
+          </a>
+        </p>
+      )}
     </div>
   );
 }

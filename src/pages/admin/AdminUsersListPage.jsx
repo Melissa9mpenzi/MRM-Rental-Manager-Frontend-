@@ -1,30 +1,101 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Search, Shield } from "lucide-react";
+import { Users, Search, Shield, UserX, UserCheck, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import useAuthStore from "../../store/authStore";
 import { workspaceApi } from "../../api/workspaceApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import { ConfirmDialog } from "../../components/ui/index.jsx";
 
 const ROLE_OPTIONS = [
   { value: "", label: "All roles" },
   { value: "tenant", label: "Tenant" },
   { value: "landlord", label: "Landlord" },
   { value: "staff", label: "Staff" },
-  { value: "admin", label: "Admin" },
+  { value: "system_admin", label: "System administrator" },
+  { value: "gov_nira", label: "NIRA officer" },
+  { value: "gov_kcca", label: "KCCA officer" },
+  { value: "gov_ura", label: "URA officer" },
 ];
 
-export default function AdminUsersListPage() {
+export default function AdminUsersListPage({ embedded = false }) {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [page, setPage] = useState(0);
+  const [disconnectTarget, setDisconnectTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const limit = 25;
   const qc = useQueryClient();
+  const me = useAuthStore((s) => s.user);
 
   const kycMutation = useMutation({
     mutationFn: ({ id, action }) => workspaceApi.adminKycReview(id, { action }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+      toast.success("KYC status updated");
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.detail?.message || err.response?.data?.detail || "KYC update failed");
     },
   });
+
+  const accountMutation = useMutation({
+    mutationFn: ({ id, action }) => workspaceApi.adminUserAccount(id, { action }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+      toast.success(data?.message || "Account updated");
+    },
+    onError: (err) => {
+      const d = err.response?.data?.detail;
+      toast.error(typeof d === "string" ? d : d?.message || "Could not update account");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => workspaceApi.adminDeleteUser(id),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+      qc.invalidateQueries({ queryKey: ["workspace-admin-summary"] });
+      toast.success(data?.message || "User deleted");
+    },
+    onError: (err) => {
+      const d = err.response?.data?.detail;
+      toast.error(typeof d === "string" ? d : d?.message || "Could not delete user");
+    },
+  });
+
+  function handleDisconnect(u) {
+    if (u.id === me?.id) {
+      toast.error("You cannot disconnect your own account.");
+      return;
+    }
+    setDisconnectTarget(u);
+  }
+
+  function confirmDisconnect() {
+    if (!disconnectTarget) return;
+    accountMutation.mutate(
+      { id: disconnectTarget.id, action: "disconnect" },
+      { onSettled: () => setDisconnectTarget(null) }
+    );
+  }
+
+  function handleReconnect(u) {
+    accountMutation.mutate({ id: u.id, action: "reconnect" });
+  }
+
+  function handleDelete(u) {
+    if (u.id === me?.id) {
+      toast.error("You cannot delete your own account.");
+      return;
+    }
+    setDeleteTarget(u);
+  }
+
+  function confirmDelete() {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
+  }
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["workspace-admin-users", search, role, page],
@@ -40,13 +111,31 @@ export default function AdminUsersListPage() {
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  return (
-    <AppPageScaffold
-      variant="command"
-      icon={Users}
-      title="Users"
-      description={`${total} account${total === 1 ? "" : "s"} · search and filter by role`}
-    >
+  const disconnectLabel = disconnectTarget?.full_name || disconnectTarget?.email || "this user";
+  const deleteLabel = deleteTarget?.full_name || deleteTarget?.email || "this user";
+
+  const body = (
+    <>
+      <ConfirmDialog
+        open={Boolean(disconnectTarget)}
+        title="Disconnect account?"
+        message={`${disconnectLabel} will be signed out and cannot log in until you reconnect the account.`}
+        confirmLabel="Disconnect"
+        variant="danger"
+        onConfirm={confirmDisconnect}
+        onCancel={() => setDisconnectTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete account permanently?"
+        message={`${deleteLabel} will be removed from the platform along with their login access. This cannot be undone. Linked data may be cleared or unlinked.`}
+        confirmLabel="Delete permanently"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="relative max-w-md flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
@@ -61,7 +150,7 @@ export default function AdminUsersListPage() {
           />
         </div>
         <select
-          className="rounded-xl border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-sm text-white"
+          className="select-field !w-auto min-w-[10rem]"
           value={role}
           onChange={(e) => {
             setRole(e.target.value);
@@ -115,35 +204,93 @@ export default function AdminUsersListPage() {
                       {u.is_active ? (
                         <span className="text-emerald-300">Active</span>
                       ) : (
-                        <span className="text-white/45">Inactive</span>
+                        <span className="text-red-300/90" title={u.gov_suspended ? "Suspended / disconnected" : ""}>
+                          Disconnected
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-3">{u.email_verified ? "Yes" : "No"}</td>
                     <td className="px-4 py-3 text-xs capitalize text-white/70">{u.kyc_review_status || "—"}</td>
                     <td className="px-4 py-3 text-xs">{u.trusted_for_commerce ? "Yes" : "No"}</td>
-                    <td className="px-4 py-3">
-                      {(u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending" ? (
-                        <div className="flex flex-wrap gap-1">
+                    <td className="px-4 py-3 align-top">
+                      <div className="flex min-w-[10rem] flex-col gap-1.5">
+                        {(u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending" && (
+                          <div className="flex flex-wrap gap-1">
+                            <button
+                              type="button"
+                              disabled={kycMutation.isPending || accountMutation.isPending}
+                              onClick={() => kycMutation.mutate({ id: u.id, action: "approve" })}
+                              className="rounded-lg bg-emerald-600/90 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-500"
+                            >
+                              Approve KYC
+                            </button>
+                            <button
+                              type="button"
+                              disabled={kycMutation.isPending || accountMutation.isPending}
+                              onClick={() => kycMutation.mutate({ id: u.id, action: "reject" })}
+                              className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/10"
+                            >
+                              Reject KYC
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {u.is_active ? (
+                            <button
+                              type="button"
+                              disabled={
+                                accountMutation.isPending || deleteMutation.isPending || u.id === me?.id
+                              }
+                              onClick={() => handleDisconnect(u)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-red-500/35 bg-red-500/10 px-2 py-1 text-[11px] font-bold text-red-200 hover:bg-red-500/20 disabled:opacity-40"
+                              title={u.id === me?.id ? "Cannot disconnect yourself" : "Revoke access and sign-out sessions"}
+                            >
+                              <UserX size={12} />
+                              Disconnect
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={accountMutation.isPending || deleteMutation.isPending}
+                              onClick={() => handleReconnect(u)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-2 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-500/20"
+                            >
+                              <UserCheck size={12} />
+                              Reconnect
+                            </button>
+                          )}
                           <button
                             type="button"
-                            disabled={kycMutation.isPending}
-                            onClick={() => kycMutation.mutate({ id: u.id, action: "approve" })}
-                            className="rounded-lg bg-emerald-600/90 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-500"
+                            disabled={
+                              deleteMutation.isPending ||
+                              accountMutation.isPending ||
+                              kycMutation.isPending ||
+                              u.id === me?.id
+                            }
+                            onClick={() => handleDelete(u)}
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-red-600/45 bg-red-950/40 text-red-200 hover:bg-red-600/25 disabled:opacity-40"
+                            aria-label={
+                              u.id === me?.id
+                                ? "Cannot delete your own account"
+                                : `Permanently delete ${u.full_name || u.email}`
+                            }
+                            title={
+                              u.id === me?.id
+                                ? "Cannot delete yourself"
+                                : "Permanently remove this account"
+                            }
                           >
-                            Approve
-                          </button>
-                          <button
-                            type="button"
-                            disabled={kycMutation.isPending}
-                            onClick={() => kycMutation.mutate({ id: u.id, action: "reject" })}
-                            className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/10"
-                          >
-                            Reject
+                            <Trash2 size={14} />
                           </button>
                         </div>
-                      ) : (
-                        <span className="text-white/35">—</span>
-                      )}
+                        {!((u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending") &&
+                          u.is_active &&
+                          u.id !== me?.id && (
+                            <span className="text-[10px] text-white/30">
+                              Disconnect blocks login · Delete removes the account
+                            </span>
+                          )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-white/50">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
@@ -178,6 +325,31 @@ export default function AdminUsersListPage() {
           )}
         </div>
       )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-bold text-white">Users & Roles</h2>
+          <p className="text-sm text-white/50">
+            {total} account{total === 1 ? "" : "s"} · search, filter, and KYC moderation
+          </p>
+        </div>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <AppPageScaffold
+      variant="command"
+      icon={Users}
+      title="Users"
+      description={`${total} account${total === 1 ? "" : "s"} · search and filter by role`}
+    >
+      {body}
     </AppPageScaffold>
   );
 }

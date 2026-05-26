@@ -8,23 +8,32 @@ import { Input } from "../../components/ui/Input";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import { usersApi } from "../../api/usersApi";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
+import { profilePathForRole } from "../../config/access";
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
   const updateUser = useAuthStore((s) => s.updateUser);
   const [tab, setTab] = useState("profile");
+  const profilePath = profilePathForRole(user?.role);
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  const [nationalId, setNationalId] = useState(user?.national_id_number || "");
   const [curPw, setCurPw] = useState("");
   const [newPw, setNewPw] = useState("");
 
   useEffect(() => {
     setFullName(user?.full_name || "");
     setPhone(user?.phone || "");
-  }, [user?.full_name, user?.phone]);
+    setNationalId(user?.national_id_number || "");
+  }, [user?.full_name, user?.phone, user?.national_id_number]);
 
   const profileMut = useMutation({
-    mutationFn: () => usersApi.putMe({ full_name: fullName.trim(), phone: phone.trim() || undefined }),
+    mutationFn: () =>
+      usersApi.putMe({
+        full_name: fullName.trim(),
+        phone: phone.trim() || undefined,
+        national_id_number: nationalId.trim() || undefined,
+      }),
     onSuccess: (u) => {
       updateUser(u);
       toast.success("Profile saved.");
@@ -90,8 +99,12 @@ export default function SettingsPage() {
             <div className="space-y-5">
               <h2 className="text-lg font-bold text-white">Profile information</h2>
               <p className="text-xs text-white/45">
-                Role <span className="font-bold text-brand-teal">{user?.role || "—"}</span> comes from your JWT. Use{" "}
-                <span className="font-mono text-[10px]">PUT /users/me</span> for name and phone.
+                Role <span className="font-bold text-brand-teal">{user?.role || "—"}</span>.{" "}
+                {profilePath ? (
+                  <Link to={profilePath} className="font-bold text-[#00C896] hover:underline">
+                    Open full profile editor
+                  </Link>
+                ) : null}
               </p>
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-dashed border-white/20 bg-white/[0.04] text-xs font-semibold text-white/45">
@@ -104,7 +117,12 @@ export default function SettingsPage() {
               <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
               <Input label="Email" value={user?.email || ""} readOnly className="opacity-80" />
               <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+256 …" />
-              <Input label="Date of birth" type="date" disabled className="opacity-50" />
+              <Input
+                label="National ID"
+                value={nationalId}
+                onChange={(e) => setNationalId(e.target.value)}
+                placeholder="CM…"
+              />
               <button
                 type="button"
                 disabled={profileMut.isPending}

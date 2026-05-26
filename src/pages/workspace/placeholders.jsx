@@ -19,32 +19,6 @@ const hint = (
   </p>
 );
 
-export const LandlordApplicantsPage = make(
-  "Applicants",
-  "Review rental applications, invite tenants, and track screening status for your listings.",
-  hint,
-);
-
-export const LandlordContractsPage = make(
-  "Contracts",
-  "Manage lease templates, e-signatures, and blockchain-verified agreements across your portfolio.",
-  hint,
-);
-
-export const LandlordAnalyticsPage = make(
-  "Analytics",
-  "Occupancy trends, rent collection velocity, and cohort views — dashboard charts will connect here.",
-  <div className="grid gap-3 sm:grid-cols-3">
-    {["Occupancy", "Collection rate", "Avg. tenancy"].map((label) => (
-      <div key={label} className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-center">
-        <div className="text-xs font-bold uppercase tracking-wide text-white/40">{label}</div>
-        <div className="mt-2 text-2xl font-extrabold text-[#00C896]">—</div>
-        <div className="mt-1 text-[10px] text-white/35">Placeholder</div>
-      </div>
-    ))}
-  </div>,
-);
-
 export const LandlordReportsHubPage = make(
   "Reports",
   "Financial and compliance exports. Arrears is live today; add more report types as the backend grows.",
@@ -64,52 +38,6 @@ export const LandlordReportsHubPage = make(
     <span className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white/45">Rent roll (soon)</span>
     <span className="rounded-xl border border-white/10 px-4 py-3 text-sm text-white/45">Tax summary (soon)</span>
   </div>,
-);
-
-export const LandlordWalletPage = make(
-  "Wallet",
-  "Payouts, MoMo / bank rails, and escrow balances for your landlord account.",
-  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5">
-    <div className="text-xs font-bold uppercase tracking-wide text-white/40">Available</div>
-    <div className="mt-1 text-3xl font-extrabold text-white">—</div>
-    <p className="mt-2 text-xs text-white/45">Connect your payout API to show balances here.</p>
-  </div>,
-);
-
-export const AgentLeadsPage = make(
-  "Leads",
-  "Capture inbound enquiries, assign stages, and convert prospects into viewings.",
-  hint,
-);
-
-export const AgentClientsPage = make(
-  "Clients",
-  "CRM-style roster of buyers and renters you represent, with notes and follow-up tasks.",
-  hint,
-);
-
-export const AgentSchedulesPage = make(
-  "Schedules",
-  "Calendar of viewings, callbacks, and handovers synced with listings.",
-  hint,
-);
-
-export const AgentDealsPage = make(
-  "Deals",
-  "Pipeline of offers, negotiations, and closed commissions.",
-  hint,
-);
-
-export const AgentCommissionsPage = make(
-  "Commissions",
-  "Accrued fees, paid batches, and payout holds — mirrors finance ops in the mockup.",
-  hint,
-);
-
-export const AgentAnalyticsPage = make(
-  "Analytics",
-  "Conversion funnels, time-on-market, and personal performance KPIs.",
-  hint,
 );
 
 export const AdminListingsPage = make(

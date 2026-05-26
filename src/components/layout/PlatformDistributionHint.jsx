@@ -17,15 +17,15 @@ const HINTS = {
     title: "Web-first for agents",
     body: "Pipeline, leads, and commission views are built for a wide screen. Mobile supports viewings and quick client replies in the field.",
   },
-  admin: {
+  systemAdmin: {
     Icon: Monitor,
-    title: "Web only for administrators",
-    body: "Admin controls are not shipped on mobile apps — use this web dashboard in a desktop-class browser for audits, user management, and platform safety.",
+    title: "System administrator",
+    body: "You operate the full RentDirect platform from the web console. Government officers use a separate secure portal.",
   },
 };
 
 function variantForRole(role) {
-  if (role === API_ROLES.admin) return "admin";
+  if (role === API_ROLES.system_admin) return "systemAdmin";
   if (role === API_ROLES.tenant) return "tenant";
   if (role === API_ROLES.staff || role === "agent") return "agent";
   if (role === API_ROLES.landlord) return "landlord";

@@ -8,8 +8,11 @@ import toast from "react-hot-toast";
 import { maintenanceApi } from "../../api/maintenanceApi";
 import { propertiesApi } from "../../api/propertiesApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import { EmptyPanel, ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { platformApiOrigin } from "../../api/config";
+
+const BASE_URL = platformApiOrigin();
 
 const STATUS_CONFIG = {
   open:        { label: "Open",        color: "bg-red-500/15 text-red-200 ring-1 ring-red-500/25",     icon: AlertTriangle },
@@ -234,17 +237,19 @@ export default function MaintenancePage() {
   const [createOpen,   setCreateOpen]   = useState(false);
   const [updateTarget, setUpdateTarget] = useState(null);
 
-  const { data: requests = [], isLoading, isError } = useQuery({
+  const { data: requests = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["maintenance", filterStatus],
     queryFn: () => maintenanceApi.list(filterStatus ? { status: filterStatus } : {}),
     refetchInterval: 30000,
   });
 
+  const list = Array.isArray(requests) ? requests : [];
+
   const counts = {
-    all:         requests.length,
-    open:        requests.filter((r) => r.status === "open").length,
-    in_progress: requests.filter((r) => r.status === "in_progress").length,
-    resolved:    requests.filter((r) => r.status === "resolved").length,
+    all:         list.length,
+    open:        list.filter((r) => r.status === "open").length,
+    in_progress: list.filter((r) => r.status === "in_progress").length,
+    resolved:    list.filter((r) => r.status === "resolved").length,
   };
 
   return (
@@ -298,26 +303,33 @@ export default function MaintenancePage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => <div key={i} className="card h-40 animate-pulse bg-brand-tealLt/30" />)}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <LoadingPanel key={i} className="h-40" />
+          ))}
         </div>
       ) : isError ? (
-        <div className="card py-14 text-center">
-          <p className="font-bold text-brand-dark">Could not load maintenance requests</p>
-          <p className="mt-1 text-sm text-brand-mid">Check the API and try again.</p>
-        </div>
-      ) : requests.length === 0 ? (
-        <div className="card text-center py-16 space-y-3">
-          <div className="w-14 h-14 rounded-full bg-brand-tealLt flex items-center justify-center mx-auto">
-            <Wrench size={24} className="text-brand-teal" />
-          </div>
-          <div className="font-bold text-brand-dark">No maintenance requests</div>
-          <p className="text-sm text-brand-mid">{filterStatus ? "No requests with this status." : "Log your first maintenance issue to get started."}</p>
-          {!filterStatus && <button className="btn-primary mx-auto" onClick={() => setCreateOpen(true)}><Plus size={16} /> New Request</button>}
-        </div>
+        <ErrorPanel
+          title="Could not load maintenance requests"
+          description="Check the API and try again."
+          onRetry={() => refetch()}
+        />
+      ) : list.length === 0 ? (
+        <EmptyPanel
+          icon={Wrench}
+          title="No maintenance requests"
+          description={filterStatus ? "No requests with this status." : "Log your first maintenance issue to get started."}
+          action={
+            !filterStatus ? (
+              <button type="button" className="btn-primary inline-flex" onClick={() => setCreateOpen(true)}>
+                <Plus size={16} /> New Request
+              </button>
+            ) : null
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {requests.map((req) => <RequestCard key={req.id} req={req} onUpdate={setUpdateTarget} />)}
+          {list.map((req) => <RequestCard key={req.id} req={req} onUpdate={setUpdateTarget} />)}
         </div>
       )}
 

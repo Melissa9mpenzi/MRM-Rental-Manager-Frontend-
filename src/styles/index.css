@@ -96,15 +96,64 @@
   }
 
   .card {
-    @apply rounded-2xl border border-rd-stroke shadow-card p-5
-           bg-rd-surface/90 backdrop-blur-xl;
+    @apply rounded-2xl border border-white/[0.1] shadow-card p-5
+           bg-rd-elevated text-white/90 backdrop-blur-xl;
   }
   .card-hover {
     @apply card hover:border-brand-teal/35 hover:shadow-glow transition-all duration-200 cursor-pointer;
   }
   .card-glass {
     @apply rounded-3xl border border-white/[0.12] shadow-modal p-6
-           bg-rd-elevated/95 backdrop-blur-2xl;
+           bg-rd-elevated backdrop-blur-2xl;
+  }
+
+  /* Loading / error / empty — never use a light “card” slab */
+  .state-panel {
+    @apply flex flex-col items-center justify-center rounded-2xl border px-6 py-14 text-center;
+  }
+  .state-panel--loading {
+    @apply border-white/[0.08] bg-white/[0.03] p-5;
+  }
+  .state-panel--error {
+    @apply border-red-500/25 bg-red-500/[0.06];
+  }
+  .state-panel--empty {
+    @apply border-dashed border-white/[0.12] bg-white/[0.02];
+  }
+  .state-panel__icon {
+    @apply mb-3 h-10 w-10 text-white/30;
+  }
+  .state-panel__icon--error {
+    @apply text-red-400/90;
+  }
+  .state-panel__title {
+    @apply text-base font-bold text-white;
+  }
+  .state-panel__desc {
+    @apply mt-1.5 max-w-md text-sm leading-relaxed text-white/55;
+  }
+  .state-panel__shimmer {
+    @apply h-full min-h-[6rem] w-full animate-pulse rounded-xl bg-white/[0.06];
+  }
+
+  /* Data cards & tables inside authenticated shell */
+  [data-app-role] .card .text-brand-dark {
+    @apply text-white;
+  }
+  [data-app-role] .card .text-brand-mid {
+    @apply text-white/55;
+  }
+  [data-app-role] .card .bg-brand-bg {
+    @apply bg-white/[0.06];
+  }
+  [data-app-role] .card thead {
+    @apply text-white/50;
+  }
+  [data-app-role] .card tbody tr {
+    @apply border-white/[0.06];
+  }
+  [data-app-role] .card tbody tr:hover {
+    @apply bg-white/[0.04];
   }
 
   .input-field {
@@ -122,20 +171,58 @@
   }
 
   /**
-   * Native <select> on dark auth cards: closed state stays on-brand; option list is often OS-white,
-   * so options need dark text (many browsers honor `option { color }`).
+   * Dark-theme native selects — consistent closed state + dropdown list (color-scheme: dark).
+   * Use on auth, government portal, super admin, and any dark form.
    */
+  .select-field,
   .select-auth {
-    @apply w-full rounded-xl border border-white/[0.18] bg-white/[0.1] px-3.5 py-2.5 text-sm font-medium
-           text-white shadow-inner
+    @apply w-full rounded-xl border border-white/[0.14] px-3.5 py-2.5 text-sm font-medium text-white
+           shadow-inner
            focus:outline-none focus:ring-2 focus:ring-brand-teal/40 focus:border-brand-teal/55
            transition-all duration-150;
     color-scheme: dark;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: rgba(15, 20, 28, 0.95);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.35rem;
+    cursor: pointer;
   }
+
+  .select-field:hover,
+  .select-auth:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(17, 24, 39, 0.98);
+  }
+
+  .select-field option,
+  .select-field optgroup,
   .select-auth option,
-  .select-auth optgroup {
-    color: #0a1210;
-    background-color: #f0f7f4;
+  .select-auth optgroup,
+  select.input-field option,
+  select.input-field optgroup {
+    background-color: #111827;
+    color: #e2e8f0;
+  }
+
+  /* App-wide: dark dropdown list where the OS/browser supports color-scheme */
+  select {
+    color-scheme: dark;
+  }
+
+  select.input-field {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: rgba(255, 255, 255, 0.06);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.9rem;
+    padding-right: 2.1rem;
+    cursor: pointer;
   }
 
   .badge-paid {
@@ -217,4 +304,57 @@
 }
 .animate-slide-up {
   animation: slide-up 0.32s ease forwards;
+}
+
+/* Landlord add-property wizard (full-page) */
+.add-property-page-card {
+  @apply rounded-3xl border border-white/[0.12] bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl sm:p-8;
+}
+
+.add-property-form--page .input-label {
+  @apply text-white/55;
+}
+
+.add-property-form .input-field {
+  @apply border-white/[0.12] bg-white/[0.06] text-white placeholder:text-white/35;
+}
+
+.add-property-form__header {
+  @apply mb-6 flex items-start gap-4;
+}
+
+.add-property-form__icon {
+  @apply flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-[#00C896]/25 bg-[#00C896]/12 text-[#00C896];
+}
+
+.add-property-form__title {
+  @apply text-xl font-extrabold tracking-tight text-white sm:text-2xl;
+}
+
+.add-property-form__subtitle {
+  @apply mt-1 text-sm text-white/50;
+}
+
+.add-property-form__steps {
+  @apply mb-6 flex items-center gap-2;
+}
+
+.add-property-form__step {
+  @apply flex flex-1 items-center gap-2 text-xs font-semibold text-white/35;
+}
+
+.add-property-form__step--active {
+  @apply text-[#00C896];
+}
+
+.add-property-form__step-num {
+  @apply flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] text-[11px] font-bold;
+}
+
+.add-property-form__step--active .add-property-form__step-num {
+  @apply border-[#00C896]/40 bg-[#00C896]/15 text-[#00C896];
+}
+
+.add-property-form__step-line {
+  @apply h-px w-8 flex-shrink-0 bg-white/10 sm:w-12;
 }
