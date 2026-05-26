@@ -53,6 +53,10 @@ export async function runTenantCheckoutUi({
     toast.error("Server is in mock mode — configure MTN MoMo or Pesapal for real payments.");
     throw new Error("Mock payments enabled");
   }
+  if (!gw.live_payments) {
+    toast.error("Online payments are not available on this server. Contact the platform operator.");
+    throw new Error("Payments not live");
+  }
 
   const supports = gw.supports || {};
   if (methodId === "airtel" && !supports.airtel) {

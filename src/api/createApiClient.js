@@ -23,6 +23,7 @@ export function createApiClient({ baseUrl, loginPath = "/login", timeout = 15_00
       url.includes("/auth/login") ||
       url.includes("/auth/register") ||
       url.includes("/auth/firebase") ||
+      url.includes("/auth/privy") ||
       url.includes("/auth/forgot-password") ||
       url.includes("/auth/reset-password") ||
       url.includes("/auth/verify-email") ||

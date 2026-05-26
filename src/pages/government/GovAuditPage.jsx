@@ -52,8 +52,10 @@ export default function GovAuditPage() {
         {exportWalrus.data?.walrus_blob_id ? (
           <WalrusProofBadge
             blobId={exportWalrus.data.walrus_blob_id}
+            contentHash={exportWalrus.data.content_hash}
             url={exportWalrus.data.walrus_url}
-            demoMode={exportWalrus.data.walrus_demo_mode}
+            walrusLive={exportWalrus.data.walrus_live}
+            storageType={exportWalrus.data.storage_type}
             label="Bundle"
           />
         ) : null}
@@ -98,8 +100,10 @@ export default function GovAuditPage() {
                 <td>
                   <WalrusProofBadge
                     blobId={row.walrus_blob_id}
+                    contentHash={row.content_hash}
                     url={row.walrus_url}
-                    demoMode={row.walrus_demo_mode}
+                    walrusLive={row.walrus_live}
+                    storageType={row.storage_type}
                   />
                 </td>
                 <td className="font-mono text-xs text-white/50">{row.ip_address || "—"}</td>

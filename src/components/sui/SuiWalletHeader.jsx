@@ -1,8 +1,8 @@
-import { ConnectButton } from "@mysten/dapp-kit";
 import { defaultNetwork } from "../../providers/SuiProvider";
 import { SUI_NETWORKS } from "../../config/suiPortalNav";
+import PlatformSuiWallet from "../blockchain/PlatformSuiWallet";
 
-/** Wallet + network chip for the main app top bar (Sui routes only). */
+/** Platform wallet chip for Sui routes — address comes with your account. */
 export default function SuiWalletHeader() {
   const netLabel = SUI_NETWORKS.find((n) => n.id === defaultNetwork)?.label || `Sui ${defaultNetwork}`;
 
@@ -12,9 +12,7 @@ export default function SuiWalletHeader() {
         <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
         {netLabel}
       </span>
-      <div className="sui-connect-btn [&_button]:!rounded-xl [&_button]:!text-xs [&_button]:!font-bold">
-        <ConnectButton />
-      </div>
+      <PlatformSuiWallet compact />
     </div>
   );
 }

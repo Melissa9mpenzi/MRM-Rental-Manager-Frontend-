@@ -5,8 +5,36 @@ import { blockchainApi } from "../api/blockchainApi";
 import { apiErrorMessage } from "./apiError";
 
 /**
- * Sui wallet checkout — hybrid with MoMo/Pesapal (does not replace fiat).
- * Requires connected wallet via @mysten/dapp-kit.
+ * Pay from RentDirect platform wallet (provisioned with your email — no extension).
+ */
+export async function runPlatformSuiCheckout({ invoiceId, onCompleted }) {
+  const chain = await blockchainApi.status();
+  if (!chain?.enabled) {
+    toast.error("Sui payments not configured on the API (SUI_TREASURY_ADDRESS).");
+    throw new Error("Sui not configured");
+  }
+
+  await blockchainApi.ensureWallet();
+
+  const checkout = await paymentsApi.initiateCheckout({
+    invoice_id: invoiceId,
+    payment_method: "sui",
+  });
+  const ref = checkout?.reference;
+  if (!ref) {
+    toast.error("Could not start Sui checkout.");
+    throw new Error("Missing checkout reference");
+  }
+
+  toast("Paying from your RentDirect wallet…", { duration: 5000 });
+  await blockchainApi.payPlatformSui(ref);
+  toast.success("Sui payment sent — on-chain receipt recorded.");
+  onCompleted?.(checkout);
+  return checkout;
+}
+
+/**
+ * Optional: external wallet (Slush, Suiet) via @mysten/dapp-kit.
  */
 export async function runSuiCheckout({
   invoiceId,

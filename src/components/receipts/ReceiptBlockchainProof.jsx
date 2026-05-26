@@ -31,7 +31,7 @@ export default function ReceiptBlockchainProof({ receipt }) {
       {verifyUrl && (
         <div className="receipt-proof-panel__qr">
           <img src={qrImageUrl(verifyUrl, 88)} alt="" width={88} height={88} />
-          <p className="text-[10px] text-white/45 mt-2 text-center">Verify online</p>
+          <p className="text-[10px] text-white/45 mt-2 text-center">Scan to Verify Receipt</p>
         </div>
       )}
       {receipt.explorer_url && (

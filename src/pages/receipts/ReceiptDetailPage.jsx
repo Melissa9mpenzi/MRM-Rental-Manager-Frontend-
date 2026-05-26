@@ -7,6 +7,7 @@ import { receiptsApi } from "../../api/receiptsApi";
 import api from "../../api/client";
 import ReceiptDocument from "../../components/receipts/ReceiptDocument";
 import ReceiptBlockchainProof from "../../components/receipts/ReceiptBlockchainProof";
+import VerifyQrBlock from "../../components/verify/VerifyQrBlock";
 import "../../styles/receipt-portal.css";
 
 export default function ReceiptDetailPage({ basePath = "/tenant/receipts" }) {
@@ -103,7 +104,12 @@ export default function ReceiptDetailPage({ basePath = "/tenant/receipts" }) {
 
         <div className="receipt-detail-layout">
           <ReceiptDocument receipt={data} />
-          <ReceiptBlockchainProof receipt={data} />
+          <div className="flex flex-col gap-4">
+            {data.verification_token && (
+              <VerifyQrBlock token={data.verification_token} label="Scan to Verify Receipt" size={120} />
+            )}
+            <ReceiptBlockchainProof receipt={data} />
+          </div>
         </div>
       </div>
     </AppPageScaffold>

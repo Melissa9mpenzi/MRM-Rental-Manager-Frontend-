@@ -15,8 +15,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useSuiDashboard, fmtSui, shortHash } from "../../lib/useSuiDashboard";
 import SuiStatusBadge from "../../components/sui/SuiStatusBadge";
 import WalrusUseCasesPanel from "../../components/sui/WalrusUseCasesPanel";
+import SuiFirstDemoPanel from "../../components/sui/SuiFirstDemoPanel";
 import { blockchainApi } from "../../api/blockchainApi";
-import { HACKATHON_TRACKS, ELEVATOR_PITCH } from "../../config/hackathonPositioning";
+import { HACKATHON_TRACKS, SUI_NATIVE_TAGLINE } from "../../config/hackathonPositioning";
 
 export default function SuiDashboardPage() {
   const { data, isLoading } = useSuiDashboard();
@@ -33,11 +34,19 @@ export default function SuiDashboardPage() {
   const contracts = data?.smart_contracts || [];
 
   const kpis = [
-    { label: "Total SUI Balance", value: data?.wallet?.sui_balance != null ? fmtSui(data.wallet.sui_balance) : "—", delta: "+2.4%" },
-    { label: "Total Transactions", value: totals.transactions ?? 0, delta: "+12%" },
-    { label: "Total Volume (SUI)", value: fmtSui(totals.volume_sui), delta: "+8.1%" },
-    { label: "Active Escrow", value: totals.active_escrow ?? 0, delta: "+3" },
-    { label: "Smart Contracts", value: totals.smart_contracts ?? 0, delta: "Live" },
+    {
+      label: "SUI Balance",
+      value: data?.wallet?.sui_balance != null ? fmtSui(data.wallet.sui_balance) : "—",
+      sub: data?.wallet?.sui_address ? `${data.wallet.sui_address.slice(0, 10)}…` : "Connect account",
+    },
+    { label: "On-chain receipts", value: totals.receipts ?? 0, sub: "From your payments" },
+    { label: "Volume (SUI est.)", value: fmtSui(totals.volume_sui), sub: "Recorded settlements" },
+    { label: "Active escrow", value: totals.active_escrow ?? 0, sub: `${totals.completed_escrow ?? 0} released` },
+    {
+      label: "Network",
+      value: net.checkpoint ?? "—",
+      sub: net.healthy ? `${data?.network || "testnet"} · live RPC` : "RPC unavailable",
+    },
   ];
 
   return (
@@ -46,8 +55,10 @@ export default function SuiDashboardPage() {
         <p className="text-[10px] font-bold uppercase tracking-widest text-violet-300/90">
           {HACKATHON_TRACKS.primary.badge} — {HACKATHON_TRACKS.primary.label}
         </p>
-        <p className="mt-1 text-sm text-white/70">{ELEVATOR_PITCH}</p>
+        <p className="mt-1 text-sm text-white/70">{SUI_NATIVE_TAGLINE}</p>
       </div>
+
+      <SuiFirstDemoPanel />
 
       <WalrusUseCasesPanel
         walrusConfigured={Boolean(chainStatus?.walrus_configured ?? chainStatus?.supports?.walrus_publisher_live)}
@@ -59,7 +70,7 @@ export default function SuiDashboardPage() {
           <div key={k.label} className="sui-kpi">
             <p className="sui-kpi__label">{k.label}</p>
             <p className="sui-kpi__value">{isLoading ? "…" : k.value}</p>
-            <p className="sui-kpi__delta">{k.delta}</p>
+            <p className="sui-kpi__delta text-white/45">{k.sub}</p>
           </div>
         ))}
       </div>
@@ -100,10 +111,19 @@ export default function SuiDashboardPage() {
           <p className="sui-panel__title">Network Status</p>
           <SuiStatusBadge status={net.healthy ? "Healthy" : "Offline"} />
           <dl className="space-y-1 text-xs text-white/60">
-            <div className="flex justify-between"><dt>Block Height</dt><dd>{net.block_height}</dd></div>
-            <div className="flex justify-between"><dt>TPS</dt><dd>{net.tps}</dd></div>
-            <div className="flex justify-between"><dt>Checkpoint</dt><dd className="sui-hash">{net.checkpoint}</dd></div>
-            <div className="flex justify-between"><dt>Gas (MIST)</dt><dd>{net.gas_mist}</dd></div>
+            <div className="flex justify-between"><dt>Network</dt><dd className="capitalize">{net.network || data?.network || "—"}</dd></div>
+            <div className="flex justify-between"><dt>Checkpoint</dt><dd className="sui-hash">{net.checkpoint ?? "—"}</dd></div>
+            {net.block_height != null ? (
+              <div className="flex justify-between"><dt>Sequence</dt><dd>{net.block_height}</dd></div>
+            ) : null}
+            {net.rpc_url ? (
+              <div className="flex justify-between gap-2">
+                <dt>RPC</dt>
+                <dd className="sui-hash max-w-[140px] truncate text-right" title={net.rpc_url}>
+                  {net.rpc_url.replace(/^https?:\/\//, "")}
+                </dd>
+              </div>
+            ) : null}
           </dl>
         </div>
       </div>

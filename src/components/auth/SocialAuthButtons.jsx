@@ -10,29 +10,32 @@ import {
   signInWithAppleFirebase,
   signInWithGoogleFirebase,
 } from "../../lib/firebaseSocialSignIn";
+import {
+  exchangePrivyForApiSession,
+  isPrivySocialAvailable,
+  privyAuthErrorMessage,
+} from "../../lib/privySocialSignIn";
 import { AppleBrandIcon, GoogleBrandIcon } from "./BrandSignInIcons";
+import PrivySocialAuthInner from "./PrivySocialAuthInner";
 
 /**
- * Google + Apple sign-in (Firebase). Works on login and register:
- * backend only links existing RentDirect accounts (register with email first).
+ * Social sign-in: Privy (preferred) when VITE_PRIVY_APP_ID is set, else Firebase fallback.
+ * Privy: one-tap Google/Apple + embedded Sui wallet + auto RentDirect account on first login.
  */
-export default function SocialAuthButtons({ disabled = false, hint }) {
+export default function SocialAuthButtons({ disabled = false, hint, registerRole = "tenant" }) {
   const navigate = useNavigate();
   const loginWithFirebase = useAuthStore((s) => s.loginWithFirebase);
+  const loginWithPrivy = useAuthStore((s) => s.loginWithPrivy);
   const storeLoading = useAuthStore((s) => s.isLoading);
   const [busy, setBusy] = useState(null);
 
-  const configured = isFirebaseSocialAvailable();
+  const usePrivy = isPrivySocialAvailable();
+  const useFirebase = !usePrivy && isFirebaseSocialAvailable();
+  const configured = usePrivy || useFirebase;
   const blocked = disabled || storeLoading || busy;
 
-  async function run(provider, signInFn) {
+  async function runFirebase(provider, signInFn) {
     if (blocked) return;
-    if (!configured) {
-      toast.error(
-        "Social sign-in is not set up. Add VITE_FIREBASE_* to .env (see .env.example), then restart the dev server.",
-      );
-      return;
-    }
     setBusy(provider);
     try {
       const data = await signInFn();
@@ -43,12 +46,34 @@ export default function SocialAuthButtons({ disabled = false, hint }) {
     } catch (err) {
       const fbMsg = firebaseAuthErrorMessage(err);
       if (fbMsg === null) return;
-      toast.error(
-        apiErrorMessage(err, fbMsg || `${provider} sign-in failed. Use email/password or register first.`),
-      );
+      toast.error(apiErrorMessage(err, fbMsg || `${provider} sign-in failed.`));
     } finally {
       setBusy(null);
     }
+  }
+
+  if (usePrivy) {
+    return (
+      <PrivySocialAuthInner
+        disabled={blocked}
+        busy={busy}
+        setBusy={setBusy}
+        hint={hint}
+        registerRole={registerRole}
+        onSession={async (sessionData) => {
+          await loginWithPrivy(sessionData);
+          const user = useAuthStore.getState().user;
+          const isNew = sessionData?.is_new_user;
+          toast.success(isNew ? "Account created — welcome to RentDirect!" : "Welcome back!");
+          navigate(postLoginDestination(user), { replace: true });
+        }}
+        onError={(err, provider) => {
+          const msg = privyAuthErrorMessage(err);
+          if (msg === null) return;
+          toast.error(apiErrorMessage(err, msg || `${provider} sign-in failed.`));
+        }}
+      />
+    );
   }
 
   return (
@@ -60,7 +85,7 @@ export default function SocialAuthButtons({ disabled = false, hint }) {
         <button
           type="button"
           disabled={blocked}
-          onClick={() => run("Google", signInWithGoogleFirebase)}
+          onClick={() => runFirebase("Google", signInWithGoogleFirebase)}
           className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] py-2 text-[10px] font-semibold text-white transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-40 sm:text-xs"
         >
           {busy === "Google" ? (
@@ -73,7 +98,7 @@ export default function SocialAuthButtons({ disabled = false, hint }) {
         <button
           type="button"
           disabled={blocked}
-          onClick={() => run("Apple", signInWithAppleFirebase)}
+          onClick={() => runFirebase("Apple", signInWithAppleFirebase)}
           className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] py-2 text-[10px] font-semibold text-white transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-40 sm:text-xs"
         >
           {busy === "Apple" ? (
@@ -86,7 +111,8 @@ export default function SocialAuthButtons({ disabled = false, hint }) {
       </div>
       {!configured ? (
         <p className="mt-1.5 text-center text-[10px] text-white/35">
-          Configure Firebase in <code className="text-white/45">.env</code> to enable these buttons.
+          Add <code className="text-white/45">VITE_PRIVY_APP_ID</code> (recommended) or Firebase keys in{" "}
+          <code className="text-white/45">.env</code>.
         </p>
       ) : null}
     </div>

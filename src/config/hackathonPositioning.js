@@ -1,7 +1,16 @@
 /**
- * Hackathon track strategy — RentDirect UG
- * PRIMARY: DeFi & Payments | SECONDARY: Walrus | OPTIONAL: Agentic Web
+ * Sui hackathon positioning — RentDirect UG
+ * PRIMARY: DeFi & Payments | SECONDARY: Walrus | OPTIONAL: rule-based risk signals only
+ *
+ * Frame: "Africa's decentralized rental infrastructure powered by Sui"
+ * NOT: "property management app with crypto"
  */
+
+export const SUI_NATIVE_TAGLINE =
+  "Africa's decentralized rental infrastructure powered by Sui";
+
+export const WINNING_POSITIONING =
+  "RentDirect UG is a decentralized rental trust infrastructure platform built on Sui, enabling secure escrow payments, immutable rental agreements, decentralized receipts, and government-grade verification for African housing markets.";
 
 export const HACKATHON_TRACKS = {
   primary: {
@@ -9,48 +18,53 @@ export const HACKATHON_TRACKS = {
     label: "DeFi & Payments",
     badge: "Primary track",
     summary:
-      "Real-world rental finance — not another swap app. Hybrid MTN/Pesapal fiat + Sui wallet escrow, smart contracts, and on-chain receipts.",
+      "Trustless rent escrow, Sui settlement, on-chain receipts, and hybrid fiat rails — real-world DeFi for housing, not a DEX.",
     highlights: [
-      "Escrow-held rent & deposits",
-      "Sui wallet checkout alongside MoMo",
-      "Move escrow contracts on Sui Testnet",
-      "Blockchain-verified receipts",
-      "Multi-rail payment infrastructure",
+      "Move escrow: tenant pays → contract holds → landlord releases on conditions",
+      "On-chain payment receipts (tx digest + verify page + QR)",
+      "Privy / platform Sui wallet — sign up with Google, get an address",
+      "Hybrid MTN/Pesapal + SUI settlement",
+      "Composable trust layer for landlords, tenants, and URA",
     ],
-    demoPaths: ["/sui/escrow", "/tenant/pay", "/sui/receipts", "/payments"],
+    demoPaths: ["/sui", "/sui/escrow", "/tenant/pay", "/sui/receipts", "/verify"],
   },
   secondary: {
     id: "walrus",
     label: "Special — Walrus",
     badge: "Secondary track",
     summary:
-      "Decentralized storage for proofs auditors and judges can verify — not a logo slide.",
+      "Permanent decentralized proofs — leases, receipts, KYC manifests, escrow releases, gov audit exports.",
     highlights: [
-      "Receipt JSON anchored on Walrus",
-      "Lease & contract document blobs",
-      "KYC document content hashes",
-      "Property verification artifacts",
-      "Escrow release proofs",
-      "Government audit exports",
+      "Receipt JSON on Walrus linked to Sui tx",
+      "Rental agreement blobs + content hash",
+      "KYC manifest (privacy-safe hash bundle)",
+      "Escrow lease & release proofs",
+      "Government audit export bundles",
     ],
-    demoPaths: ["/sui/receipts", "/sui/settings"],
+    demoPaths: ["/sui/receipts", "/sui/settings", "/government/audit"],
   },
   optional: {
-    id: "agentic-web",
-    label: "The Agentic Web",
-    badge: "Bonus track",
-    summary: "AI-assisted fraud signals, pricing hints, and compliance summaries (mocked where models are offline).",
+    id: "risk-signals",
+    label: "Risk signals (optional)",
+    badge: "If asked about AI",
+    summary:
+      "Rule-based fraud detection only — duplicate NIN, KYC flags, illegal property signals. No fake LLM.",
     highlights: [
-      "AI fraud alerts (NIRA queue)",
-      "Landlord dashboard insights",
-      "Smart search & recommendations-ready UX",
+      "Heuristic fraud queue (NIRA)",
+      "KCCA property compliance flags",
+      "URA payment anomaly views",
     ],
-    demoPaths: ["/government/fraud", "/landlord/dashboard"],
+    demoPaths: ["/government/fraud"],
   },
   avoid: {
+    id: "agentic-web",
+    label: "The Agentic Web",
+    reason: "Not an agent economy or autonomous workflow product — do not lead with this.",
+  },
+  avoidDeepbook: {
     id: "deepbook",
     label: "DeepBook",
-    reason: "Order-book / trading liquidity — not our core. Do not position as an exchange.",
+    reason: "Not order-book / trading liquidity.",
   },
 };
 
@@ -59,21 +73,59 @@ export const SUI_DEPLOYMENT = {
   label: "Sui Testnet",
   rpc: "https://fullnode.testnet.sui.io:443",
   explorer: "https://suiscan.xyz/testnet",
-  whyNotDevnet: "Devnet is fine for experiments but less stable for live demos.",
-  whyNotMainnet: "Mainnet adds cost and risk during hackathon development.",
+  movePackagePath: "contracts/rentdirect",
+  modules: ["escrow", "receipt"],
 };
 
 export const WALRUS_USE_CASES = [
-  { key: "receipts", title: "Rent receipts", desc: "Tamper-evident receipt JSON after each payment." },
-  { key: "contracts", title: "Lease contracts", desc: "Signed lease artifacts hashed and stored." },
-  { key: "kyc", title: "KYC documents", desc: "National ID & selfie bundle content hash (privacy-safe)." },
-  { key: "property", title: "Property verification", desc: "KCCA approval packets & inspection notes." },
-  { key: "escrow", title: "Escrow proofs", desc: "Release/refund evidence linked to Move escrow." },
-  { key: "audit", title: "Government audit", desc: "NIRA/KCCA/URA decision logs exportable to blob storage." },
+  { key: "receipts", title: "Rent receipts", desc: "Receipt JSON anchored; linked to on-chain tx digest." },
+  { key: "contracts", title: "Rental agreements", desc: "Lease terms hashed + stored as Walrus blob." },
+  { key: "kyc", title: "KYC manifests", desc: "Identity proof bundle (hash-first, privacy-safe)." },
+  { key: "property", title: "Property verification", desc: "KCCA approval packets." },
+  { key: "escrow", title: "Escrow proofs", desc: "Fund + release evidence tied to Move escrow." },
+  { key: "audit", title: "Government audit", desc: "Exportable compliance trail." },
 ];
 
-export const ELEVATOR_PITCH =
-  "RentDirect UG is government-integrated rental infrastructure on Sui Testnet — hybrid fiat + wallet payments, Move escrow, Walrus proofs, and AI-assisted compliance (NIRA · KCCA · URA).";
+/** 60-second judge script */
+export const SUI_DEMO_FLOW = [
+  { step: 1, title: "Account + wallet", detail: "Google via Privy → embedded Sui address (no extension)." },
+  { step: 2, title: "Rental agreement", detail: "Landlord creates lease → agreement hash + Walrus proof." },
+  { step: 3, title: "On-chain rent", detail: "Tenant pays from RentDirect wallet → Sui tx digest." },
+  { step: 4, title: "Receipt", detail: "QR verify + Walrus blob + explorer link." },
+  { step: 5, title: "Escrow", detail: "Create hold → release → Walrus release proof." },
+  { step: 6, title: "Gov trust", detail: "NIRA/KCCA/URA dashboards + fraud + audit export." },
+];
+
+export const ELEVATOR_PITCH = WINNING_POSITIONING;
 
 export const JUDGE_ONE_LINER =
-  "We built real-world DeFi for rentals: escrow, hybrid payments, and Walrus-backed receipts — not another DEX.";
+  "We built decentralized rental infrastructure on Sui — escrow, immutable agreements, on-chain receipts, and Walrus proofs — not another property CRUD app.";
+
+/** Critical question: "Why could this not exist without Sui?" */
+export const WHY_NOT_WITHOUT_SUI = {
+  title: "Why could this not exist properly without Sui?",
+  answer:
+    "Rent requires trust in custody, settlement, and evidence. Banks and PDFs cannot give tenants and governments the same verifiable, composable guarantees as on-chain escrow, transaction digests, and Walrus-backed proofs — especially across disputes and audits.",
+  pillars: [
+    { title: "Escrow payments", body: "Programmable hold/release — trustless rent custody on testnet Move contracts." },
+    { title: "Smart rental agreements", body: "Lease terms anchored (hash + Walrus); tamper-evident vs editable database rows." },
+    { title: "Decentralized receipts", body: "Every Sui payment gets a digest, verify URL, and optional on-chain Receipt object." },
+    { title: "On-chain verification", body: "Anyone can validate payment and agreement proofs via explorer + public verify routes." },
+    { title: "Walrus storage", body: "Receipts, contracts, KYC manifests, and audit bundles outlive any single API server." },
+    { title: "Digital identity layer", body: "Gov verification (NIRA/KCCA/URA) + Sui wallet per account = trust stack for Uganda." },
+  ],
+};
+
+export const JUDGE_FAQ = {
+  title: "Why Sui & Walrus?",
+  shortAnswer: WHY_NOT_WITHOUT_SUI.answer,
+  points: WHY_NOT_WITHOUT_SUI.pillars.map((p) => ({
+    heading: p.title,
+    body: p.body,
+  })),
+  walrusStrategy:
+    "Transactional truth on Sui; dispute-grade documents on Walrus; CRM speed in Postgres. Set WALRUS_PUBLISHER_URL for live blobs.",
+};
+
+// Legacy alias
+export const HACKATHON_TRACKS_AGENTIC = HACKATHON_TRACKS.optional;

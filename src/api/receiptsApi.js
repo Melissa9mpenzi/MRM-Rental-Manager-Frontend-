@@ -14,6 +14,6 @@ export const receiptsApi = {
   pdfUrl: (id) => platformApiV1(`/receipts/${id}/pdf`),
   verifyPageUrl: (token) =>
     typeof window !== "undefined"
-      ? `${window.location.origin}/verify/receipt/${token}`
-      : `/verify/receipt/${token}`,
+      ? `${window.location.origin}/verify/${token}`
+      : `/verify/${token}`,
 };

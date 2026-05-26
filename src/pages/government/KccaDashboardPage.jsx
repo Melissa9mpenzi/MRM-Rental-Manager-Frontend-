@@ -114,8 +114,10 @@ export default function KccaDashboardPage() {
                 <td>
                   <WalrusProofBadge
                     blobId={r.walrus_blob_id}
+                    contentHash={r.content_hash}
                     url={r.walrus_url}
-                    demoMode={r.walrus_demo_mode}
+                    walrusLive={r.walrus_live}
+                    storageType={r.storage_type}
                     label="Packet"
                   />
                 </td>

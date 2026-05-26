@@ -7,13 +7,15 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-ki
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import ConnectWalletButton from "../../components/blockchain/ConnectWalletButton";
+import PlatformSuiWallet from "../../components/blockchain/PlatformSuiWallet";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
-import { fetchBlockchainStatus, runSuiCheckout } from "../../lib/suiCheckout";
+import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from "../../lib/suiCheckout";
 import useAuthStore from "../../store/authStore";
 import { receiptsApi } from "../../api/receiptsApi";
 import PaymentReceiptSuccess from "../../components/receipts/PaymentReceiptSuccess";
+import ProductionReadinessBanner from "../../components/layout/ProductionReadinessBanner";
 import "../../styles/receipt-portal.css";
 
 function fmt(n) {
@@ -28,6 +30,7 @@ export default function PaymentFlowPage() {
   const [method, setMethod] = useState("mtn_momo");
   const [phone, setPhone] = useState(user?.phone || "");
   const [paying, setPaying] = useState(false);
+  const [suiExternalWallet, setSuiExternalWallet] = useState(false);
   const [successReceipt, setSuccessReceipt] = useState(null);
   const account = useCurrentAccount();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
@@ -124,12 +127,19 @@ export default function PaymentFlowPage() {
         await showLatestReceipt();
       };
       if (method === "sui") {
-        await runSuiCheckout({
-          invoiceId: openInvoice.id,
-          signAndExecuteTransaction,
-          accountAddress: account.address,
-          onCompleted: onDone,
-        });
+        if (suiExternalWallet) {
+          await runSuiCheckout({
+            invoiceId: openInvoice.id,
+            signAndExecuteTransaction,
+            accountAddress: account.address,
+            onCompleted: onDone,
+          });
+        } else {
+          await runPlatformSuiCheckout({
+            invoiceId: openInvoice.id,
+            onCompleted: onDone,
+          });
+        }
       } else {
         await runTenantCheckoutUi({
           invoiceId: openInvoice.id,
@@ -154,8 +164,10 @@ export default function PaymentFlowPage() {
       variant="ledger"
       icon={CreditCard}
       title="Pay rent"
-      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui wallet with on-chain receipts."
+      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui — your wallet is created with your email account."
     >
+      <ProductionReadinessBanner />
+
       {gatewayQuery.data && !gatewayQuery.data.configured && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           Configure <strong>MTN MoMo</strong> or <strong>Pesapal</strong> on the API server. See{" "}
@@ -204,12 +216,22 @@ export default function PaymentFlowPage() {
           )}
 
           {method === "sui" ? (
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-white/60">Sui wallet</label>
-              <ConnectWalletButton />
-              <p className="mt-2 text-xs text-white/45">
-                Supports Slush, Nightly, Suiet, and other Sui wallets via dApp Kit.
-              </p>
+            <div className="space-y-3">
+              <label className="mb-1 block text-xs font-semibold text-white/60">Your Sui wallet</label>
+              {!suiExternalWallet ? (
+                <PlatformSuiWallet />
+              ) : (
+                <ConnectWalletButton />
+              )}
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-white/55">
+                <input
+                  type="checkbox"
+                  checked={suiExternalWallet}
+                  onChange={(e) => setSuiExternalWallet(e.target.checked)}
+                  className="rounded border-white/20"
+                />
+                Use browser wallet instead (Slush, Suiet, Nightly — advanced)
+              </label>
             </div>
           ) : (
             <div>

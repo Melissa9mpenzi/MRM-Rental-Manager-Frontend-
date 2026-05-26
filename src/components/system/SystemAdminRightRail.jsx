@@ -139,7 +139,7 @@ export default function SystemAdminRightRail({ summary, gov, fraudAlerts = [], h
       <section className="sys-rail-card sys-rail-card--health">
         <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">System health</p>
         <p className="mt-1 text-lg font-extrabold text-emerald-400">Excellent</p>
-        <p className="text-xs text-white/55">{health.toFixed(2)}% uptime</p>
+        <p className="text-xs text-white/55">Platform health score (live alerts &amp; queue)</p>
       </section>
     </aside>
   );

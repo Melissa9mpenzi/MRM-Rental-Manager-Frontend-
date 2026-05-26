@@ -94,7 +94,23 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  /** Session from POST /auth/firebase (Google / Apple via Firebase popup). */
+  /** Session from POST /auth/privy (Google / Apple / email + embedded Sui wallet). */
+  loginWithPrivy: async (sessionData) => {
+    set({ isLoading: true, error: null });
+    try {
+      get()._setSession(sessionData);
+      await get().refreshSessionUser();
+      return { ...sessionData, user: get().user };
+    } catch (err) {
+      const message = apiErrorMessage(err, "Privy sign-in failed.");
+      set({ error: message });
+      throw err;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  /** Session from POST /auth/firebase (legacy fallback). */
   loginWithFirebase: async (sessionData) => {
     set({ isLoading: true, error: null });
     try {

@@ -86,7 +86,8 @@ export default function RegisterPage() {
 
       <SocialAuthButtons
         disabled={loading}
-        hint="Already registered? Sign in with Google or Apple (same email as your account)."
+        registerRole={form.role}
+        hint="Google or Apple — creates your account and Sui wallet in one step."
       />
 
       <div className="my-3 flex items-center gap-2">

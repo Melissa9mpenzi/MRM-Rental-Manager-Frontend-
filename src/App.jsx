@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import SuiProvider from "./providers/SuiProvider";
+import PrivyAppProvider from "./providers/PrivyAppProvider";
 
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import KycOnboardingGuard from "./components/layout/KycOnboardingGuard";
@@ -52,6 +53,7 @@ import SystemSettingsPage from "./pages/system/SystemSettingsPage";
 import SystemAnnouncementsPage from "./pages/system/SystemAnnouncementsPage";
 import SystemSupportPage from "./pages/system/SystemSupportPage";
 import ReceiptVerifyPage from "./pages/receipts/ReceiptVerifyPage";
+import BlockchainVerifyPage from "./pages/verify/BlockchainVerifyPage";
 import ReceiptsListPage from "./pages/receipts/ReceiptsListPage";
 import ReceiptDetailPage from "./pages/receipts/ReceiptDetailPage";
 import AdminReceiptsPage from "./pages/system/AdminReceiptsPage";
@@ -121,7 +123,8 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiProvider>
+      <PrivyAppProvider>
+        <SuiProvider>
         <BrowserRouter
         future={{
           v7_startTransition: true,
@@ -163,7 +166,11 @@ export default function App() {
             <Route path="/government/accept-invite" element={<GovernmentAcceptInvitePage />} />
           </Route>
 
+          <Route path="/verify/:token" element={<BlockchainVerifyPage />} />
           <Route path="/verify/receipt/:token" element={<ReceiptVerifyPage />} />
+          <Route path="/verify/contract/:token" element={<BlockchainVerifyPage forcedKind="contract" />} />
+          <Route path="/verify/property/:token" element={<BlockchainVerifyPage forcedKind="property" />} />
+          <Route path="/verify/compliance/:token" element={<BlockchainVerifyPage forcedKind="compliance" />} />
 
           {/* ── Public auth (tenant / landlord / agent) ── */}
           <Route element={<AuthLayout />}>
@@ -333,7 +340,8 @@ export default function App() {
           </Route>
         </Routes>
         </BrowserRouter>
-      </SuiProvider>
+        </SuiProvider>
+      </PrivyAppProvider>
     </QueryClientProvider>
   );
 }

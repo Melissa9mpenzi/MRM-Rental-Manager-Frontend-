@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import { leasesApi } from "../../api/leasesApi";
 import { ErrorPanel, EmptyPanel, LoadingPanel } from "../../components/ui/StatePanel";
+import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
+import VerifyQrBlock from "../../components/verify/VerifyQrBlock";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -140,6 +142,8 @@ export default function LandlordContractsPage() {
                 <th className="pb-3 pr-4 font-semibold">Term</th>
                 <th className="pb-3 pr-4 text-right font-semibold">Rent</th>
                 <th className="pb-3 pr-4 font-semibold">Status</th>
+                <th className="pb-3 pr-4 font-semibold">Sui proof</th>
+                <th className="pb-3 pr-4 font-semibold">Verify</th>
                 <th className="pb-3 font-semibold" />
               </tr>
             </thead>
@@ -169,6 +173,23 @@ export default function LandlordContractsPage() {
                       {l.status || "—"}
                     </span>
                   </td>
+                  <td className="py-3 pr-4">
+                    <WalrusProofBadge
+                      blobId={l.walrus_blob_id}
+                      contentHash={l.agreement_hash}
+                      url={l.walrus_url}
+                      walrusLive={l.walrus_live}
+                      storageType={l.storage_type}
+                      label="Agreement"
+                    />
+                  </td>
+                  <td className="py-3 pr-4">
+                    {l.verification_token ? (
+                      <VerifyQrBlock token={l.verification_token} label="Contract QR" size={64} />
+                    ) : (
+                      <span className="text-[10px] text-white/35">Pending anchor</span>
+                    )}
+                  </td>
                   <td className="py-3 text-right">
                     {l.status === "active" && (
                       <button
@@ -192,7 +213,7 @@ export default function LandlordContractsPage() {
         </div>
       )}
       <p className="mt-4 text-xs text-white/40">
-        Blockchain-verified agreement hashes and e-signatures will appear here when those integrations are enabled.
+        Each lease gets a unique verification QR — scan to confirm agreement authenticity on Sui / Walrus.
       </p>
     </AppPageScaffold>
   );
