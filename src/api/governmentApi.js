@@ -24,6 +24,7 @@ export const governmentApi = {
   niraDecision: (body) => govApi.post("/government/nira/decision", body).then((r) => r.data?.data ?? r.data),
   kccaProperties: (params) =>
     govApi.get("/government/kcca/properties", { params }).then((r) => r.data?.data ?? r.data),
+  kccaStats: () => govApi.get("/government/kcca/stats").then((r) => r.data?.data ?? r.data),
   kccaDecision: (body) => govApi.post("/government/kcca/decision", body).then((r) => r.data?.data ?? r.data),
   uraReports: (params) => govApi.get("/government/ura/reports", { params }).then((r) => r.data?.data ?? r.data),
   fraudAlerts: (params) =>

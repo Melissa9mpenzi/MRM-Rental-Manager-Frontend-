@@ -87,10 +87,21 @@ function PropertyCard({ property }) {
             )}
           </div>
         </div>
-        <Badge
-          label={property.is_active ? "Active" : "Archived"}
-          variant={property.is_active ? "active" : "archived"}
-        />
+        <div className="flex flex-col items-end gap-1">
+          <Badge
+            label={property.is_active ? "Active" : "Archived"}
+            variant={property.is_active ? "active" : "archived"}
+          />
+          {property.gov_verification_status === "verified" ? (
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+              KCCA verified
+            </span>
+          ) : (
+            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-300" title="Visible to tenants; full trust badge after KCCA approval">
+              KCCA pending
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Stats row */}

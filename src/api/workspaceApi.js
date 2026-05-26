@@ -23,6 +23,9 @@ export const workspaceApi = {
   adminUserAccount: (userId, body) =>
     api.patch(`/workspace/admin/users/${userId}/account`, body).then(unwrap),
 
+  adminDeleteUser: (userId) =>
+    api.delete(`/workspace/admin/users/${userId}`).then(unwrap),
+
   /** Staff or admin — operations-style summary for the agent workspace */
   staffSummary: () => api.get("/workspace/staff/summary").then(unwrap),
 };

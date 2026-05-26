@@ -431,15 +431,29 @@ export default function PropertySearchPage() {
 
           {filtered.length === 0 && !isLoading && (
             <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-6 py-14 text-center">
-              <p className="text-sm font-bold text-white">No listings match these filters</p>
-              <p className="mt-2 text-xs text-white/45">Widen price range or clear amenity / type filters.</p>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="mt-5 rounded-xl bg-[#00C896] px-5 py-2.5 text-xs font-extrabold text-[#041208]"
-              >
-                Reset filters
-              </button>
+              <p className="text-sm font-bold text-white">
+                {rows.length === 0 ? "No rentals available yet" : "No listings match these filters"}
+              </p>
+              <p className="mt-2 text-xs text-white/45">
+                {rows.length === 0 ? (
+                  <>
+                    Listings need a <strong className="text-white/70">vacant unit with monthly rent</strong>, landlord{" "}
+                    <strong className="text-white/70">NIRA KYC approved</strong>, and property marked active. New
+                    properties show here while <strong className="text-white/70">KCCA review is pending</strong>.
+                  </>
+                ) : (
+                  "Widen price range or clear amenity / type filters."
+                )}
+              </p>
+              {rows.length === 0 ? null : (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="mt-5 rounded-xl bg-[#00C896] px-5 py-2.5 text-xs font-extrabold text-[#041208]"
+                >
+                  Reset filters
+                </button>
+              )}
             </div>
           )}
         </div>
