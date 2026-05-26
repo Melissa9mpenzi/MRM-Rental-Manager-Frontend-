@@ -16,5 +16,18 @@ export function uploadMediaUrl(path) {
 /** Turn `photo_path` from API into a full URL for `<img src>`. */
 export function listingImageUrl(path) {
   if (!path) return "/images/hero-villa.jpg";
+
+  // On Vercel we don't persist /uploads, so fall back to stock image.
+  if (typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app")) {
+    if (typeof path === "string" && path.startsWith("/uploads/")) {
+      return "/images/hero-villa.jpg";
+    }
+  }
+
+  // Frontend-bundled images live under /images on the SPA host.
+  if (typeof path === "string" && path.startsWith("/images/")) {
+    return path;
+  }
+
   return uploadMediaUrl(path) || "/images/hero-villa.jpg";
 }
