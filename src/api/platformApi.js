@@ -12,4 +12,5 @@ export const platformApi = {
     api.get("/platform/system-status").then((r) => r.data?.data ?? r.data ?? {}),
   dataSummary: () =>
     api.get("/platform/data-summary").then((r) => r.data?.data ?? r.data ?? {}),
+  readiness: () => api.get("/platform/readiness").then((r) => r.data?.data ?? r.data ?? {}),
 };

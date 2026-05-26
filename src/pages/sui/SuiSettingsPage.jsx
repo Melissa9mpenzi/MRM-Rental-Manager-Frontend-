@@ -18,7 +18,8 @@ export default function SuiSettingsPage() {
       </article>
       <article className="sui-panel">
         <p className="text-sm text-white/60">
-          See <code className="rounded bg-black/30 px-1">docs/SUI_PAYMENTS.md</code> for devnet treasury, Move deploy, and Walrus setup.
+          See <code className="rounded bg-black/30 px-1">docs/SUI_PAYMENTS.md</code> and{" "}
+          <code className="rounded bg-black/30 px-1">docs/HACKATHON_SUI_WALRUS.md</code> for treasury, judge pitch, and Walrus setup.
         </p>
       </article>
     </section>

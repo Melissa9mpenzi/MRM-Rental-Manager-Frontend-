@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Search, Shield, UserX, UserCheck } from "lucide-react";
+import { Users, Search, Shield, UserX, UserCheck, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { workspaceApi } from "../../api/workspaceApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import { ConfirmDialog } from "../../components/ui/index.jsx";
 
 const ROLE_OPTIONS = [
   { value: "", label: "All roles" },
@@ -21,6 +22,8 @@ export default function AdminUsersListPage({ embedded = false }) {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [page, setPage] = useState(0);
+  const [disconnectTarget, setDisconnectTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const limit = 25;
   const qc = useQueryClient();
   const me = useAuthStore((s) => s.user);
@@ -48,24 +51,50 @@ export default function AdminUsersListPage({ embedded = false }) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => workspaceApi.adminDeleteUser(id),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["workspace-admin-users"] });
+      qc.invalidateQueries({ queryKey: ["workspace-admin-summary"] });
+      toast.success(data?.message || "User deleted");
+    },
+    onError: (err) => {
+      const d = err.response?.data?.detail;
+      toast.error(typeof d === "string" ? d : d?.message || "Could not delete user");
+    },
+  });
+
   function handleDisconnect(u) {
     if (u.id === me?.id) {
       toast.error("You cannot disconnect your own account.");
       return;
     }
-    const label = u.full_name || u.email;
-    if (
-      !window.confirm(
-        `Disconnect ${label}? They will be signed out and cannot log in until you reconnect the account.`
-      )
-    ) {
-      return;
-    }
-    accountMutation.mutate({ id: u.id, action: "disconnect" });
+    setDisconnectTarget(u);
+  }
+
+  function confirmDisconnect() {
+    if (!disconnectTarget) return;
+    accountMutation.mutate(
+      { id: disconnectTarget.id, action: "disconnect" },
+      { onSettled: () => setDisconnectTarget(null) }
+    );
   }
 
   function handleReconnect(u) {
     accountMutation.mutate({ id: u.id, action: "reconnect" });
+  }
+
+  function handleDelete(u) {
+    if (u.id === me?.id) {
+      toast.error("You cannot delete your own account.");
+      return;
+    }
+    setDeleteTarget(u);
+  }
+
+  function confirmDelete() {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
   }
 
   const { data, isLoading, isError } = useQuery({
@@ -82,8 +111,31 @@ export default function AdminUsersListPage({ embedded = false }) {
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
 
+  const disconnectLabel = disconnectTarget?.full_name || disconnectTarget?.email || "this user";
+  const deleteLabel = deleteTarget?.full_name || deleteTarget?.email || "this user";
+
   const body = (
     <>
+      <ConfirmDialog
+        open={Boolean(disconnectTarget)}
+        title="Disconnect account?"
+        message={`${disconnectLabel} will be signed out and cannot log in until you reconnect the account.`}
+        confirmLabel="Disconnect"
+        variant="danger"
+        onConfirm={confirmDisconnect}
+        onCancel={() => setDisconnectTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete account permanently?"
+        message={`${deleteLabel} will be removed from the platform along with their login access. This cannot be undone. Linked data may be cleared or unlinked.`}
+        confirmLabel="Delete permanently"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="relative max-w-md flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
@@ -182,32 +234,61 @@ export default function AdminUsersListPage({ embedded = false }) {
                             </button>
                           </div>
                         )}
-                        {u.is_active ? (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {u.is_active ? (
+                            <button
+                              type="button"
+                              disabled={
+                                accountMutation.isPending || deleteMutation.isPending || u.id === me?.id
+                              }
+                              onClick={() => handleDisconnect(u)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-red-500/35 bg-red-500/10 px-2 py-1 text-[11px] font-bold text-red-200 hover:bg-red-500/20 disabled:opacity-40"
+                              title={u.id === me?.id ? "Cannot disconnect yourself" : "Revoke access and sign-out sessions"}
+                            >
+                              <UserX size={12} />
+                              Disconnect
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={accountMutation.isPending || deleteMutation.isPending}
+                              onClick={() => handleReconnect(u)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-2 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-500/20"
+                            >
+                              <UserCheck size={12} />
+                              Reconnect
+                            </button>
+                          )}
                           <button
                             type="button"
-                            disabled={accountMutation.isPending || u.id === me?.id}
-                            onClick={() => handleDisconnect(u)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/35 bg-red-500/10 px-2 py-1 text-[11px] font-bold text-red-200 hover:bg-red-500/20 disabled:opacity-40"
-                            title={u.id === me?.id ? "Cannot disconnect yourself" : "Revoke access and sign-out sessions"}
+                            disabled={
+                              deleteMutation.isPending ||
+                              accountMutation.isPending ||
+                              kycMutation.isPending ||
+                              u.id === me?.id
+                            }
+                            onClick={() => handleDelete(u)}
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-red-600/45 bg-red-950/40 text-red-200 hover:bg-red-600/25 disabled:opacity-40"
+                            aria-label={
+                              u.id === me?.id
+                                ? "Cannot delete your own account"
+                                : `Permanently delete ${u.full_name || u.email}`
+                            }
+                            title={
+                              u.id === me?.id
+                                ? "Cannot delete yourself"
+                                : "Permanently remove this account"
+                            }
                           >
-                            <UserX size={12} />
-                            Disconnect
+                            <Trash2 size={14} />
                           </button>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={accountMutation.isPending}
-                            onClick={() => handleReconnect(u)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-2 py-1 text-[11px] font-bold text-emerald-200 hover:bg-emerald-500/20"
-                          >
-                            <UserCheck size={12} />
-                            Reconnect
-                          </button>
-                        )}
+                        </div>
                         {!((u.role === "landlord" || u.role === "staff") && u.kyc_review_status === "pending") &&
                           u.is_active &&
                           u.id !== me?.id && (
-                            <span className="text-[10px] text-white/30">Revokes login sessions</span>
+                            <span className="text-[10px] text-white/30">
+                              Disconnect blocks login · Delete removes the account
+                            </span>
                           )}
                       </div>
                     </td>

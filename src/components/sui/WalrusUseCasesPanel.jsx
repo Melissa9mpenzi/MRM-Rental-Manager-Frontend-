@@ -22,7 +22,9 @@ export default function WalrusUseCasesPanel({ walrusConfigured, inventory }) {
           </p>
           <p className="mt-1 text-xs text-white/50">
             Secondary hackathon track. Network: <strong className="text-cyan-200">{SUI_DEPLOYMENT.label}</strong>
-            {walrusConfigured ? " · Publisher connected" : " · Demo mode (content hashes until publisher URL is set)"}
+            {walrusConfigured
+              ? " · Live Walrus publisher"
+              : " · SHA-256 proofs on-platform (set WALRUS_PUBLISHER_URL for decentralized blobs)"}
           </p>
         </div>
         <span className="rounded-full border border-cyan-500/30 bg-cyan-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase text-cyan-200">

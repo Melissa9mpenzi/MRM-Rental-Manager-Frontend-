@@ -25,29 +25,35 @@ export default function KccaDashboardPage() {
     queryKey: ["gov-kcca", filter],
     queryFn: () => governmentApi.kccaProperties({ status: filter === "all" ? undefined : filter }),
   });
+  const { data: statsData } = useQuery({
+    queryKey: ["gov-kcca-stats"],
+    queryFn: () => governmentApi.kccaStats(),
+  });
 
-  const stats = useMemo(() => ({
-    total: rows.length,
-    verified: rows.filter((r) => r.status === "verified").length,
-    pending: rows.filter((r) => r.status === "pending").length,
-    flagged: rows.filter((r) => r.status === "illegal" || r.status === "rejected").length,
-  }), [rows]);
+  const stats = useMemo(() => {
+    const verified = statsData?.verified ?? 0;
+    const pending = statsData?.pending ?? 0;
+    const flagged = statsData?.flagged ?? 0;
+    const total = statsData?.total ?? verified + pending + flagged + (statsData?.inspection ?? 0);
+    return { total, verified, pending, flagged };
+  }, [statsData]);
 
   const decide = useMutation({
     mutationFn: (body) => governmentApi.kccaDecision(body),
     onSuccess: () => {
       toast.success("KCCA property decision recorded");
       qc.invalidateQueries({ queryKey: ["gov-kcca"] });
+      qc.invalidateQueries({ queryKey: ["gov-kcca-stats"] });
       qc.invalidateQueries({ queryKey: ["gov-overview"] });
     },
     onError: (e) => toast.error(e?.response?.data?.detail?.message || e.message || "Failed"),
   });
 
   const kpis = [
-    { icon: Building2, label: "Total Properties", value: stats.total.toLocaleString(), trend: "+14.2%", tone: "cyan", spark: [8, 9, 10, 11, 12, 13, 14] },
-    { icon: CheckCircle2, label: "Verified", value: stats.verified.toLocaleString(), trend: "+16.1%", tone: "emerald", spark: [5, 6, 7, 8, 9, 10, 11] },
-    { icon: Clock, label: "Pending", value: stats.pending.toLocaleString(), trend: "-3.8%", tone: "purple", spark: [4, 4, 3, 4, 3, 3, 2] },
-    { icon: AlertTriangle, label: "Flagged", value: stats.flagged.toLocaleString(), trend: "+5.4%", tone: "red", spark: [1, 2, 2, 3, 2, 3, 4] },
+    { icon: Building2, label: "Total Properties", value: stats.total.toLocaleString(), tone: "cyan", spark: [8, 9, 10, 11, 12, 13, 14] },
+    { icon: CheckCircle2, label: "Verified", value: stats.verified.toLocaleString(), tone: "emerald", spark: [5, 6, 7, 8, 9, 10, 11] },
+    { icon: Clock, label: "Pending", value: stats.pending.toLocaleString(), tone: "purple", spark: [4, 4, 3, 4, 3, 3, 2] },
+    { icon: AlertTriangle, label: "Flagged", value: stats.flagged.toLocaleString(), tone: "red", spark: [1, 2, 2, 3, 2, 3, 4] },
   ];
 
   return (
@@ -114,8 +120,10 @@ export default function KccaDashboardPage() {
                 <td>
                   <WalrusProofBadge
                     blobId={r.walrus_blob_id}
+                    contentHash={r.content_hash}
                     url={r.walrus_url}
-                    demoMode={r.walrus_demo_mode}
+                    walrusLive={r.walrus_live}
+                    storageType={r.storage_type}
                     label="Packet"
                   />
                 </td>

@@ -14,16 +14,21 @@ export default function GovInspectionsPage() {
   const [page, setPage] = useState(1);
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["gov-kcca", filter],
-    queryFn: () => governmentApi.kccaProperties({ status: filter }),
+    queryFn: () => governmentApi.kccaProperties({ status: filter === "all" ? undefined : filter }),
+  });
+  const { data: statsData } = useQuery({
+    queryKey: ["gov-kcca-stats"],
+    queryFn: () => governmentApi.kccaStats(),
   });
 
   const stats = useMemo(
     () => ({
-      scheduled: rows.filter((r) => r.status === "inspection").length || 42,
-      completed: rows.filter((r) => r.status === "verified").length || 318,
-      pending: rows.filter((r) => r.status === "pending").length || 28,
+      scheduled: statsData?.inspection ?? 0,
+      completed: statsData?.verified ?? 0,
+      pending: statsData?.pending ?? 0,
+      districts: statsData?.inspection_districts ?? 0,
     }),
-    [rows],
+    [statsData],
   );
 
   const decide = useMutation({
@@ -31,15 +36,24 @@ export default function GovInspectionsPage() {
     onSuccess: () => {
       toast.success("Inspection outcome recorded");
       qc.invalidateQueries({ queryKey: ["gov-kcca"] });
+      qc.invalidateQueries({ queryKey: ["gov-kcca-stats"] });
+      qc.invalidateQueries({ queryKey: ["gov-overview"] });
     },
     onError: (e) => toast.error(e?.response?.data?.detail?.message || e.message || "Failed"),
   });
 
   const kpis = [
-    { icon: ClipboardList, label: "Scheduled", value: stats.scheduled.toLocaleString(), trend: "+6.2%", tone: "cyan", spark: [2, 3, 4, 4, 5, 5, 6] },
-    { icon: CheckCircle2, label: "Completed", value: stats.completed.toLocaleString(), trend: "+14.8%", tone: "emerald", spark: [8, 9, 10, 11, 12, 13, 14] },
-    { icon: Clock, label: "Awaiting Visit", value: stats.pending.toLocaleString(), trend: "-3.1%", tone: "purple", spark: [4, 3, 3, 2, 3, 2, 2] },
-    { icon: MapPin, label: "Districts Covered", value: "12", trend: "Kampala metro", tone: "amber", spark: [1, 2, 2, 3, 3, 3, 4] },
+    { icon: ClipboardList, label: "Scheduled", value: stats.scheduled.toLocaleString(), tone: "cyan", spark: [2, 3, 4, 4, 5, 5, 6] },
+    { icon: CheckCircle2, label: "Completed", value: stats.completed.toLocaleString(), tone: "emerald", spark: [8, 9, 10, 11, 12, 13, 14] },
+    { icon: Clock, label: "Awaiting Visit", value: stats.pending.toLocaleString(), tone: "purple", spark: [4, 3, 3, 2, 3, 2, 2] },
+    {
+      icon: MapPin,
+      label: "Districts Covered",
+      value: stats.districts.toLocaleString(),
+      trend: stats.districts === 1 ? "1 district" : `${stats.districts} districts`,
+      tone: "amber",
+      spark: [1, 2, 2, 3, 3, 3, 4],
+    },
   ];
 
   return (
@@ -138,7 +152,7 @@ export default function GovInspectionsPage() {
             )}
           </tbody>
         </table>
-        <GovTablePagination page={page} totalPages={Math.max(1, Math.ceil(rows.length / 10) || 8)} onPage={setPage} />
+        <GovTablePagination page={page} totalPages={Math.max(1, Math.ceil(rows.length / 10) || 1)} onPage={setPage} />
       </div>
     </div>
   );

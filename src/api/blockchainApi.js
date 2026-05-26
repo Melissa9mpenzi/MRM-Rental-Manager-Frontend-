@@ -12,6 +12,9 @@ export const blockchainApi = {
   status: () => api.get("/blockchain/status").then(unwrap),
   dashboard: () => api.get("/blockchain/dashboard").then(unwrap),
   myWallet: () => api.get("/blockchain/wallet/me").then(unwrap),
+  ensureWallet: () => api.post("/blockchain/wallet/ensure").then(unwrap),
+  payPlatformSui: (reference) =>
+    api.post(`/payments/checkout/${reference}/pay-platform-sui`).then(unwrap),
   linkWallet: (data) => api.post("/blockchain/wallet/link", data).then(unwrap),
   receipts: (params = {}) => api.get("/blockchain/receipts", { params }).then(unwrap),
   receipt: (id) => api.get(`/blockchain/receipts/${id}`).then(unwrap),

@@ -42,7 +42,7 @@ const TRUST_PILLS = [
   { icon: Shield, title: "NIRA Verified", subtitle: "National ID & anti-fraud compliance" },
   { icon: Building2, title: "KCCA Approved", subtitle: "Property legality & inspections" },
   { icon: CreditCard, title: "URA Compliant", subtitle: "Rental tax & revenue tracking" },
-  { icon: Sparkles, title: "Sui Escrow + AI", subtitle: "Blockchain receipts & smart insights" },
+  { icon: Sparkles, title: "Sui + Walrus", subtitle: "On-chain escrow, receipts & decentralized proofs" },
 ];
 
 const GOV_FLOW = [

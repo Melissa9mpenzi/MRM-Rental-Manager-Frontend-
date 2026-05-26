@@ -9,6 +9,8 @@ import GovWorkflowBanner from "../../components/government/GovWorkflowBanner";
 import GovModuleKpis from "../../components/government/GovModuleKpis";
 import GovTablePagination from "../../components/government/GovTablePagination";
 import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
+import VerifyQrBlock from "../../components/verify/VerifyQrBlock";
+import { ExternalLink } from "lucide-react";
 
 function badgeClass(status) {
   if (status === "approved") return "gov-badge gov-badge-verified";
@@ -162,20 +164,21 @@ export default function NiraDashboardPage() {
               <th>Biometric</th>
               <th>Submitted</th>
               <th>Walrus</th>
+              <th>Compliance QR</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={9} className="py-10 text-center text-white/45">
+                <td colSpan={10} className="py-10 text-center text-white/45">
                   Loading…
                 </td>
               </tr>
             )}
             {!isLoading && rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-10 text-center text-white/45">
+                <td colSpan={10} className="py-10 text-center text-white/45">
                   No records in this queue. Confirm the landlord submitted KYC and you are on the same backend as
                   their login.
                 </td>
@@ -197,10 +200,37 @@ export default function NiraDashboardPage() {
                 <td>
                   <WalrusProofBadge
                     blobId={r.walrus_blob_id}
+                    contentHash={r.content_hash || r.kyc_manifest_hash}
                     url={r.walrus_url}
-                    demoMode={r.walrus_demo_mode}
+                    walrusLive={r.walrus_live}
+                    storageType={r.storage_type}
                     label="KYC"
                   />
+                </td>
+                <td className="align-top">
+                  {r.verification_status === "approved" && r.compliance_verify_token ? (
+                    <div className="flex flex-col items-start gap-1">
+                      <VerifyQrBlock
+                        token={r.compliance_verify_token}
+                        label="NIRA verified"
+                        size={72}
+                      />
+                      {r.verification_url ? (
+                        <a
+                          href={r.verification_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-0.5 text-[9px] font-bold text-cyan-300 hover:text-white"
+                        >
+                          Open verify page <ExternalLink size={10} />
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-white/35" title="Issued when NIRA approves KYC">
+                      {r.verification_status === "approved" ? "Generating…" : "After approval"}
+                    </span>
+                  )}
                 </td>
                 <td>
                   <div className="flex gap-1">

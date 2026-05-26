@@ -1,16 +1,26 @@
-import { HardDrive, ExternalLink } from "lucide-react";
+import { HardDrive, ExternalLink, Hash } from "lucide-react";
 
 /**
- * Compact Walrus proof indicator (blob id or demo hash anchor).
+ * Walrus blob or verifiable content-hash proof (never labeled as Walrus when only hashed).
  */
 export default function WalrusProofBadge({
   blobId,
+  contentHash,
   url,
+  walrusLive,
   demoMode,
-  label = "Walrus",
+  storageType,
+  label,
   className = "",
 }) {
-  if (!blobId) {
+  const live =
+    walrusLive === true ||
+    (walrusLive == null && storageType === "walrus") ||
+    (walrusLive == null && blobId && !String(blobId).startsWith("hash:") && !demoMode);
+  const hash = contentHash || (blobId?.startsWith("hash:") ? blobId.slice(5) : null);
+  const displayId = live ? blobId : hash;
+
+  if (!displayId) {
     return (
       <span className={`text-[10px] text-white/35 ${className}`} title="Not anchored yet">
         —
@@ -18,21 +28,23 @@ export default function WalrusProofBadge({
     );
   }
 
-  const short = blobId.length > 20 ? `${blobId.slice(0, 10)}…${blobId.slice(-6)}` : blobId;
-  const isDemo = demoMode ?? blobId.startsWith("hash:");
+  const short = displayId.length > 20 ? `${displayId.slice(0, 10)}…${displayId.slice(-6)}` : displayId;
+  const tag = label || (live ? "Walrus" : "Content hash");
 
   return (
     <span
-      className={`inline-flex max-w-[140px] items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[9px] ${className} ${
-        isDemo
-          ? "border-amber-500/30 bg-amber-500/10 text-amber-200/90"
-          : "border-cyan-500/30 bg-cyan-500/10 text-cyan-200/90"
+      className={`inline-flex max-w-[160px] items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[9px] ${className} ${
+        live
+          ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-200/90"
+          : "border-amber-500/30 bg-amber-500/10 text-amber-200/90"
       }`}
-      title={blobId}
+      title={displayId}
     >
-      <HardDrive size={10} className="shrink-0 opacity-80" />
-      <span className="truncate">{label}: {short}</span>
-      {url && !isDemo ? (
+      {live ? <HardDrive size={10} className="shrink-0 opacity-80" /> : <Hash size={10} className="shrink-0 opacity-80" />}
+      <span className="truncate">
+        {tag}: {short}
+      </span>
+      {url && live ? (
         <a
           href={url}
           target="_blank"

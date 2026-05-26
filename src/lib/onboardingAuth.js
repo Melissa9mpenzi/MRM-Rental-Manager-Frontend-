@@ -8,13 +8,26 @@ export function requiresKycCommerce(role) {
 }
 
 /**
- * Landlord / agent must upload KYC (or resubmit if rejected) before leaving onboarding.
- * Pending review can use the dashboard (banner only).
+ * Landlord / agent has finished the KYC onboarding step (may still be pending NIRA review).
+ */
+export function hasPassedKycOnboarding(user) {
+  if (!user || !requiresKycCommerce(user.role)) return true;
+  if (user.trusted_for_commerce) return true;
+  const status = (user.kyc_review_status || "none").toLowerCase();
+  if (status === "approved") return true;
+  if (status === "pending" && user.kyc_submitted_at) return true;
+  return false;
+}
+
+/**
+ * Must visit /auth/kyc to upload (or re-upload after rejection).
+ * Returning users who already submitted or were approved are not sent back.
  */
 export function mustCompleteKycBeforeApp(user) {
   if (!user || !requiresKycCommerce(user.role)) return false;
-  if (!user.kyc_submitted_at) return true;
+  if (hasPassedKycOnboarding(user)) return false;
   if ((user.kyc_review_status || "").toLowerCase() === "rejected") return true;
+  if (!user.kyc_submitted_at) return true;
   return false;
 }
 

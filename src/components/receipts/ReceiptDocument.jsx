@@ -146,7 +146,7 @@ export default function ReceiptDocument({ receipt, className = "" }) {
         <section className="receipt-doc__qr">
           <img src={qrImageUrl(verifyUrl, 100)} alt="Verify receipt QR" width={100} height={100} />
           <div>
-            <p className="receipt-doc__qr-title">Scan to verify this receipt</p>
+            <p className="receipt-doc__qr-title">Scan to Verify Receipt</p>
             <p className="receipt-doc__qr-url">{verifyUrl.replace(/^https?:\/\//, "")}</p>
           </div>
         </section>
