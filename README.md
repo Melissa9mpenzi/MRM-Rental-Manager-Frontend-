@@ -25,6 +25,21 @@ Official **React** single-page application for **RentDirect UG** (MRM Rental Man
 
 ## Features at a glance
 
+## Surface strategy (web vs mobile)
+
+This web app is intentionally the **management/control surface**.  
+The mobile app is intentionally the **quick action surface**.
+
+- **Web-first roles:** landlord management, government officers (NIRA/KCCA/URA), system admin
+- **Mobile-first roles:** tenant daily actions and field agent workflows
+- **Web-only:** government and system admin operations
+
+See backend architecture policy: `docs/ROLE_SURFACE_MATRIX.md` in the backend repo.
+
+---
+
+## Features at a glance
+
 ### Public & marketing
 
 - Landing, about, pricing, contact
