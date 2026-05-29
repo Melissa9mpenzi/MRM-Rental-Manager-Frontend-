@@ -79,7 +79,7 @@ function RecentProperty({ p }) {
       <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-brand-tealLt/30">
         {p.photo_path ? (
           <img
-            src={p.photo_path.startsWith("http") ? p.photo_path : `${listingImageUrl(p.photo_path)}`}
+            src={listingImageUrl(p.photo_path)}
             alt={p.name}
             className="h-full w-full object-cover"
           />

@@ -14,9 +14,7 @@ import { Badge, ConfirmDialog, EmptyState, StatCard } from "../../components/ui/
 import { ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
-import { platformApiOrigin } from "../../api/config";
-
-const API_ORIGIN = platformApiOrigin();
+import { listingImageUrl, mediaImageFallback } from "../../lib/mediaUrl";
 
 // ── Property Card ─────────────────────────────────────────────────
 function PropertyCard({ property }) {
@@ -57,12 +55,12 @@ function PropertyCard({ property }) {
     <div className={`card hover:border-brand-teal transition-all duration-150 ${!property.is_active ? "opacity-60" : ""}`}>
       {/* Photo banner */}
       {property.photo_path ? (
-        <div className="h-32 -mx-5 -mt-5 mb-4 rounded-t-lg overflow-hidden">
+        <div className="h-32 -mx-5 -mt-5 mb-4 rounded-t-lg overflow-hidden bg-brand-tealLt/20">
           <img
-            src={property.photo_path.startsWith('http') ? property.photo_path : `${API_ORIGIN}${property.photo_path}`}
+            src={listingImageUrl(property.photo_path)}
             alt={property.name}
             className="w-full h-full object-cover"
-            onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.classList.add('bg-gradient-to-r', 'from-brand-tealLt', 'to-white/10'); }}
+            onError={mediaImageFallback}
           />
         </div>
       ) : (

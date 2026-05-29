@@ -13,7 +13,7 @@ import EditPropertyModal from "../../components/domain/EditPropertyModal";
 import UnitCard from "../../components/domain/UnitCard";
 
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
-import { listingImageUrl, uploadMediaUrl } from "../../lib/mediaUrl";
+import { listingImageUrl, mediaImageFallback, uploadMediaUrl } from "../../lib/mediaUrl";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -75,6 +75,7 @@ export default function PropertyDetailPage() {
             src={listingImageUrl(property.photo_path)}
             alt={property.name}
             className="w-full h-full object-cover"
+            onError={mediaImageFallback}
           />
           {/* Overlay with name */}
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent" />
