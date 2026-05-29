@@ -13,7 +13,8 @@ import EditPropertyModal from "../../components/domain/EditPropertyModal";
 import UnitCard from "../../components/domain/UnitCard";
 
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
-import { listingImageUrl, mediaImageFallback, uploadMediaUrl } from "../../lib/mediaUrl";
+import { needsPhotoReupload, propertyPhotoUrl, uploadMediaUrl } from "../../lib/mediaUrl";
+import PropertyPhotoUpload from "../../components/domain/PropertyPhotoUpload";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -69,15 +70,13 @@ export default function PropertyDetailPage() {
       </Link>
 
       {/* Hero photo or header */}
-      {property.photo_path ? (
+      {property.photo_path && !needsPhotoReupload(property.photo_path) && propertyPhotoUrl(property.photo_path) ? (
         <div className="relative rounded-xl overflow-hidden h-52 w-full">
           <img
-            src={listingImageUrl(property.photo_path)}
+            src={propertyPhotoUrl(property.photo_path)}
             alt={property.name}
             className="w-full h-full object-cover"
-            onError={mediaImageFallback}
           />
-          {/* Overlay with name */}
           <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent" />
           <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
             <div>
@@ -99,6 +98,17 @@ export default function PropertyDetailPage() {
           </div>
         </div>
       ) : null}
+
+      {(!property.photo_path || needsPhotoReupload(property.photo_path)) && (
+        <div className="card space-y-3 border border-amber-400/30 bg-amber-500/5">
+          <p className="text-sm text-brand-mid">
+            {needsPhotoReupload(property.photo_path)
+              ? "The photo you uploaded from your laptop was saved on the old server folder and is no longer available after deploy. Re-upload it once — it will go to Cloudinary and stay permanent."
+              : "Add a cover photo for this property."}
+          </p>
+          <PropertyPhotoUpload property={property} variant="hero" />
+        </div>
+      )}
 
       {property.video_path && (
         <div className="card overflow-hidden p-0">
