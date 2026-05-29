@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import SuiProvider from "./providers/SuiProvider";
 import PrivyAppProvider from "./providers/PrivyAppProvider";
-import { ThemeProvider } from "./theme/ThemeProvider";
 
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import KycOnboardingGuard from "./components/layout/KycOnboardingGuard";
@@ -124,7 +123,6 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
       <PrivyAppProvider>
         <SuiProvider>
         <BrowserRouter
@@ -344,7 +342,6 @@ export default function App() {
         </BrowserRouter>
         </SuiProvider>
       </PrivyAppProvider>
-      </ThemeProvider>
     </QueryClientProvider>
   );
 }

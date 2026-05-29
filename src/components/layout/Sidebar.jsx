@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import BrandMark from "../brand/BrandMark";
-import ThemeToggleButton from "../ui/ThemeToggleButton";
 import { SUI_SIDEBAR_ITEMS, SUI_SIDEBAR_EXTERNAL } from "../../config/suiSidebarNav";
 
 const SUI_ROLES = new Set(["tenant", "landlord", "staff", "agent", "system_admin"]);
@@ -220,10 +219,6 @@ export default function Sidebar({ open, onClose }) {
         </nav>
 
         <div className="shrink-0 space-y-3 border-t border-white/10 px-4 py-4">
-          <div className="flex items-center justify-between gap-2 px-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-white/45">Theme</span>
-            <ThemeToggleButton />
-          </div>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-teal text-sm font-bold text-[#041208] ring-2 ring-brand-teal/30">
               {initials}

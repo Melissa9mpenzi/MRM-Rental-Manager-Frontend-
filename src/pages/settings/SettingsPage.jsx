@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { User, Bell, Lock, Wallet, Receipt, Shield, Palette, Eye } from "lucide-react";
+import { User, Bell, Lock, Wallet, Receipt, Shield, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { Input } from "../../components/ui/Input";
@@ -9,7 +9,6 @@ import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import { usersApi } from "../../api/usersApi";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { profilePathForRole } from "../../config/access";
-import ThemeSelector from "../../components/ui/ThemeSelector";
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
@@ -67,7 +66,6 @@ export default function SettingsPage() {
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "wallet", label: "Wallet", icon: Wallet },
     { id: "billing", label: "Billing", icon: Receipt },
-    { id: "appearance", label: "Appearance", icon: Palette },
     { id: "privacy", label: "Privacy", icon: Eye },
   ];
 
@@ -234,16 +232,6 @@ export default function SettingsPage() {
                   Use landlord payments and invoices in the app menu.
                 </div>
               )}
-            </div>
-          )}
-
-          {tab === "appearance" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-brand-dark">Appearance</h2>
-              <p className="text-sm text-brand-mid">
-                Choose light, dark, or match your device (system). Saved on this browser.
-              </p>
-              <ThemeSelector />
             </div>
           )}
 

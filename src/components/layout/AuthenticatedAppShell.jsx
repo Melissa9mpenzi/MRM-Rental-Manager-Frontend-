@@ -8,7 +8,6 @@ import SystemStatusBar from "../enterprise/SystemStatusBar";
 import NotificationBell from "./NotificationBell";
 import UserProfileMenu from "./UserProfileMenu";
 import SuiWalletHeader from "../sui/SuiWalletHeader";
-import ThemeToggleButton from "../ui/ThemeToggleButton";
 import useAuthStore from "../../store/authStore";
 import { isSuiRoute } from "../../config/suiSidebarNav";
 
@@ -137,7 +136,6 @@ export default function AuthenticatedAppShell({ children }) {
           </div>
 
           <div className="relative z-50 flex flex-shrink-0 items-center gap-1.5">
-            <ThemeToggleButton />
             {onSui && <SuiWalletHeader />}
             <NotificationBell variant="app" />
             <UserProfileMenu variant="app" showName={false} />
