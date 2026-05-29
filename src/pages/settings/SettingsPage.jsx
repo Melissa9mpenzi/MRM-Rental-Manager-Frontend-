@@ -9,6 +9,7 @@ import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import { usersApi } from "../../api/usersApi";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { profilePathForRole } from "../../config/access";
+import ThemeSelector from "../../components/ui/ThemeSelector";
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
@@ -238,12 +239,11 @@ export default function SettingsPage() {
 
           {tab === "appearance" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white">Appearance</h2>
-              <p className="text-sm text-white/50">Theme follows your RentDirect layout (dark glass).</p>
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 opacity-60">
-                <span className="text-sm font-semibold text-white">Compact density</span>
-                <input type="checkbox" className="rounded border-white/20 text-brand-teal" />
-              </label>
+              <h2 className="text-lg font-bold text-brand-dark">Appearance</h2>
+              <p className="text-sm text-brand-mid">
+                Choose light, dark, or match your device (system). Saved on this browser.
+              </p>
+              <ThemeSelector />
             </div>
           )}
 

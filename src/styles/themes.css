@@ -1,0 +1,145 @@
+/**
+ * Light / dark theme tokens. Default (no class) = dark glass (RentDirect).
+ * html.theme-light = light mode.
+ */
+
+:root,
+html.theme-dark {
+  color-scheme: dark;
+
+  --brand-bg: #080d12;
+  --brand-dark: #f1f5f9;
+  --brand-mid: #8b9db0;
+  --brand-teal: #00c076;
+  --brand-teal-lt: rgba(0, 192, 118, 0.16);
+
+  --rd-base: #060a0e;
+  --rd-surface: #0f141c;
+  --rd-elevated: #121a22;
+  --rd-stroke: rgba(255, 255, 255, 0.1);
+  --rd-muted: #8b9db0;
+  --rd-ink: #f4f4f5;
+
+  --rd-gradient: linear-gradient(155deg, #0a1018 0%, #060a0e 42%, #0d1520 100%);
+  --rd-mesh:
+    radial-gradient(ellipse 80% 50% at 15% -5%, rgba(0, 192, 118, 0.14), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, rgba(59, 130, 246, 0.07), transparent 48%);
+
+  --scrollbar-thumb: rgb(255 255 255 / 0.2);
+  --card-bg: #121a22;
+  --card-border: rgb(255 255 255 / 0.1);
+  --card-text: rgb(255 255 255 / 0.9);
+  --header-border: rgb(255 255 255 / 0.1);
+}
+
+html.theme-light {
+  color-scheme: light;
+
+  --brand-bg: #f4f7f7;
+  --brand-dark: #161d23;
+  --brand-mid: #576e6a;
+  --brand-teal: #5e8d83;
+  --brand-teal-lt: rgba(94, 141, 131, 0.14);
+
+  --rd-base: #ffffff;
+  --rd-surface: #ffffff;
+  --rd-elevated: #ffffff;
+  --rd-stroke: rgba(22, 29, 35, 0.12);
+  --rd-muted: #576e6a;
+  --rd-ink: #161d23;
+
+  --rd-gradient: linear-gradient(160deg, #ffffff 0%, #f4f7f7 45%, #e8f0ef 100%);
+  --rd-mesh:
+    radial-gradient(ellipse 70% 45% at 10% -5%, rgba(94, 141, 131, 0.12), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(94, 141, 131, 0.08), transparent 50%);
+
+  --scrollbar-thumb: rgb(22 29 35 / 0.2);
+  --card-bg: #ffffff;
+  --card-border: rgba(22, 29, 35, 0.1);
+  --card-text: #161d23;
+  --header-border: rgba(22, 29, 35, 0.08);
+}
+
+html.theme-light ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+
+html.theme-light .card {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  color: var(--card-text);
+  box-shadow: 0 4px 24px rgba(22, 29, 35, 0.08);
+}
+
+html.theme-light .card-hover:hover {
+  box-shadow: 0 8px 28px rgba(94, 141, 131, 0.15);
+}
+
+html.theme-light .btn-outline {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--brand-dark);
+}
+
+html.theme-light .btn-ghost:hover {
+  background: rgba(22, 29, 35, 0.06);
+  color: var(--brand-dark);
+}
+
+html.theme-light .input-field {
+  background: #ffffff;
+  color: var(--brand-dark);
+}
+
+html.theme-light .select-field,
+html.theme-light .select-auth,
+html.theme-light select {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: var(--brand-dark);
+  border-color: var(--rd-stroke);
+}
+
+html.theme-light [data-app-role] .card .text-brand-dark {
+  color: var(--brand-dark);
+}
+
+html.theme-light [data-app-role] .card .text-brand-mid {
+  color: var(--brand-mid);
+}
+
+html.theme-light [data-app-role] .card .bg-brand-bg {
+  background: rgba(94, 141, 131, 0.08);
+}
+
+html.theme-light [data-app-role] .card thead {
+  color: var(--brand-mid);
+}
+
+html.theme-light [data-app-role] .card tbody tr {
+  border-color: rgba(22, 29, 35, 0.08);
+}
+
+html.theme-light [data-app-role] .card tbody tr:hover {
+  background: rgba(94, 141, 131, 0.06);
+}
+
+html.theme-light .state-panel--loading {
+  border-color: rgba(22, 29, 35, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+html.theme-light .state-panel__title {
+  color: var(--brand-dark);
+}
+
+html.theme-light .state-panel__desc {
+  color: var(--brand-mid);
+}
+
+html.theme-light .shadow-card {
+  box-shadow: 0 4px 24px rgba(22, 29, 35, 0.08);
+}
+
+html.theme-light header.border-white\/10 {
+  border-color: var(--header-border);
+}
