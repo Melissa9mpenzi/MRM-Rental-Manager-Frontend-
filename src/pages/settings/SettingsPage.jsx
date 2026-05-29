@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { User, Bell, Lock, Wallet, Receipt, Shield, Palette, Eye } from "lucide-react";
+import { User, Bell, Lock, Wallet, Receipt, Shield, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { Input } from "../../components/ui/Input";
@@ -66,7 +66,6 @@ export default function SettingsPage() {
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "wallet", label: "Wallet", icon: Wallet },
     { id: "billing", label: "Billing", icon: Receipt },
-    { id: "appearance", label: "Appearance", icon: Palette },
     { id: "privacy", label: "Privacy", icon: Eye },
   ];
 
@@ -233,17 +232,6 @@ export default function SettingsPage() {
                   Use landlord payments and invoices in the app menu.
                 </div>
               )}
-            </div>
-          )}
-
-          {tab === "appearance" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white">Appearance</h2>
-              <p className="text-sm text-white/50">Theme follows your RentDirect layout (dark glass).</p>
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 opacity-60">
-                <span className="text-sm font-semibold text-white">Compact density</span>
-                <input type="checkbox" className="rounded border-white/20 text-brand-teal" />
-              </label>
             </div>
           )}
 
