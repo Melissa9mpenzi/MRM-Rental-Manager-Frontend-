@@ -27,6 +27,7 @@ export function createApiClient({ baseUrl, loginPath = "/login", timeout = 15_00
       url.includes("/auth/forgot-password") ||
       url.includes("/auth/reset-password") ||
       url.includes("/auth/verify-email") ||
+      url.includes("/auth/verify-totp") ||
       url.includes("/government/auth/login") ||
       url.includes("/government/invitation/")
     );

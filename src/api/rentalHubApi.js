@@ -51,6 +51,15 @@ export const rentalHubApi = {
     api
       .post("/messages/start", { unit_id: Number(unitId), body, thread_type: threadType })
       .then(unwrap),
+
+  startCall: (threadId, mode = "video") =>
+    api.post(`/messages/threads/${threadId}/call-session`, { mode }).then(unwrap),
+
+  adminThreads: (params = {}) =>
+    api
+      .get("/messages/admin/threads", { params })
+      .then(unwrap)
+      .then((d) => (Array.isArray(d) ? d : [])),
 };
 /** @deprecated use rentalHubApi */
 export const messagesApi = rentalHubApi;

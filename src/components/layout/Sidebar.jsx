@@ -73,6 +73,7 @@ const AGENT_NAV = [
   { to: "/agent/deals", icon: Briefcase, label: "Deals" },
   { to: "/agent/commissions", icon: Coins, label: "Commissions" },
   { to: "/agent/analytics", icon: BarChart2, label: "Analytics" },
+  { to: "/agent/workspace", icon: Briefcase, label: "Operations" },
   { to: "/agent/messages", icon: MessageSquare, label: "Rental Hub" },
   { to: "/agent/notifications", icon: Bell, label: "Notifications" },
   { to: "/agent/profile", icon: UserCircle, label: "Profile" },

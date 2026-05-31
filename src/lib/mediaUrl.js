@@ -1,8 +1,5 @@
 import { platformApiOrigin } from "../api/config";
 
-/** Stock image for marketplace listings with no photo at all. */
-const LISTING_PLACEHOLDER = "/images/hero-villa.jpg";
-
 /** Base URL for static uploads (same host as API, no `/api/v1`). */
 export function apiOrigin() {
   return platformApiOrigin();
@@ -42,18 +39,17 @@ export function uploadMediaUrl(path) {
 export function propertyPhotoUrl(path) {
   if (!path) return null;
   if (typeof path === "string" && path.startsWith("http")) return path;
-  if (typeof path === "string" && path.startsWith("/images/")) return path;
+  if (typeof path === "string" && path.startsWith("/images/")) return null;
   if (needsPhotoReupload(path)) return null;
   return uploadMediaUrl(path);
 }
 
-/** Marketplace / search cards — placeholder only when listing has no image field. */
+/** Marketplace / search — real upload URL only; null when none or stock path. */
 export function listingImageUrl(path) {
-  if (!path) return LISTING_PLACEHOLDER;
+  if (!path) return null;
   if (typeof path === "string" && path.startsWith("http")) return path;
-  if (typeof path === "string" && path.startsWith("/images/")) return path;
-  const resolved = propertyPhotoUrl(path);
-  return resolved || LISTING_PLACEHOLDER;
+  if (typeof path === "string" && path.startsWith("/images/")) return null;
+  return propertyPhotoUrl(path);
 }
 
 /** On load error: do not swap in a fake stock photo for landlord property cards. */

@@ -13,4 +13,11 @@ export const usersApi = {
     fd.append("new_password", new_password);
     return api.post("/users/me/change-password", fd).then((r) => r.data);
   },
+
+  totpStatus: () => api.get("/users/me/totp/status").then((r) => r.data),
+  totpSetup: () => api.post("/users/me/totp/setup").then((r) => r.data),
+  totpEnable: (code) => api.post("/users/me/totp/enable", { code }).then((r) => r.data),
+  totpDisable: (code) => api.post("/users/me/totp/disable", { code }).then((r) => r.data),
+
+  exportMyData: () => api.get("/users/me/export").then((r) => r.data),
 };
