@@ -4,7 +4,7 @@ import { Heart, MapPin, Search, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthStore from "../../store/authStore";
 import { savedListingsApi } from "../../api/savedListingsApi";
-import { listingImageUrl } from "../../lib/mediaUrl";
+import ListingPhoto from "../../components/domain/ListingPhoto";
 import ListingSaveButton from "../../components/domain/ListingSaveButton";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
@@ -86,11 +86,7 @@ export default function TenantSavedPage() {
           {rows.map((p) => (
             <div key={p.id} className="card-glass group overflow-hidden border-white/[0.1]">
               <div className="relative h-40 bg-[#0d1520]">
-                <img
-                  src={listingImageUrl(p.image)}
-                  alt=""
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                />
+                <ListingPhoto path={p.image} wrapperClassName="h-40" emptyLabel="No photo" />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#060a0e]/85 to-transparent" />
                 <div className="absolute right-3 top-3">
                   <ListingSaveButton listingId={p.id} compact />

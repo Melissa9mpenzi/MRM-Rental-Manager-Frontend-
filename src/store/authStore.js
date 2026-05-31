@@ -82,11 +82,37 @@ const useAuthStore = create((set, get) => ({
     const emailTrim = String(email ?? "").trim();
     try {
       const data = await authApi.login({ email: emailTrim, password });
+      if (data?.needs_totp) {
+        return {
+          needsTotp: true,
+          totpPendingToken: data.totp_pending_token,
+          user: data.user,
+        };
+      }
       get()._setSession(data);
       await get().refreshSessionUser();
       return { ...data, user: get().user };
     } catch (err) {
       const message = apiErrorMessage(err, "Login failed. Check your credentials.");
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  verifyTotpLogin: async ({ totpPendingToken, code }) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await authApi.verifyTotp({
+        totp_pending_token: totpPendingToken,
+        code: String(code ?? "").trim(),
+      });
+      get()._setSession(data);
+      await get().refreshSessionUser();
+      return { ...data, user: get().user };
+    } catch (err) {
+      const message = apiErrorMessage(err, "Invalid authenticator code.");
       set({ error: message });
       throw new Error(message);
     } finally {

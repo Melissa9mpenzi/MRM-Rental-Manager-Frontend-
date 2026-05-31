@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,7 +18,7 @@ import { messagesPathForRole } from "../../config/access";
 import ViewingScheduleModal from "../../components/domain/ViewingScheduleModal";
 import ListingSaveButton from "../../components/domain/ListingSaveButton";
 import { marketplaceApi } from "../../api/marketplaceApi";
-import { listingImageUrl } from "../../lib/mediaUrl";
+import ListingPhoto from "../../components/domain/ListingPhoto";
 import GovernmentComplianceBadges from "../../components/government/GovernmentComplianceBadges";
 
 function BedIcon(props) {
@@ -39,7 +39,6 @@ export default function ListingDetailPage() {
   const user = useAuthStore((s) => s.user);
   const loginState = { from: { pathname: location.pathname } };
   const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [heroIndex, setHeroIndex] = useState(0);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["marketplace-listing", unitId],
@@ -48,25 +47,7 @@ export default function ListingDetailPage() {
     retry: false,
   });
 
-  const p = data || {
-    title: "Listing",
-    price: 0,
-    address: "",
-    beds: 0,
-    baths: 1,
-    sqft: 0,
-    image: "/images/hero-villa.jpg",
-    desc: "",
-    parking: "—",
-    verified: false,
-    amenities: [],
-  };
-
-  const hero = listingImageUrl(p.image);
-  const gallery = useMemo(() => {
-    const extra = ["/images/listing-interior.jpg", "/images/listing-luxury.jpg"];
-    return [hero, ...extra].filter(Boolean);
-  }, [hero]);
+  const p = data;
 
   if (!Number.isFinite(unitId) || unitId <= 0) {
     return (
@@ -86,7 +67,7 @@ export default function ListingDetailPage() {
     const params = new URLSearchParams({
       listing: String(id),
       intent,
-      title: p.title || "",
+      title: p?.title || "",
     });
     navigate(`${messagesBase}?${params.toString()}`);
   };
@@ -95,14 +76,14 @@ export default function ListingDetailPage() {
     const params = new URLSearchParams({
       listing: String(id),
       intent: "viewing",
-      title: p.title || "",
+      title: p?.title || "",
       date,
       time,
     });
     navigate(`${messagesBase}?${params.toString()}`);
   };
 
-  const amenityRows = Array.isArray(p.amenities) && p.amenities.length > 0 ? p.amenities : null;
+  const amenityRows = Array.isArray(p?.amenities) && p.amenities.length > 0 ? p.amenities : null;
 
   if (isError) {
     return (
@@ -116,7 +97,7 @@ export default function ListingDetailPage() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !p) {
     return (
       <div className="card-glass p-10 text-center text-sm text-white/50">
         Loading listing from the API…
@@ -130,7 +111,18 @@ export default function ListingDetailPage() {
         <div className="space-y-4">
           <div className="overflow-hidden rounded-3xl border border-white/[0.1] bg-[#0a1018]">
             <div className="relative aspect-[21/9] lg:aspect-[2/1]">
-              <img src={gallery[heroIndex] || hero} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              {p.image ? (
+                <ListingPhoto
+                  path={p.image}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  wrapperClassName="absolute inset-0 h-full w-full"
+                  emptyLabel="No photo uploaded"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#0d1520] text-sm text-white/45">
+                  No photo uploaded for this listing
+                </div>
+              )}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#060a0e]/70 via-transparent to-transparent" />
               {p.verified && (
                 <div className="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-[#00C896]/35 bg-black/55 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-[#00C896] backdrop-blur-md">
@@ -143,22 +135,6 @@ export default function ListingDetailPage() {
                 </div>
               )}
             </div>
-          </div>
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {gallery.slice(0, 4).map((src, i) => (
-              <button
-                key={`${src}-${i}`}
-                type="button"
-                aria-label={`Show image ${i + 1}`}
-                aria-pressed={heroIndex === i}
-                onClick={() => setHeroIndex(i)}
-                className={`relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg border ring-offset-2 ring-offset-[#0a1018] transition focus:outline-none focus:ring-2 focus:ring-[#00C896]/50 ${
-                  heroIndex === i ? "border-[#00C896]/60 opacity-100 ring-2 ring-[#00C896]/40" : "border-white/10 opacity-90 hover:opacity-100"
-                }`}
-              >
-                <img src={src} alt="" className="h-full w-full object-cover" />
-              </button>
-            ))}
           </div>
           <div className="card-glass p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -193,8 +169,9 @@ export default function ListingDetailPage() {
             </div>
             <div className="mt-8">
               <h3 className="text-xs font-extrabold uppercase tracking-wide text-white/40">Amenities</h3>
+              {amenityRows ? (
               <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
-                {(amenityRows || ["WiFi", "Parking", "Security", "Balcony", "Generator", "Furnished"]).map((label) => {
+                {amenityRows.map((label) => {
                   const row =
                     typeof label === "string"
                       ? { icon: Wifi, label }
@@ -211,6 +188,9 @@ export default function ListingDetailPage() {
                   );
                 })}
               </div>
+              ) : (
+                <p className="mt-3 text-sm text-white/45">No amenities listed — ask the landlord for details.</p>
+              )}
             </div>
           </div>
         </div>

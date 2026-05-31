@@ -28,4 +28,21 @@ export const workspaceApi = {
 
   /** Staff or admin — operations-style summary for the agent workspace */
   staffSummary: () => api.get("/workspace/staff/summary").then(unwrap),
+
+  adminAnnouncements: () =>
+    api
+      .get("/workspace/admin/announcements")
+      .then(unwrap)
+      .then((d) => (Array.isArray(d) ? d : [])),
+
+  createAnnouncement: (body) => api.post("/workspace/admin/announcements", body).then(unwrap),
+
+  adminSupportTickets: () =>
+    api
+      .get("/workspace/admin/support-tickets")
+      .then(unwrap)
+      .then((d) => (Array.isArray(d) ? d : [])),
+
+  updateSupportTicket: (ticketId, body) =>
+    api.patch(`/workspace/admin/support-tickets/${ticketId}`, body).then(unwrap),
 };

@@ -1,15 +1,12 @@
 /**
- * Consistent “module coming online” shell for new sidebar destinations.
+ * Legacy wrapper — workspace modules now use WorkspaceModulePage directly.
  */
-import { LayoutGrid } from "lucide-react";
-import AppPageScaffold from "../../components/layout/AppPageScaffold";
+import WorkspaceModulePage from "../../components/workspace/WorkspaceModulePage";
 
-export default function ModuleShell({ title, subtitle, children }) {
+export default function ModuleShell({ title, subtitle, children, variant = "registry", icon }) {
   return (
-    <AppPageScaffold variant="registry" icon={LayoutGrid} title={title} description={subtitle || ""}>
-      {children ? (
-        <div className="card-glass border border-white/[0.08] p-6 lg:p-8">{children}</div>
-      ) : null}
-    </AppPageScaffold>
+    <WorkspaceModulePage variant={variant} icon={icon} title={title} subtitle={subtitle}>
+      {children}
+    </WorkspaceModulePage>
   );
 }

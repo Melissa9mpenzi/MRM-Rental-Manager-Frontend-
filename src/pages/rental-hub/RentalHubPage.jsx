@@ -116,6 +116,8 @@ export default function RentalHubPage() {
     queryKey: ["rental-hub-threads", folder, searchQ],
     queryFn: () => rentalHubApi.threads({ folder, q: searchQ || undefined }),
     staleTime: 12_000,
+    refetchInterval: 8_000,
+    refetchIntervalInBackground: false,
   });
 
   const threadList = Array.isArray(threads) ? threads : [];
@@ -129,6 +131,15 @@ export default function RentalHubPage() {
     if (active == null && threadList.length > 0) setActive(threadList[0].id);
   }, [active, threadList, threadParam]);
 
+  useEffect(() => {
+    if (!active) return;
+    requestAnimationFrame(() => inputRef.current?.focus());
+    rentalHubApi.markRead(active).then(() => {
+      qc.invalidateQueries({ queryKey: ["notif-count"] });
+      qc.invalidateQueries({ queryKey: ["rental-hub-threads"] });
+    });
+  }, [active, qc]);
+
   const { data: ctx } = useQuery({
     queryKey: ["rental-hub-context", active],
     queryFn: () => rentalHubApi.threadContext(active),
@@ -140,6 +151,8 @@ export default function RentalHubPage() {
     queryFn: () => rentalHubApi.threadMessages(active),
     enabled: active != null,
     staleTime: 4_000,
+    refetchInterval: active != null ? 5_000 : false,
+    refetchIntervalInBackground: false,
   });
 
   const msgs = Array.isArray(rawMessages) ? rawMessages : [];
@@ -186,7 +199,9 @@ export default function RentalHubPage() {
     mutationFn: ({ threadId, body }) => rentalHubApi.postMessage(threadId, body),
     onSuccess: () => {
       invalidateAll();
+      qc.invalidateQueries({ queryKey: ["notif-count"] });
       setDraft("");
+      requestAnimationFrame(() => inputRef.current?.focus());
     },
     onError: () => toast.error("Could not send."),
   });
@@ -213,6 +228,18 @@ export default function RentalHubPage() {
     },
   });
 
+  const callMut = useMutation({
+    mutationFn: ({ threadId, mode }) => rentalHubApi.startCall(threadId, mode),
+    onSuccess: (data) => {
+      invalidateAll();
+      if (data?.join_url) {
+        window.open(data.join_url, "_blank", "noopener,noreferrer");
+        toast.success(data.mode === "voice" ? "Voice call room opened." : "Video call room opened.");
+      }
+    },
+    onError: () => toast.error("Could not start call."),
+  });
+
   const handleSend = () => {
     const text = draft.trim();
     if (!text) return toast.error("Type a message first.");
@@ -232,7 +259,12 @@ export default function RentalHubPage() {
     else if (id === "report_issue") navigate("/tenant/maintenance/submit");
     else if (id === "view_property" && activeThread?.property?.property_id)
       navigate(`/landlord/properties`);
-    else toast("Coming soon — voice/video and AI assistant.");
+    else toast("Coming soon — AI assistant.");
+  };
+
+  const startCall = (mode) => {
+    if (!active) return toast.error("Select a conversation first.");
+    callMut.mutate({ threadId: active, mode });
   };
 
   const listingBanner =
@@ -340,7 +372,7 @@ export default function RentalHubPage() {
           </div>
         </aside>
 
-        <section className="flex min-w-0 flex-col">
+        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden">
           <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
             <div>
               <h2 className="text-sm font-bold text-white">{activeThread?.title || activeThread?.peer?.name || "Select a chat"}</h2>
@@ -354,17 +386,19 @@ export default function RentalHubPage() {
             <div className="flex gap-1">
               <button
                 type="button"
-                disabled
-                className="cursor-not-allowed rounded-lg p-2 text-white/25"
-                title="Voice calls — coming soon"
+                disabled={!active || callMut.isPending}
+                onClick={() => startCall("voice")}
+                className="rounded-lg p-2 text-white/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+                title="Start voice call (Jitsi)"
               >
                 <Phone size={16} />
               </button>
               <button
                 type="button"
-                disabled
-                className="cursor-not-allowed rounded-lg p-2 text-white/25"
-                title="Video calls — coming soon"
+                disabled={!active || callMut.isPending}
+                onClick={() => startCall("video")}
+                className="rounded-lg p-2 text-white/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30"
+                title="Start video call (Jitsi)"
               >
                 <Video size={16} />
               </button>
@@ -381,7 +415,7 @@ export default function RentalHubPage() {
             </div>
           </header>
 
-          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
             {msgLoading ? (
               <p className="text-xs text-white/45">Loading messages…</p>
             ) : (
@@ -426,7 +460,7 @@ export default function RentalHubPage() {
             )}
           </div>
 
-          <div className="border-t border-white/10 p-3">
+          <div className="rental-hub-compose border-t border-white/10 p-3">
             <div className="mb-2 flex flex-wrap gap-1">
               {(ctx?.quick_actions || []).slice(0, 4).map((a) => (
                 <button
@@ -452,8 +486,14 @@ export default function RentalHubPage() {
                 ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
                 rows={2}
-                placeholder="Write a message…"
+                placeholder="Write a message… (Enter to send)"
                 className="max-h-32 min-h-[2.5rem] flex-1 resize-none bg-transparent text-sm text-white outline-none"
               />
               <button

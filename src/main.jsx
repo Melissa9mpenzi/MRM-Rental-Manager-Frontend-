@@ -5,6 +5,7 @@ import "./styles/index.css";
 import "./styles/enterprise.css";
 import "./styles/government-portal.css";
 import "./styles/system-admin.css";
+import "./styles/settings-portal.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

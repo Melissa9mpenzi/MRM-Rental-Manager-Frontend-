@@ -297,7 +297,10 @@ Brand logo and PWA assets use `src/assets/rentdirect-logo.png`, copied under `pu
 - `apple-touch-icon.png`
 - `site.webmanifest`
 
-After updating the logo, replace those files and redeploy.
+After updating the logo, run `python scripts/generate-brand-assets.py` to refresh:
+
+- `favicon.ico`, `favicon-16.png`, `favicon-32.png`
+- `apple-touch-icon.png`, `logo-icon.png`
 
 ---
 

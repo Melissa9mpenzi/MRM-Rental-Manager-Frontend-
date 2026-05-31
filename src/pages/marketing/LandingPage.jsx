@@ -430,9 +430,6 @@ export default function LandingPage() {
           <Link to="/browse-properties" className="text-[#10B981] hover:underline">
             Browse
           </Link>
-          <Link to="/demo" className="text-white/50 hover:text-[#10B981]">
-            Demo guide
-          </Link>
           <Link to="/pricing" className="text-white/50 hover:text-[#10B981]">
             Pricing
           </Link>

@@ -71,7 +71,6 @@ import PendingApprovalPage from "./pages/auth/PendingApprovalPage";
 import RoleHomeRedirect from "./pages/auth/RoleHomeRedirect";
 
 import LandingPage from "./pages/marketing/LandingPage";
-import DemoGuidePage from "./pages/marketing/DemoGuidePage";
 import StaticInfoPage from "./pages/marketing/StaticInfoPage";
 import PropertySearchPage from "./pages/marketplace/PropertySearchPage";
 import ListingDetailPage from "./pages/marketplace/ListingDetailPage";
@@ -102,13 +101,28 @@ import ArrearsReportPage from "./pages/reports/ArrearsReportPage";
 import ContractPage from "./pages/legal/ContractPage";
 import MessagesPage from "./pages/messages/MessagesPage";
 import SettingsPage from "./pages/settings/SettingsPage";
+import LandlordSettingsPage from "./pages/settings/LandlordSettingsPage";
+import AgentSettingsPage from "./pages/settings/AgentSettingsPage";
 import LandlordAddPropertyPage from "./pages/landlord/LandlordAddPropertyPage";
 import SharedInAppNotificationsPage from "./pages/notifications/SharedInAppNotificationsPage";
 import LandlordApplicantsPage from "./pages/landlord/LandlordApplicantsPage.jsx";
 import LandlordContractsPage from "./pages/landlord/LandlordContractsPage.jsx";
 import LandlordAnalyticsPage from "./pages/landlord/LandlordAnalyticsPage.jsx";
 import LandlordWalletPage from "./pages/landlord/LandlordWalletPage.jsx";
-import { LandlordReportsHubPage } from "./pages/workspace/placeholders.jsx";
+import {
+  LandlordReportsHubPage,
+  AdminListingsPage,
+  AdminModerationPage,
+  AdminPaymentsPage,
+  AdminContractsPage,
+  AdminFraudPage,
+  AdminAnalyticsPage,
+  AdminReportsPage,
+  AdminSupportPage,
+  AdminAuditLogsPage,
+  AdminSystemSettingsPage,
+} from "./pages/workspace/placeholders.jsx";
+import AgentWorkspaceHubPage from "./pages/workspace/AgentWorkspaceHubPage.jsx";
 import AgentLeadsPage from "./pages/agent/AgentLeadsPage.jsx";
 import AgentClientsPage from "./pages/agent/AgentClientsPage.jsx";
 import AgentSchedulesPage from "./pages/agent/AgentSchedulesPage.jsx";
@@ -141,7 +155,6 @@ export default function App() {
         <Routes>
           {/* ── Public marketing ── */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/demo" element={<DemoGuidePage />} />
 
           {/* Legacy public URLs → canonical */}
           <Route path="/browse" element={<Navigate to="/browse-properties" replace />} />
@@ -283,7 +296,7 @@ export default function App() {
                 <Route path="/landlord/reports/arrears" element={<ArrearsReportPage />} />
                 <Route path="/landlord/messages" element={<MessagesPage />} />
                 <Route path="/landlord/profile" element={<AccountProfilePage />} />
-                <Route path="/landlord/settings" element={<SettingsPage />} />
+                <Route path="/landlord/settings" element={<LandlordSettingsPage />} />
                 </Route>
               </Route>
 
@@ -301,7 +314,18 @@ export default function App() {
                 <Route path="/agent/notifications" element={<SharedInAppNotificationsPage />} />
                 <Route path="/agent/messages" element={<MessagesPage />} />
                 <Route path="/agent/profile" element={<AccountProfilePage />} />
-                <Route path="/agent/settings" element={<SettingsPage />} />
+                <Route path="/agent/settings" element={<AgentSettingsPage />} />
+                <Route path="/agent/workspace" element={<AgentWorkspaceHubPage />} />
+                <Route path="/agent/workspace/listings" element={<AdminListingsPage />} />
+                <Route path="/agent/workspace/moderation" element={<AdminModerationPage />} />
+                <Route path="/agent/workspace/payments" element={<AdminPaymentsPage />} />
+                <Route path="/agent/workspace/contracts" element={<AdminContractsPage />} />
+                <Route path="/agent/workspace/fraud" element={<AdminFraudPage />} />
+                <Route path="/agent/workspace/analytics" element={<AdminAnalyticsPage />} />
+                <Route path="/agent/workspace/reports" element={<AdminReportsPage />} />
+                <Route path="/agent/workspace/support" element={<AdminSupportPage />} />
+                <Route path="/agent/workspace/audit" element={<AdminAuditLogsPage />} />
+                <Route path="/agent/workspace/system" element={<AdminSystemSettingsPage />} />
                 </Route>
               </Route>
 

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, SlidersHorizontal, MapPin, CheckCircle2, Lock, X, Store } from "lucide-react";
 import GovernmentComplianceBadges from "../../components/government/GovernmentComplianceBadges";
 import { marketplaceApi } from "../../api/marketplaceApi";
-import { listingImageUrl } from "../../lib/mediaUrl";
+import ListingPhoto from "../../components/domain/ListingPhoto";
 import useAuthStore from "../../store/authStore";
 import ListingSaveButton from "../../components/domain/ListingSaveButton";
 import {
@@ -396,11 +396,7 @@ export default function PropertySearchPage() {
                 )}
                 <Link to={`/property/${p.id}`} className="block">
                   <div className="relative h-40 overflow-hidden bg-[#0d1520]">
-                    <img
-                      src={listingImageUrl(p.image)}
-                      alt=""
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                    />
+                    <ListingPhoto path={p.image} wrapperClassName="h-40" emptyLabel="No photo" />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#060a0e]/80 to-transparent" />
                   </div>
                   <div className="p-4">

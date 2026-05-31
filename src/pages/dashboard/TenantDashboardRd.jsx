@@ -13,13 +13,13 @@ import {
 import useAuthStore from "../../store/authStore";
 import { marketplaceApi } from "../../api/marketplaceApi";
 import { savedListingsApi } from "../../api/savedListingsApi";
-import { listingImageUrl } from "../../lib/mediaUrl";
+import { propertyPhotoUrl } from "../../lib/mediaUrl";
+import ListingPhoto from "../../components/domain/ListingPhoto";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
+import { rentalHubApi } from "../../api/rentalHubApi";
 import { notificationsApi } from "../../api/notificationsApi";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
-
-const FALLBACK_LEASE_IMAGE = "/images/hero-villa.jpg";
 
 function fmtPaidYtd(n) {
   const v = Number(n) || 0;
@@ -67,6 +67,19 @@ export default function TenantDashboardRd() {
     retry: false,
   });
 
+  const applicationsQuery = useQuery({
+    queryKey: ["tenant-applications-count"],
+    queryFn: () =>
+      rentalHubApi.threads({
+        folder: "inbox",
+        thread_type: "inquiry",
+      }),
+    enabled: user?.role === "tenant",
+    retry: false,
+  });
+
+  const applicationCount = Array.isArray(applicationsQuery.data) ? applicationsQuery.data.length : 0;
+
   const leasePayload = leaseQuery.data;
   const lease = leasePayload?.lease;
   const property = leasePayload?.property;
@@ -103,13 +116,14 @@ export default function TenantDashboardRd() {
   }, [paymentsQuery.data]);
 
   const unread = unreadQuery.data ?? 0;
+  const leasePhoto = propertyPhotoUrl(property?.photo_path);
 
   const stats = [
     {
       icon: Sparkles,
       label: "Applications",
-      value: "0",
-      sub: "None yet",
+      value: applicationsQuery.isLoading ? "…" : String(applicationCount),
+      sub: applicationCount === 0 ? "None yet" : "Listing enquiries",
       to: "/tenant/applications",
     },
     {
@@ -159,12 +173,18 @@ export default function TenantDashboardRd() {
       <div className="card-glass overflow-hidden border-white/[0.12]">
         <div className="grid gap-6 md:grid-cols-[1.1fr_1fr]">
           <div className="relative h-44 overflow-hidden rounded-xl bg-[#0d1520] md:h-auto md:min-h-[200px]">
-            <img
-              src={FALLBACK_LEASE_IMAGE}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-            />
+            {leasePhoto ? (
+              <img
+                src={leasePhoto}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-xs text-white/40">
+                {lease ? "No property photo on file" : "Lease photo when assigned"}
+              </div>
+            )}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10" />
             <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
               {lease ? "Active lease" : "Lease"}
@@ -253,7 +273,7 @@ export default function TenantDashboardRd() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="card-glass">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Recommended for you</h3>
+            <h3 className="text-sm font-bold text-white">Available listings</h3>
             <Link to="/browse-properties" className="text-xs font-semibold text-[#00C896] hover:underline">
               Browse all
             </Link>
@@ -269,7 +289,7 @@ export default function TenantDashboardRd() {
                 className="w-[200px] flex-shrink-0 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] transition hover:border-[#00C896]/35"
               >
                 <div className="relative h-28 overflow-hidden bg-[#0d1520]">
-                  <img src={listingImageUrl(l.image)} alt="" className="h-full w-full object-cover" />
+                  <ListingPhoto path={l.image} wrapperClassName="h-28" emptyLabel="No photo" />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
                 </div>
                 <div className="p-3">
