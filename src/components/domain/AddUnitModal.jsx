@@ -78,14 +78,17 @@ export default function AddUnitModal({ open, onClose, propertyId }) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Unit number"
-            placeholder="e.g. A1 or 101"
+            label="Unit code/name"
+            placeholder="e.g. A1, E2, Shop G3"
             required
             error={errors.unit_number?.message}
             {...register("unit_number", { required: "Unit number is required" })}
           />
-          <Input label="Floor" type="number" placeholder="0 = ground" {...register("floor_number")} />
+          <Input label="Floor number" type="number" placeholder="0 = Ground floor, 1 = First floor" {...register("floor_number")} />
         </div>
+        <p className="text-[11px] text-brand-mid">
+          A unit can be an apartment, office, or shop. Keep your own labels (for example A1-E2 or Shop-01).
+        </p>
 
         <ListingDetailsFields
           register={register}
