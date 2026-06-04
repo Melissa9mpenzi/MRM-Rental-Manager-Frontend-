@@ -16,7 +16,6 @@ import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from ".
 import useAuthStore from "../../store/authStore";
 import { receiptsApi } from "../../api/receiptsApi";
 import PaymentReceiptSuccess from "../../components/receipts/PaymentReceiptSuccess";
-import ProductionReadinessBanner from "../../components/layout/ProductionReadinessBanner";
 import "../../styles/receipt-portal.css";
 
 function fmt(n) {
@@ -244,8 +243,6 @@ export default function PaymentFlowPage() {
       title="Pay rent"
       description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui — your wallet is created with your email account."
     >
-      <ProductionReadinessBanner />
-
       {gatewayQuery.data && !gatewayQuery.data.configured && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           Configure <strong>MTN MoMo</strong> or <strong>Pesapal</strong> on the API server. See{" "}
@@ -266,14 +263,6 @@ export default function PaymentFlowPage() {
         <div className="mb-4 rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-3 text-sm text-violet-100">
           <strong>Sui blockchain</strong> active on {blockchainQuery.data.network}. Fiat payments can
           generate immutable receipts; wallet payments use on-chain settlement.
-        </div>
-      )}
-      {blockchainQuery.isSuccess && !blockchainQuery.data?.enabled && (
-        <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/65">
-          <strong className="text-white/85">Sui wallet pay</strong> is not configured on the API (
-          <code className="rounded bg-black/30 px-1 text-xs">SUI_TREASURY_ADDRESS</code>). Use{" "}
-          <strong className="text-white/85">MTN MoMo</strong>, <strong className="text-white/85">Airtel</strong>, or{" "}
-          <strong className="text-white/85">Pesapal</strong> below.
         </div>
       )}
       {noProfile && (

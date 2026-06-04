@@ -29,7 +29,6 @@ import {
 import { workspaceApi } from "../../api/workspaceApi";
 import { governmentApi } from "../../api/governmentApi";
 import SystemAdminRightRail from "../../components/system/SystemAdminRightRail";
-import ProductionReadinessBanner from "../../components/layout/ProductionReadinessBanner";
 import MiniSparkline from "../../components/system/MiniSparkline";
 
 const fmt = (n) => new Intl.NumberFormat("en-UG", { notation: "compact", maximumFractionDigits: 1 }).format(n || 0);
@@ -194,7 +193,6 @@ export default function SystemDashboardPage() {
 
   return (
     <div className="sys-dashboard">
-      <ProductionReadinessBanner />
       {isError && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           Could not load platform summary. Ensure the API is running.
