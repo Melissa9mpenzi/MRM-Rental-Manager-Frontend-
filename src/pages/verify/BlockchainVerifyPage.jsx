@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, ExternalLink, ShieldCheck, ShieldX, XCircle } from "lucide-react";
 import { verifyApi } from "../../api/verifyApi";
 import { methodLabel, qrImageUrl } from "../../lib/receiptTheme";
-import WalrusProofBadge from "../../components/sui/WalrusProofBadge";
+import { verifyPayloadForDisplay } from "../../lib/receiptRedaction";
 import BrandMark from "../../components/brand/BrandMark";
 import "../../styles/verify-portal.css";
 
@@ -116,21 +116,22 @@ export default function BlockchainVerifyPage({ forcedKind }) {
   }, [isLoading, data, isError]);
 
   const showResult = phase === "done" && !isLoading;
-  const valid = data?.valid;
+  const display = verifyPayloadForDisplay(data);
+  const valid = display?.valid;
   const loading = !showResult;
 
   const title = useMemo(() => {
     if (loading) return "Verifying on Sui…";
     if (isError || !data) return "Verification failed";
-    if (valid) return data.title || "Verified";
-    return data.title || "Not verified";
-  }, [loading, isError, data, valid]);
+    if (valid) return display?.title || "Verified";
+    return display?.title || "Not verified";
+  }, [loading, isError, display, valid]);
 
   const headline = useMemo(() => {
-    if (loading) return "Running tamper-proof checks";
-    if (valid) return data.headline || "Receipt Authenticated";
-    return data?.headline || data?.message || "Record could not be authenticated";
-  }, [loading, valid, data]);
+    if (loading) return "Checking receipt authenticity";
+    if (valid) return display?.headline || "Payment record confirmed";
+    return display?.headline || display?.message || "Record could not be authenticated";
+  }, [loading, valid, display]);
 
   return (
     <div className="verify-portal">
@@ -164,7 +165,7 @@ export default function BlockchainVerifyPage({ forcedKind }) {
               <ShieldCheck className="mx-auto mb-3 text-emerald-400" size={52} strokeWidth={1.5} />
               <h1 className="text-2xl font-extrabold text-emerald-100">{title}</h1>
               <p className="mt-2 text-sm font-semibold text-emerald-300/90">{headline}</p>
-              <p className="mt-1 text-xs text-white/50">{data.message}</p>
+              <p className="mt-1 text-xs text-white/50">{display?.message}</p>
             </>
           ) : (
             <>
@@ -177,139 +178,82 @@ export default function BlockchainVerifyPage({ forcedKind }) {
           )}
         </div>
 
-        {showResult && data && (
+        {showResult && display && (
           <div className="verify-card">
             <div className="verify-card__section">
               <p className="verify-card__title">
-                {data.kind === "receipt"
-                  ? "Blockchain payment receipt"
-                  : data.kind === "contract"
+                {display.kind === "receipt"
+                  ? "Payment receipt"
+                  : display.kind === "contract"
                     ? "Rental agreement"
-                    : data.kind === "property"
+                    : display.kind === "property"
                       ? "Property compliance"
-                      : data.kind === "compliance"
+                      : display.kind === "compliance"
                         ? "Government identity"
                         : "Verification"}
               </p>
-              <ChecksGrid checks={data.checks} />
+              <ChecksGrid checks={display.checks} />
             </div>
 
-            {data.kind === "receipt" && (
-              <>
-                <div className="verify-card__section">
-                  <p className="verify-card__title">Main details</p>
-                  <VerifyRow label="Receipt number" value={data.receipt_number} mono />
-                  <VerifyRow label="Tenant" value={data.tenant_name} />
-                  <VerifyRow label="Landlord" value={data.landlord_name} />
-                  <VerifyRow label="Property" value={data.property_name} />
-                  <VerifyRow label="Unit" value={data.unit_number} />
-                  <VerifyRow label="Amount paid" value={fmtMoney(data.amount, data.currency)} />
-                  <VerifyRow label="Payment method" value={methodLabel(data.payment_method)} />
-                  <VerifyRow label="Period" value={data.period_label} />
-                  <VerifyRow label="Date" value={fmtDate(data.issued_at)} />
-                  <VerifyRow label="Reference" value={data.transaction_reference} mono />
-                  <VerifyRow label="Escrow status" value={data.escrow_status || data.status} />
-                </div>
-                <div className="verify-card__section">
-                  <p className="verify-card__title">Blockchain</p>
-                  <VerifyRow label="Transaction hash" value={data.tx_hash} mono />
-                  <VerifyRow label="Smart contract ID" value={data.contract_id || "—"} mono />
-                  <VerifyRow
-                    label="Verification status"
-                    value={valid ? "Verified on Sui Blockchain" : "Pending / off-chain"}
-                  />
-                  {(data.walrus_blob_id || data.content_hash) && (
-                    <div className="mt-2">
-                      <WalrusProofBadge
-                        blobId={data.walrus_blob_id}
-                        contentHash={data.content_hash}
-                        walrusLive={data.walrus_live}
-                        storageType={data.storage_type}
-                        label="Walrus proof"
-                      />
-                    </div>
-                  )}
-                  {data.explorer_url && (
-                    <a
-                      href={data.explorer_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-violet-300 hover:text-white"
-                    >
-                      View on Sui Explorer <ExternalLink size={12} />
-                    </a>
-                  )}
-                </div>
-              </>
+            {display.kind === "receipt" && (
+              <div className="verify-card__section">
+                <p className="verify-card__title">Receipt summary</p>
+                <VerifyRow label="Receipt number" value={display.receipt_number} mono />
+                <VerifyRow label="Property" value={display.property_name} />
+                <VerifyRow label="Location" value={display.property_address} />
+                <VerifyRow label="Unit" value={display.unit_number} />
+                <VerifyRow label="Amount" value={fmtMoney(display.amount, display.currency)} />
+                <VerifyRow label="Payment method" value={methodLabel(display.payment_method)} />
+                <VerifyRow label="Period" value={display.period_label} />
+                <VerifyRow label="Date issued" value={fmtDate(display.issued_at)} />
+                <VerifyRow label="Reference" value={display.transaction_reference} mono />
+                <VerifyRow label="Status" value={display.escrow_status || display.status} />
+                {display.tx_hash && (
+                  <VerifyRow label="Transaction" value={display.tx_hash} mono />
+                )}
+                {display.explorer_url && valid && (
+                  <a
+                    href={display.explorer_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-white"
+                  >
+                    View transaction <ExternalLink size={12} />
+                  </a>
+                )}
+              </div>
             )}
 
-            {data.kind === "contract" && (
+            {display.kind === "contract" && (
               <div className="verify-card__section">
                 <p className="verify-card__title">Agreement</p>
-                <VerifyRow label="Tenant" value={data.tenant_name} />
-                <VerifyRow label="Landlord" value={data.landlord_name} />
-                <VerifyRow label="Property" value={data.property_name} />
-                <VerifyRow label="Unit" value={data.unit_number} />
-                <VerifyRow label="Monthly rent" value={fmtMoney(data.monthly_rent)} />
-                <VerifyRow label="Deposit" value={fmtMoney(data.deposit_amount)} />
-                <VerifyRow label="Lease period" value={`${data.start_date || "—"} → ${data.end_date || "open"}`} />
-                <VerifyRow label="Status" value={data.status} />
-                <VerifyRow label="Agreement hash" value={data.agreement_hash} mono />
-                <VerifyRow label="Smart contract ID" value={data.contract_id} mono />
-                <div className="mt-2">
-                  <WalrusProofBadge
-                    blobId={data.walrus_blob_id}
-                    contentHash={data.content_hash}
-                    walrusLive={data.walrus_live}
-                    storageType={data.storage_type}
-                  />
-                </div>
+                <VerifyRow label="Property" value={display.property_name} />
+                <VerifyRow label="Unit" value={display.unit_number} />
+                <VerifyRow label="Monthly rent" value={fmtMoney(display.monthly_rent)} />
+                <VerifyRow label="Status" value={display.status} />
               </div>
             )}
 
-            {data.kind === "property" && (
+            {display.kind === "property" && (
               <div className="verify-card__section">
-                <p className="verify-card__title">KCCA property</p>
-                <VerifyRow label="Property" value={data.property_name} />
-                <VerifyRow label="Address" value={data.property_address} />
-                <VerifyRow label="District" value={data.district} />
-                <VerifyRow label="Landlord" value={data.landlord_name} />
-                <VerifyRow label="KCCA status" value={data.gov_verification_status} />
-                <div className="mt-2">
-                  <WalrusProofBadge
-                    blobId={data.walrus_blob_id}
-                    contentHash={data.content_hash}
-                    walrusLive={data.walrus_live}
-                    storageType={data.storage_type}
-                    label="Compliance packet"
-                  />
-                </div>
+                <p className="verify-card__title">Property record</p>
+                <VerifyRow label="Property" value={display.property_name} />
+                <VerifyRow label="District" value={display.district} />
+                <VerifyRow label="KCCA status" value={display.gov_verification_status} />
               </div>
             )}
 
-            {data.kind === "compliance" && (
+            {display.kind === "compliance" && (
               <div className="verify-card__section">
-                <p className="verify-card__title">NIRA / identity</p>
-                <VerifyRow label="Name" value={data.full_name} />
-                <VerifyRow label="Email" value={data.email} />
-                <VerifyRow label="National ID" value={data.national_id_masked} mono />
-                <VerifyRow label="KYC status" value={data.kyc_review_status} />
-                <VerifyRow label="Verified at" value={fmtDate(data.verified_at)} />
-                <div className="mt-2">
-                  <WalrusProofBadge
-                    blobId={data.walrus_blob_id}
-                    contentHash={data.content_hash}
-                    walrusLive={data.walrus_live}
-                    storageType={data.storage_type}
-                    label="KYC manifest"
-                  />
-                </div>
+                <p className="verify-card__title">Identity check</p>
+                <VerifyRow label="KYC status" value={display.kyc_review_status} />
+                <VerifyRow label="Verified at" value={fmtDate(display.verified_at)} />
               </div>
             )}
 
-            {data.verification_url && (
+            {display.verification_url && (
               <div className="verify-qr-block">
-                <img src={qrImageUrl(data.verification_url, 100)} alt="" width={100} height={100} />
+                <img src={qrImageUrl(display.verification_url, 100)} alt="" width={100} height={100} />
                 <p className="mt-2 text-[10px] text-white/45">Scan to verify again</p>
               </div>
             )}
@@ -317,10 +261,8 @@ export default function BlockchainVerifyPage({ forcedKind }) {
         )}
 
         <footer className="verify-footer">
-          <strong>Secured by Sui Blockchain</strong>
-          Stored on Walrus
-          <br />
-          Powered by RentDirect UG
+          <strong>RentDirect UG</strong>
+          Official verification service · Uganda
         </footer>
 
         <p className="mt-6 text-center">

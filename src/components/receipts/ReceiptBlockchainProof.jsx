@@ -1,42 +1,43 @@
-import { qrImageUrl } from "../../lib/receiptTheme";
+import { ExternalLink, ShieldCheck } from "lucide-react";
+import { maskWalletOrHash } from "../../lib/receiptRedaction";
 
+/** Sidebar on receipt detail — verification only, no raw hashes or blob IDs. */
 export default function ReceiptBlockchainProof({ receipt }) {
-  if (!receipt?.verification_hash && !receipt?.walrus_blob_id && !receipt?.tx_hash) return null;
+  const hasVerify = Boolean(receipt?.verification_url || receipt?.verification_token);
+  const hasChain = Boolean(receipt?.tx_hash);
 
-  const verifyUrl = receipt.verification_url || "";
+  if (!hasVerify && !hasChain) return null;
 
   return (
     <aside className="receipt-proof-panel">
-      <p className="receipt-proof-panel__title">Blockchain proof</p>
+      <p className="receipt-proof-panel__title">
+        <ShieldCheck size={14} className="inline mr-1 text-emerald-400" />
+        Verification
+      </p>
+      <p className="text-xs text-white/55 leading-relaxed mb-3">
+        This receipt is registered on RentDirect UG. Share the QR code or receipt number for confirmation — not your
+        full payment reference or wallet details.
+      </p>
       <dl className="receipt-proof-panel__list">
-        {receipt.verification_hash && (
+        <div>
+          <dt>Receipt number</dt>
+          <dd className="font-mono text-[11px]">{receipt.receipt_number}</dd>
+        </div>
+        {hasChain && (
           <div>
-            <dt>SHA256 hash</dt>
-            <dd className="font-mono text-[10px] leading-relaxed break-all">{receipt.verification_hash}</dd>
-          </div>
-        )}
-        {receipt.walrus_blob_id && (
-          <div>
-            <dt>Stored on Walrus</dt>
-            <dd className="font-mono text-[10px] break-all">{receipt.walrus_blob_id}</dd>
-          </div>
-        )}
-        {receipt.digital_signature && (
-          <div>
-            <dt>Digital signature</dt>
-            <dd className="font-mono text-[10px] break-all">{receipt.digital_signature.slice(0, 32)}…</dd>
+            <dt>Transaction (masked)</dt>
+            <dd className="font-mono text-[10px]">{maskWalletOrHash(receipt.tx_hash)}</dd>
           </div>
         )}
       </dl>
-      {verifyUrl && (
-        <div className="receipt-proof-panel__qr">
-          <img src={qrImageUrl(verifyUrl, 88)} alt="" width={88} height={88} />
-          <p className="text-[10px] text-white/45 mt-2 text-center">Scan to Verify Receipt</p>
-        </div>
-      )}
       {receipt.explorer_url && (
-        <a href={receipt.explorer_url} target="_blank" rel="noreferrer" className="receipt-btn receipt-btn--violet w-full justify-center mt-3 text-xs">
-          Sui Explorer
+        <a
+          href={receipt.explorer_url}
+          target="_blank"
+          rel="noreferrer"
+          className="receipt-btn receipt-btn--violet w-full justify-center mt-3 text-xs"
+        >
+          <ExternalLink size={12} /> View on explorer
         </a>
       )}
     </aside>

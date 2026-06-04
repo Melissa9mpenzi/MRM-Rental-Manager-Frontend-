@@ -83,9 +83,9 @@ export default function PaymentsPage() {
             <option value="">All methods</option>
             <option value="mtn_momo">MTN MoMo</option>
             <option value="airtel">Airtel</option>
-            <option value="cash">Cash</option>
+            <option value="pesapal">Pesapal / Card</option>
             <option value="bank">Bank</option>
-            <option value="other">Other</option>
+            <option value="sui">Sui</option>
           </select>
         </div>
       </div>

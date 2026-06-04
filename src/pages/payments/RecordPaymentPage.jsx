@@ -41,7 +41,7 @@ export default function RecordPaymentPage() {
     tenant_id:      "",
     amount:         "",
     payment_type:   "rent",
-    payment_method: "cash",
+    payment_method: "mtn_momo",
     reference:      "",
     period_month:   new Date().getMonth() + 1,
     period_year:    CURRENT_YEAR,
