@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CreditCard } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
@@ -11,6 +11,7 @@ import PlatformSuiWallet from "../../components/blockchain/PlatformSuiWallet";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
+import { apiErrorMessage } from "../../lib/apiError";
 import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from "../../lib/suiCheckout";
 import useAuthStore from "../../store/authStore";
 import { receiptsApi } from "../../api/receiptsApi";
@@ -32,13 +33,21 @@ export default function PaymentFlowPage() {
   const [paying, setPaying] = useState(false);
   const [suiExternalWallet, setSuiExternalWallet] = useState(false);
   const [successReceipt, setSuccessReceipt] = useState(null);
+  const [linking, setLinking] = useState(false);
   const account = useCurrentAccount();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+
+  const profileQuery = useQuery({
+    queryKey: ["tenant-me-pay"],
+    queryFn: () => tenantPortalApi.myProfile(),
+    retry: false,
+  });
 
   const invoicesQuery = useQuery({
     queryKey: ["tenant-my-invoices-pay"],
     queryFn: () => tenantPortalApi.myInvoices(),
     retry: false,
+    enabled: profileQuery.isSuccess,
   });
 
   const gatewayQuery = useQuery({
@@ -103,17 +112,54 @@ export default function PaymentFlowPage() {
     });
   }, [returnRef, qc]);
 
-  async function handlePay() {
+  async function handleReconnectRental() {
+    setLinking(true);
+    try {
+      await tenantPortalApi.reconnectProfile();
+      toast.success("Rental record linked to this login.");
+      await profileQuery.refetch();
+      await invoicesQuery.refetch();
+    } catch (err) {
+      toast.error(
+        apiErrorMessage(
+          err,
+          "Could not link your rental. Ask your landlord to add this email on your tenant record."
+        ),
+        { duration: 6000 }
+      );
+    } finally {
+      setLinking(false);
+    }
+  }
+
+  function explainPayBlocked() {
+    if (noProfile) {
+      return `Link your rental to ${user?.email || "this login"} (same email the landlord used). You do not need to accept the invite again.`;
+    }
     if (!openInvoice?.id) {
-      toast.error("No open invoice to pay.");
+      return "There is no rent bill ready yet. Your landlord must assign you a unit and active lease, or all invoices are already paid.";
+    }
+    return null;
+  }
+
+  function handleMethodSelect(id) {
+    setMethod(id);
+    const blocked = explainPayBlocked();
+    if (blocked) toast.error(blocked, { duration: 5000 });
+  }
+
+  async function handlePay() {
+    const blocked = explainPayBlocked();
+    if (blocked) {
+      toast.error(blocked, { duration: 5000 });
       return;
     }
     if (method !== "sui" && !phone.trim()) {
       toast.error("Enter your Mobile Money phone (256…).");
       return;
     }
-    if (method === "sui" && !account?.address) {
-      toast.error("Connect your Sui wallet first (Slush, Nightly, Suiet, etc.).");
+    if (method === "sui" && suiExternalWallet && !account?.address) {
+      toast.error("Connect your Sui wallet first (Slush, Nightly, Suiet, etc.), or uncheck “browser wallet”.");
       return;
     }
     setPaying(true);
@@ -153,7 +199,10 @@ export default function PaymentFlowPage() {
     }
   }
 
-  const noProfile = invoicesQuery.isError && invoicesQuery.error?.response?.status === 404;
+  const noProfile =
+    (profileQuery.isError && profileQuery.error?.response?.status === 404) ||
+    (invoicesQuery.isError && invoicesQuery.error?.response?.status === 404);
+  const payBlocked = Boolean(explainPayBlocked());
 
   return (
     <>
@@ -192,7 +241,27 @@ export default function PaymentFlowPage() {
       )}
       {noProfile && (
         <div className="mb-4 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          No tenant profile linked. Accept your landlord invite first.
+          <p className="font-semibold">No tenant profile linked</p>
+          <p className="mt-1 text-amber-100/90">
+            You are signed in as <strong>{user?.email || "—"}</strong>. If you already accepted the invite, you do{" "}
+            <strong>not</strong> need to do it again — link that rental record to this login (same email).
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={linking}
+              onClick={handleReconnectRental}
+              className="inline-flex rounded-lg bg-amber-500/25 px-4 py-2 text-sm font-bold text-amber-50 hover:bg-amber-500/35 disabled:opacity-50"
+            >
+              {linking ? "Linking…" : "Link rental to this account"}
+            </button>
+            <Link
+              to="/tenant/accept-invite"
+              className="inline-flex rounded-lg border border-amber-400/40 px-4 py-2 text-sm font-bold text-amber-50 hover:bg-amber-500/15"
+            >
+              I still have an invite link
+            </Link>
+          </div>
         </div>
       )}
 
@@ -212,7 +281,26 @@ export default function PaymentFlowPage() {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-white/50">No open invoices with a balance due.</p>
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/60">
+              <p className="font-semibold text-white/80">No open invoices with a balance due.</p>
+              <p className="mt-2">
+                {noProfile
+                  ? "Link your account first (see above), then return here."
+                  : "If you have an active lease, refresh this page — we create this month’s rent bill automatically. Otherwise ask your landlord to add you as a tenant and start a lease."}
+              </p>
+              {!noProfile && (
+                <button
+                  type="button"
+                  className="mt-3 text-sm font-bold text-brand-teal hover:underline"
+                  onClick={() => {
+                    qc.invalidateQueries({ queryKey: ["tenant-my-invoices-pay"] });
+                    invoicesQuery.refetch();
+                  }}
+                >
+                  Refresh invoice
+                </button>
+              )}
+            </div>
           )}
 
           {method === "sui" ? (
@@ -249,19 +337,34 @@ export default function PaymentFlowPage() {
             <h3 className="mb-1 text-sm font-bold text-white">Payment methods</h3>
             <div className="flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
               {TENANT_PAY_METHODS.map((m) => (
-                <MethodRadio key={m.id} config={m} selected={method === m.id} onSelect={() => setMethod(m.id)} />
+                <MethodRadio
+                  key={m.id}
+                  config={m}
+                  selected={method === m.id}
+                  onSelect={() => handleMethodSelect(m.id)}
+                />
               ))}
             </div>
           </div>
 
           <button
             type="button"
-            disabled={paying || !openInvoice}
+            disabled={paying}
             onClick={handlePay}
-            className="w-full rounded-xl bg-brand-teal py-3.5 text-base font-extrabold text-[#041208] shadow-glow transition hover:brightness-110 disabled:opacity-40"
+            className={`w-full rounded-xl py-3.5 text-base font-extrabold shadow-glow transition ${
+              payBlocked
+                ? "cursor-not-allowed bg-brand-teal/40 text-[#041208]/70"
+                : "bg-brand-teal text-[#041208] hover:brightness-110"
+            }`}
+            aria-disabled={payBlocked || paying}
           >
-            {paying ? "Starting checkout…" : "Pay now"}
+            {paying ? "Starting checkout…" : payBlocked ? "Pay now (not ready)" : "Pay now"}
           </button>
+          {payBlocked && (
+            <p className="text-center text-xs text-white/45">
+              Select a payment method above after your rent bill is ready — then tap Pay now.
+            </p>
+          )}
         </div>
 
         <div className="card-glass p-6">
