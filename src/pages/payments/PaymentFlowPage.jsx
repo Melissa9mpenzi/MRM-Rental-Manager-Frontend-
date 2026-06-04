@@ -77,6 +77,18 @@ export default function PaymentFlowPage() {
   }, [invoicesQuery.data]);
 
   const totalDue = Number(openInvoice?.balance_due ?? 0);
+  const suiPaymentsEnabled = blockchainQuery.data?.enabled === true;
+
+  const tenantPayMethods = useMemo(
+    () => TENANT_PAY_METHODS.filter((m) => m.id !== "sui" || suiPaymentsEnabled),
+    [suiPaymentsEnabled],
+  );
+
+  useEffect(() => {
+    if (method === "sui" && blockchainQuery.isSuccess && !suiPaymentsEnabled) {
+      setMethod("mtn_momo");
+    }
+  }, [method, blockchainQuery.isSuccess, suiPaymentsEnabled]);
 
   const history = useMemo(() => {
     const rows = Array.isArray(paymentsQuery.data) ? paymentsQuery.data : [];
@@ -143,6 +155,13 @@ export default function PaymentFlowPage() {
   }
 
   function handleMethodSelect(id) {
+    if (id === "sui" && !suiPaymentsEnabled) {
+      toast.error(
+        "Sui wallet pay is not configured on the API yet. Use Mobile Money or Pesapal.",
+        { duration: 6000 },
+      );
+      return;
+    }
     setMethod(id);
     const blocked = explainPayBlocked();
     if (blocked) toast.error(blocked, { duration: 5000 });
@@ -156,6 +175,10 @@ export default function PaymentFlowPage() {
     }
     if (method !== "sui" && !phone.trim()) {
       toast.error("Enter your Mobile Money phone (256…).");
+      return;
+    }
+    if (method === "sui" && !suiPaymentsEnabled) {
+      toast.error("Sui payments are not available. Choose MTN MoMo, Airtel, or Pesapal.");
       return;
     }
     if (method === "sui" && suiExternalWallet && !account?.address) {
@@ -173,19 +196,21 @@ export default function PaymentFlowPage() {
         await showLatestReceipt();
       };
       if (method === "sui") {
+        let checkout;
         if (suiExternalWallet) {
-          await runSuiCheckout({
+          checkout = await runSuiCheckout({
             invoiceId: openInvoice.id,
             signAndExecuteTransaction,
             accountAddress: account.address,
             onCompleted: onDone,
           });
         } else {
-          await runPlatformSuiCheckout({
+          checkout = await runPlatformSuiCheckout({
             invoiceId: openInvoice.id,
             onCompleted: onDone,
           });
         }
+        if (!checkout) return;
       } else {
         await runTenantCheckoutUi({
           invoiceId: openInvoice.id,
@@ -194,6 +219,10 @@ export default function PaymentFlowPage() {
           onCompleted: onDone,
         });
       }
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Payment could not be started. Try another method."), {
+        duration: 6000,
+      });
     } finally {
       setPaying(false);
     }
@@ -237,6 +266,14 @@ export default function PaymentFlowPage() {
         <div className="mb-4 rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-3 text-sm text-violet-100">
           <strong>Sui blockchain</strong> active on {blockchainQuery.data.network}. Fiat payments can
           generate immutable receipts; wallet payments use on-chain settlement.
+        </div>
+      )}
+      {blockchainQuery.isSuccess && !blockchainQuery.data?.enabled && (
+        <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/65">
+          <strong className="text-white/85">Sui wallet pay</strong> is not configured on the API (
+          <code className="rounded bg-black/30 px-1 text-xs">SUI_TREASURY_ADDRESS</code>). Use{" "}
+          <strong className="text-white/85">MTN MoMo</strong>, <strong className="text-white/85">Airtel</strong>, or{" "}
+          <strong className="text-white/85">Pesapal</strong> below.
         </div>
       )}
       {noProfile && (
@@ -336,7 +373,7 @@ export default function PaymentFlowPage() {
           <div>
             <h3 className="mb-1 text-sm font-bold text-white">Payment methods</h3>
             <div className="flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
-              {TENANT_PAY_METHODS.map((m) => (
+              {tenantPayMethods.map((m) => (
                 <MethodRadio
                   key={m.id}
                   config={m}

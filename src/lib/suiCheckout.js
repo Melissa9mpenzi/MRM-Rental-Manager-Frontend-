@@ -10,8 +10,11 @@ import { apiErrorMessage } from "./apiError";
 export async function runPlatformSuiCheckout({ invoiceId, onCompleted }) {
   const chain = await blockchainApi.status();
   if (!chain?.enabled) {
-    toast.error("Sui payments not configured on the API (SUI_TREASURY_ADDRESS).");
-    throw new Error("Sui not configured");
+    toast.error(
+      "Sui payments are not enabled on this server. Use MTN MoMo, Airtel, or Pesapal — or ask the admin to set SUI_TREASURY_ADDRESS.",
+      { duration: 7000 },
+    );
+    return null;
   }
 
   await blockchainApi.ensureWallet();
@@ -44,8 +47,11 @@ export async function runSuiCheckout({
 }) {
   const chain = await blockchainApi.status();
   if (!chain?.enabled) {
-    toast.error("Sui payments not configured on the API (SUI_TREASURY_ADDRESS).");
-    throw new Error("Sui not configured");
+    toast.error(
+      "Sui payments are not enabled on this server. Use MTN MoMo, Airtel, or Pesapal — or ask the admin to set SUI_TREASURY_ADDRESS.",
+      { duration: 7000 },
+    );
+    return null;
   }
 
   const checkout = await paymentsApi.initiateCheckout({
