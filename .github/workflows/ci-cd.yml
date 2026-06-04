@@ -1,0 +1,170 @@
+# RentDirect Web — continuous integration and deployment
+# Docs: see backend repo docs/CI_CD.md (monorepo handbook)
+
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main, master, develop, feature-fix]
+  pull_request:
+    branches: [main, master, develop, feature-fix]
+  workflow_dispatch:
+    inputs:
+      run_deploy:
+        description: Deploy to Vercel production (requires secrets)
+        type: boolean
+        default: false
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  NPM_VERSION: "10.8.2"
+  VITE_API_URL: https://mrm-rental-manager-backend.vercel.app
+  VITE_GOV_API_URL: https://mrm-rental-manager-backend.vercel.app
+  VITE_SUI_NETWORK: testnet
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Pin npm (lockfile compatibility)
+        run: npm install -g npm@${{ env.NPM_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+        run: npm run lint
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Pin npm (lockfile compatibility)
+        run: npm install -g npm@${{ env.NPM_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify dist output
+        run: test -f dist/index.html
+
+      - name: Build summary
+        run: |
+          echo "## Build" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Node: \`${{ env.NODE_VERSION }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- npm: \`${{ env.NPM_VERSION }}\` (matches lockfile generator)" >> "$GITHUB_STEP_SUMMARY"
+          du -sh dist | awk '{print "- Artifact size: `" $1 "`"}' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          retention-days: 7
+
+  security:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Pin npm
+        run: npm install -g npm@${{ env.NPM_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit (production)
+        run: npm audit --omit=dev --audit-level=high
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: build
+    if: >
+      (github.event_name == 'workflow_dispatch' && inputs.run_deploy == true) ||
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://mrm-rental-manager-frontend-pink.vercel.app
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Pin npm
+        run: npm install -g npm@${{ env.NPM_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy to Vercel
+        id: deploy
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prod"
+          working-directory: ./
+
+      - name: Skip deploy (secrets not configured)
+        if: ${{ secrets.VERCEL_TOKEN == '' }}
+        run: |
+          echo "::notice::Vercel deploy skipped. Add VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID, or use Vercel Git integration."
+          echo "## Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "No Vercel secrets in GitHub. Connect this repo in the Vercel dashboard for automatic deploys on \`main\`." >> "$GITHUB_STEP_SUMMARY"

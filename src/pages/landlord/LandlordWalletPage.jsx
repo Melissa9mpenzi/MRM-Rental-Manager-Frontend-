@@ -16,6 +16,8 @@ import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import EscrowStatusPanel from "../../components/blockchain/EscrowStatusPanel";
 import { paymentsApi } from "../../api/paymentsApi";
 import { blockchainApi } from "../../api/blockchainApi";
+import { apiErrorMessage } from "../../lib/apiError";
+import { PLATFORM_API_URL } from "../../api/config";
 import { ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
 
 function fmt(n) {
@@ -86,7 +88,13 @@ export default function LandlordWalletPage() {
       ) : walletQuery.isError ? (
         <ErrorPanel
           title="Could not load wallet"
-          description="Check that you are logged in as a landlord and the API is running."
+          description={
+            apiErrorMessage(
+              walletQuery.error,
+              "Could not load payment totals from the API."
+            ) +
+            ` (GET ${PLATFORM_API_URL}/api/v1/payments/wallet-summary)`
+          }
           onRetry={() => walletQuery.refetch()}
         />
       ) : (
