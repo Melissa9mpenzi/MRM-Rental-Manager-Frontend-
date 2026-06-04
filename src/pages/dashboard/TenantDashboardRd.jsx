@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { formatDistanceToNow } from "date-fns";
 import {
   CreditCard,
@@ -30,6 +31,7 @@ function fmtPaidYtd(n) {
 
 export default function TenantDashboardRd() {
   const user = useAuthStore((s) => s.user);
+  const queryClient = useQueryClient();
 
   const { data: savedRows = [] } = useQuery({
     queryKey: ["saved-units"],
@@ -51,6 +53,32 @@ export default function TenantDashboardRd() {
     queryFn: () => tenantPortalApi.myLease(),
     enabled: user?.role === "tenant",
     retry: false,
+  });
+
+  const pendingInviteQuery = useQuery({
+    queryKey: ["tenant-pending-invitation"],
+    queryFn: () => tenantPortalApi.pendingInvitation(),
+    enabled: user?.role === "tenant",
+    retry: false,
+  });
+
+  const acceptRentalMutation = useMutation({
+    mutationFn: () => tenantPortalApi.acceptRental(),
+    onSuccess: () => {
+      toast.success("Rental linked to your account.");
+      queryClient.invalidateQueries({ queryKey: ["tenant-pending-invitation"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-my-lease"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-my-payments"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-my-invoices"] });
+    },
+    onError: (err) => {
+      const msg =
+        err?.response?.data?.detail?.message ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Could not accept invitation.";
+      toast.error(msg);
+    },
   });
 
   const paymentsQuery = useQuery({
@@ -87,6 +115,8 @@ export default function TenantDashboardRd() {
 
   const noTenantProfile =
     leaseQuery.isError && leaseQuery.error?.response?.status === 404;
+
+  const pendingInvite = pendingInviteQuery.data?.data ?? pendingInviteQuery.data ?? null;
 
   const ytdTotal = useMemo(() => {
     const y = new Date().getFullYear();
@@ -158,6 +188,33 @@ export default function TenantDashboardRd() {
         <p className="mt-0.5 text-sm text-white/55">Welcome back, {user?.full_name?.split(" ")[0]}</p>
       </div>
 
+      {pendingInvite ? (
+        <div className="rounded-xl border border-[#00C896]/35 bg-[#00C896]/10 px-4 py-4">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Rental invitation</p>
+          <h3 className="mt-1 text-lg font-bold text-white">
+            {pendingInvite.property?.name ?? "Your rental"}
+            {pendingInvite.unit?.unit_number ? ` · Unit ${pendingInvite.unit.unit_number}` : ""}
+          </h3>
+          <p className="mt-2 text-sm text-white/60">
+            Your landlord invited you to link this rental to{" "}
+            <span className="font-semibold text-white">{user?.email}</span>. Accept here — no email link required.
+          </p>
+          {pendingInvite.monthly_rent != null ? (
+            <p className="mt-1 text-sm text-white/50">
+              Monthly rent: UGX {Number(pendingInvite.monthly_rent).toLocaleString()}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => acceptRentalMutation.mutate()}
+            disabled={acceptRentalMutation.isPending}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#00C896] px-5 py-2.5 text-sm font-bold text-[#041208] shadow-glow transition hover:brightness-110 disabled:opacity-60"
+          >
+            {acceptRentalMutation.isPending ? "Linking…" : "Accept rental invitation"}
+          </button>
+        </div>
+      ) : null}
+
       <Link
         to="/tenant/saved"
         className="flex items-start gap-3 rounded-xl border border-brand-teal/25 bg-brand-teal/5 px-4 py-3 text-sm leading-snug text-white/75 transition hover:bg-brand-teal/10"
@@ -198,13 +255,14 @@ export default function TenantDashboardRd() {
                 <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Current lease</p>
                 <h3 className="mt-1 text-lg font-bold text-white">No tenant profile linked</h3>
                 <p className="mt-2 text-sm text-white/50">
-                  Ask your landlord to send an invite, or accept one from your email. Then sign in again.
+                  If your landlord added you with this email, refresh this page or use Accept above. Otherwise ask
+                  them to set your email on the tenant record and send a portal invite.
                 </p>
                 <Link
                   to="/tenant/accept-invite"
                   className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-sm font-bold text-white/85 transition hover:bg-white/10"
                 >
-                  Accept invite
+                  Have an email link instead?
                 </Link>
               </>
             ) : !lease ? (
