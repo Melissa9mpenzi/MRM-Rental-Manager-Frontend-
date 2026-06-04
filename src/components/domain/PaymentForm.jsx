@@ -16,7 +16,7 @@ export default function PaymentForm({ tenant, onSuccess }) {
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm({
     defaultValues: {
       amount:         tenant?.monthly_rent || "",
-      payment_method: "cash",
+      payment_method: "mtn_momo",
       payment_type:   "rent",
       period_month:   now.getMonth() + 1,
       period_year:    now.getFullYear(),

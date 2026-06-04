@@ -12,7 +12,6 @@ import PlatformDistributionHint from "../../components/layout/PlatformDistributi
 import KycStatusBanner from "../../components/domain/KycStatusBanner";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import ActivityTimeline from "../../components/enterprise/ActivityTimeline";
-import SystemStatusBar from "../../components/enterprise/SystemStatusBar";
 import { platformApi } from "../../api/platformApi";
 
 function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
@@ -131,8 +130,6 @@ export default function LandlordDashboard() {
       </div>
 
       <KycStatusBanner user={user} roleLabel="landlord" />
-
-      <SystemStatusBar />
 
       {isError && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">

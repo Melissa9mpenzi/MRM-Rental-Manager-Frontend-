@@ -182,7 +182,7 @@ export default function LandlordSettingsPage() {
                     links={[
                       { label: "Wallet", description: "Balances and payout view", to: "/landlord/wallet" },
                       { label: "Payments ledger", description: "All rent transactions", to: "/landlord/payments" },
-                      { label: "Record payment", description: "Manual cash or bank entry", to: "/landlord/payments/new" },
+                      { label: "Record payment", description: "MoMo, Pesapal, bank, or Sui entry", to: "/landlord/payments/new" },
                       { label: "Receipts", description: "Downloadable receipts", to: "/landlord/receipts" },
                     ]}
                   />

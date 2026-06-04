@@ -125,7 +125,7 @@ export default function LandlordContractsPage() {
         <EmptyPanel
           icon={FileText}
           title="No leases yet"
-          description="Create a lease when you onboard a tenant, or they will appear here after move-in."
+          description="Contracts are created automatically when you add a tenant. Open this page again if you added one before today — missing leases will sync."
           action={
             <Link to="/landlord/tenants/new" className="btn-primary inline-flex rounded-lg px-5 py-2 text-sm font-bold">
               Add tenant
