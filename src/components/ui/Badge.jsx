@@ -1,12 +1,15 @@
 const COLORS = {
-  Paid: 'bg-brand-teal text-white',
-  Arrears: 'bg-amber-500 text-white',
-  Vacant: 'bg-gray-500 text-white',
-  Maintenance: 'bg-red-600 text-white',
-}
+  Paid: "bg-emerald-100 text-emerald-700",
+  Arrears: "bg-amber-100 text-amber-700",
+  Vacant: "bg-slate-100 text-slate-500",
+  Maintenance: "bg-red-100 text-red-600",
+};
 
 export function Badge({ children }) {
-  const cls = COLORS[String(children)] ?? 'bg-brand-tealLt text-brand-dark'
-  return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs ${cls}`}>{children}</span>
+  const cls = COLORS[String(children)] ?? "bg-indigo-50 text-indigo-600";
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>
+      {children}
+    </span>
+  );
 }
-

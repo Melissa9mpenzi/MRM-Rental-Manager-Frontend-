@@ -153,15 +153,15 @@ function TenantDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="border-b border-gray-200">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+          <div className="border-b border-gray-200 dark:border-slate-800">
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab("overview")}
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === "overview"
                     ? "border-brand-teal text-brand-teal"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                 }`}
               >
                 Overview
@@ -171,7 +171,7 @@ function TenantDashboard() {
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === "payments"
                     ? "border-brand-teal text-brand-teal"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                 }`}
               >
                 Payment History
@@ -181,7 +181,7 @@ function TenantDashboard() {
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === "maintenance"
                     ? "border-brand-teal text-brand-teal"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                 }`}
               >
                 Maintenance
@@ -193,31 +193,31 @@ function TenantDashboard() {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Property Details
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-gray-500">Property</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="text-gray-500 dark:text-slate-400">Property</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-200">
                         {lease?.property?.name || "N/A"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Unit Number</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="text-gray-500 dark:text-slate-400">Unit Number</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-200">
                         {lease?.unit?.unit_number || "N/A"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Address</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="text-gray-500 dark:text-slate-400">Address</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-200">
                         {lease?.property?.address || "N/A"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Unit Type</p>
-                      <p className="font-medium text-gray-900 capitalize">
+                      <p className="text-gray-500 dark:text-slate-400">Unit Type</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-200 capitalize">
                         {lease?.unit?.unit_type?.replace("_", " ") || "N/A"}
                       </p>
                     </div>
@@ -225,19 +225,19 @@ function TenantDashboard() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Lease Information
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-gray-500">Lease Start</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="text-gray-500 dark:text-slate-400">Lease Start</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-200">
                         {lease?.tenant?.lease_start || "N/A"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Lease End</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="text-gray-500 dark:text-slate-400">Lease End</p>
+                      <p className="font-medium text-gray-900 dark:text-slate-200">
                         {lease?.tenant?.lease_end || "N/A"}
                       </p>
                     </div>
@@ -248,43 +248,43 @@ function TenantDashboard() {
 
             {activeTab === "payments" && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Payment History
                 </h3>
                 {payments.length === 0 ? (
-                  <p className="text-gray-500">No payment records found.</p>
+                  <p className="text-gray-500 dark:text-slate-400">No payment records found.</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-50 dark:bg-slate-800/50">
                         <tr>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                          <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
                             Date
                           </th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                          <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
                             Amount
                           </th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                          <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
                             Period
                           </th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                          <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400">
                             Method
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200">
+                      <tbody className="divide-y divide-gray-200 dark:divide-slate-800">
                         {payments.map((payment) => (
                           <tr key={payment.id}>
-                            <td className="px-4 py-3 text-gray-900">
+                            <td className="px-4 py-3 text-gray-900 dark:text-slate-300">
                               {payment.payment_date}
                             </td>
-                            <td className="px-4 py-3 font-medium text-gray-900">
+                            <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
                               UGX {parseFloat(payment.amount).toLocaleString()}
                             </td>
-                            <td className="px-4 py-3 text-gray-600">
+                            <td className="px-4 py-3 text-gray-600 dark:text-slate-400">
                               {payment.period_month}/{payment.period_year}
                             </td>
-                            <td className="px-4 py-3 text-gray-600 capitalize">
+                            <td className="px-4 py-3 text-gray-600 dark:text-slate-400 capitalize">
                               {payment.payment_method?.replace("_", " ")}
                             </td>
                           </tr>

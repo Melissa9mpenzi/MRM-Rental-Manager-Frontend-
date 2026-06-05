@@ -6,19 +6,24 @@
   * {
     box-sizing: border-box;
   }
+
   body {
     @apply bg-brand-bg text-brand-dark antialiased;
     font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
   }
+
   #root {
     min-height: 100dvh;
   }
+
   h1 {
     @apply text-2xl font-bold text-brand-dark tracking-tight;
   }
+
   h2 {
     @apply text-xl font-semibold text-brand-dark;
   }
+
   h3 {
     @apply text-base font-semibold text-brand-mid;
   }
@@ -27,164 +32,134 @@
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-white/15 hover:bg-white/25;
+    @apply rounded-full bg-slate-300 hover:bg-slate-400;
   }
 }
 
 @layer utilities {
-  /**
-   * Scroll inside the panel only (not the whole document). Stable gutter + slightly
-   * wider thumb so the bar reads as part of the app chrome, not “browser website scroll”.
-   */
   .overflow-panel-y {
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior-y: contain;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
-    scrollbar-color: rgb(255 255 255 / 0.22) transparent;
+    scrollbar-color: rgba(17, 24, 39, 0.15) transparent;
   }
+
   .overflow-panel-y::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
+
   .overflow-panel-y::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .overflow-panel-y::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background: rgb(255 255 255 / 0.2);
+    background: rgba(17, 24, 39, 0.15);
   }
+
   .overflow-panel-y::-webkit-scrollbar-thumb:hover {
-    background: rgb(255 255 255 / 0.32);
+    background: rgba(17, 24, 39, 0.25);
   }
 }
 
 @layer components {
+
+  /* ── Buttons ── */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2
-           bg-brand-teal text-[#041208] font-semibold text-sm
-           px-5 py-2.5 rounded-xl shadow-glow
-           hover:brightness-110 active:scale-[0.98]
-           transition-all duration-150 ease-out
-           disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-2 bg-brand-teal text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:opacity-90 active:scale-[0.98] transition-all duration-150 ease-out disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100;
   }
+
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2
-           border border-rd-stroke text-brand-dark font-semibold text-sm
-           px-5 py-2.5 rounded-xl bg-white/5 backdrop-blur-sm
-           hover:border-brand-teal/45 hover:bg-brand-tealLt/35 hover:text-brand-teal
-           transition-all duration-150 ease-out
-           disabled:opacity-45 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 border border-brand-teal text-brand-teal font-semibold text-sm px-5 py-2.5 rounded-xl bg-brand-tealLt hover:bg-brand-teal hover:text-white transition-all duration-150 ease-out disabled:opacity-45 disabled:cursor-not-allowed;
   }
+
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2
-           text-brand-mid font-semibold text-sm
-           px-4 py-2 rounded-xl
-           hover:bg-white/[0.07] hover:text-brand-dark
-           transition-all duration-150 ease-out;
+    @apply inline-flex items-center justify-center gap-2 text-brand-mid font-semibold text-sm px-4 py-2 rounded-xl hover:bg-slate-100 hover:text-brand-dark transition-all duration-150 ease-out;
   }
+
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2
-           bg-red-600 text-white font-semibold text-sm
-           px-5 py-2.5 rounded-xl
-           hover:bg-red-500 active:scale-[0.98]
-           transition-all duration-150;
+    @apply inline-flex items-center justify-center gap-2 bg-red-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-red-500 active:scale-[0.98] transition-all duration-150;
   }
 
+  /* ── Cards ── */
   .card {
-    @apply rounded-2xl border border-white/[0.1] shadow-card p-5
-           bg-rd-elevated text-white/90 backdrop-blur-xl;
-  }
-  .card-hover {
-    @apply card hover:border-brand-teal/35 hover:shadow-glow transition-all duration-200 cursor-pointer;
-  }
-  .card-glass {
-    @apply rounded-3xl border border-white/[0.12] shadow-modal p-6
-           bg-rd-elevated backdrop-blur-2xl;
+    @apply rounded-2xl border border-slate-200 shadow-card p-5 bg-white text-brand-dark;
   }
 
-  /* Loading / error / empty — never use a light “card” slab */
+  .card-hover {
+    @apply card hover:border-brand-teal/40 hover:shadow-glow transition-all duration-200 cursor-pointer;
+  }
+
+  .card-glass {
+    @apply rounded-2xl border border-slate-200 shadow-card p-5 bg-white;
+  }
+
+  /* ── State panels ── */
   .state-panel {
     @apply flex flex-col items-center justify-center rounded-2xl border px-6 py-14 text-center;
   }
+
   .state-panel--loading {
-    @apply border-white/[0.08] bg-white/[0.03] p-5;
+    @apply border-slate-200 bg-slate-50 p-5;
   }
+
   .state-panel--error {
-    @apply border-red-500/25 bg-red-500/[0.06];
+    @apply border-red-200 bg-red-50;
   }
+
   .state-panel--empty {
-    @apply border-dashed border-white/[0.12] bg-white/[0.02];
+    @apply border-dashed border-slate-300 bg-slate-50/50;
   }
+
   .state-panel__icon {
-    @apply mb-3 h-10 w-10 text-white/30;
+    @apply mb-3 h-10 w-10 text-slate-300;
   }
+
   .state-panel__icon--error {
-    @apply text-red-400/90;
+    @apply text-red-400;
   }
+
   .state-panel__title {
-    @apply text-base font-bold text-white;
+    @apply text-base font-bold text-brand-dark;
   }
+
   .state-panel__desc {
-    @apply mt-1.5 max-w-md text-sm leading-relaxed text-white/55;
+    @apply mt-1.5 max-w-md text-sm leading-relaxed text-brand-mid;
   }
+
   .state-panel__shimmer {
-    @apply h-full min-h-[6rem] w-full animate-pulse rounded-xl bg-white/[0.06];
+    @apply h-full min-h-[6rem] w-full animate-pulse rounded-xl bg-slate-100;
   }
 
-  /* Data cards & tables inside authenticated shell */
-  [data-app-role] .card .text-brand-dark {
-    @apply text-white;
-  }
-  [data-app-role] .card .text-brand-mid {
-    @apply text-white/55;
-  }
-  [data-app-role] .card .bg-brand-bg {
-    @apply bg-white/[0.06];
-  }
-  [data-app-role] .card thead {
-    @apply text-white/50;
-  }
-  [data-app-role] .card tbody tr {
-    @apply border-white/[0.06];
-  }
-  [data-app-role] .card tbody tr:hover {
-    @apply bg-white/[0.04];
-  }
-
+  /* ── Inputs ── */
   .input-field {
-    @apply w-full border border-rd-stroke rounded-xl px-3.5 py-2.5
-           text-sm text-brand-dark placeholder-brand-mid/45
-           bg-white/[0.04] backdrop-blur-sm
-           focus:outline-none focus:ring-2 focus:ring-brand-teal/35 focus:border-brand-teal/55
-           transition-all duration-150;
+    @apply w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-brand-dark placeholder-brand-mid/60 bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/25 focus:border-brand-teal transition-all duration-150;
   }
+
   .input-error {
-    @apply input-field border-red-500/55 focus:ring-red-500/25 focus:border-red-500/70;
+    @apply input-field border-red-400 focus:ring-red-200 focus:border-red-500;
   }
+
   .input-label {
     @apply block text-[11px] font-semibold text-brand-mid mb-1.5 tracking-wide uppercase;
   }
 
-  /**
-   * Dark-theme native selects — consistent closed state + dropdown list (color-scheme: dark).
-   * Use on auth, government portal, super admin, and any dark form.
-   */
+  /* ── Selects ── */
   .select-field,
   .select-auth {
-    @apply w-full rounded-xl border border-white/[0.14] px-3.5 py-2.5 text-sm font-medium text-white
-           shadow-inner
-           focus:outline-none focus:ring-2 focus:ring-brand-teal/40 focus:border-brand-teal/55
-           transition-all duration-150;
-    color-scheme: dark;
+    @apply w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-brand-dark bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/25 focus:border-brand-teal transition-all duration-150;
+    color-scheme: light;
     appearance: none;
     -webkit-appearance: none;
-    background-color: rgba(15, 20, 28, 0.95);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1rem;
@@ -194,30 +169,13 @@
 
   .select-field:hover,
   .select-auth:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    background-color: rgba(17, 24, 39, 0.98);
-  }
-
-  .select-field option,
-  .select-field optgroup,
-  .select-auth option,
-  .select-auth optgroup,
-  select.input-field option,
-  select.input-field optgroup {
-    background-color: #111827;
-    color: #e2e8f0;
-  }
-
-  /* App-wide: dark dropdown list where the OS/browser supports color-scheme */
-  select {
-    color-scheme: dark;
+    border-color: #cbd5e1;
   }
 
   select.input-field {
     appearance: none;
     -webkit-appearance: none;
-    background-color: rgba(255, 255, 255, 0.06);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.65rem center;
     background-size: 0.9rem;
@@ -225,40 +183,103 @@
     cursor: pointer;
   }
 
+  select {
+    color-scheme: light;
+  }
+
+  /* ── Badges ── */
   .badge-paid {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-tealLt text-brand-teal;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700;
   }
+
   .badge-arrears {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700;
   }
+
   .badge-vacant {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/10 text-brand-mid;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500;
   }
+
   .badge-danger {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-500/15 text-red-300;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600;
   }
 
+  /* ── Nav items ── */
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl
-           text-sm font-semibold text-white/50
-           hover:bg-white/[0.06] hover:text-white
-           transition-all duration-150 cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-brand-mid hover:bg-brand-tealLt hover:text-brand-dark transition-all duration-150 cursor-pointer;
   }
+
   .nav-item-active {
-    @apply nav-item text-brand-teal bg-brand-tealLt/45 border border-brand-teal/35 shadow-[0_0_22px_rgba(0,200,83,0.12)];
+    @apply nav-item text-brand-teal bg-brand-tealLt border border-brand-teal/20;
   }
 
+  /* ── Skeleton ── */
   .skeleton {
-    @apply animate-pulse rounded-xl bg-gradient-to-r from-white/5 via-white/10 to-white/5;
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 1.5s ease infinite;
+    @apply animate-pulse rounded-xl bg-slate-100;
   }
 
-  /* Arbitrary opacity in @apply: theme keys like /12 and /28 are not always resolved for custom colors. */
+  /* ── Stat card ── */
   .stat-card {
-    @apply flex items-start gap-3 rounded-2xl border border-white/[0.12] p-4 shadow-card
-           bg-rd-elevated/90 backdrop-blur-xl
-           hover:border-brand-teal/[0.28] hover:shadow-glow transition-all duration-200;
+    @apply flex items-start gap-3 rounded-2xl border border-slate-200 p-4 shadow-card bg-white hover:border-brand-teal/30 hover:shadow-glow transition-all duration-200;
+  }
+
+  /* ── Enterprise card ── */
+  .enterprise-card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-card duration-200;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .enterprise-card:hover {
+    @apply border-slate-300;
+  }
+
+  /* ── Add-property form ── */
+  .add-property-page-card {
+    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-card sm:p-8;
+  }
+
+  .add-property-form .input-field {
+    @apply border-slate-200 bg-white text-brand-dark placeholder:text-brand-mid/50;
+  }
+
+  .add-property-form__header {
+    @apply mb-6 flex items-start gap-4;
+  }
+
+  .add-property-form__icon {
+    @apply flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-brand-teal/20 bg-brand-tealLt text-brand-teal;
+  }
+
+  .add-property-form__title {
+    @apply text-xl font-extrabold tracking-tight text-brand-dark sm:text-2xl;
+  }
+
+  .add-property-form__subtitle {
+    @apply mt-1 text-sm text-brand-mid;
+  }
+
+  .add-property-form__steps {
+    @apply mb-6 flex items-center gap-2;
+  }
+
+  .add-property-form__step {
+    @apply flex flex-1 items-center gap-2 text-xs font-semibold text-slate-400;
+  }
+
+  .add-property-form__step--active {
+    @apply text-brand-teal;
+  }
+
+  .add-property-form__step-num {
+    @apply flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[11px] font-bold;
+  }
+
+  .add-property-form__step--active .add-property-form__step-num {
+    @apply border-brand-teal/30 bg-brand-tealLt text-brand-teal;
+  }
+
+  .add-property-form__step-line {
+    @apply h-px w-8 flex-shrink-0 bg-slate-200 sm:w-12;
   }
 }
 
@@ -272,6 +293,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -282,6 +304,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -293,6 +316,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -302,59 +326,7 @@
 .animate-fade-in {
   animation: fade-in 0.28s ease forwards;
 }
+
 .animate-slide-up {
   animation: slide-up 0.32s ease forwards;
-}
-
-/* Landlord add-property wizard (full-page) */
-.add-property-page-card {
-  @apply rounded-3xl border border-white/[0.12] bg-rd-elevated/95 p-6 shadow-modal backdrop-blur-2xl sm:p-8;
-}
-
-.add-property-form--page .input-label {
-  @apply text-white/55;
-}
-
-.add-property-form .input-field {
-  @apply border-white/[0.12] bg-white/[0.06] text-white placeholder:text-white/35;
-}
-
-.add-property-form__header {
-  @apply mb-6 flex items-start gap-4;
-}
-
-.add-property-form__icon {
-  @apply flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-[#00C896]/25 bg-[#00C896]/12 text-[#00C896];
-}
-
-.add-property-form__title {
-  @apply text-xl font-extrabold tracking-tight text-white sm:text-2xl;
-}
-
-.add-property-form__subtitle {
-  @apply mt-1 text-sm text-white/50;
-}
-
-.add-property-form__steps {
-  @apply mb-6 flex items-center gap-2;
-}
-
-.add-property-form__step {
-  @apply flex flex-1 items-center gap-2 text-xs font-semibold text-white/35;
-}
-
-.add-property-form__step--active {
-  @apply text-[#00C896];
-}
-
-.add-property-form__step-num {
-  @apply flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] text-[11px] font-bold;
-}
-
-.add-property-form__step--active .add-property-form__step-num {
-  @apply border-[#00C896]/40 bg-[#00C896]/15 text-[#00C896];
-}
-
-.add-property-form__step-line {
-  @apply h-px w-8 flex-shrink-0 bg-white/10 sm:w-12;
 }

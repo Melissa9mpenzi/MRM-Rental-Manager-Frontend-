@@ -109,11 +109,11 @@ export default function TenantWalletPage() {
               <Wallet size={22} />
             </div>
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-white/45">Paid this year</div>
-              <div className="mt-1 text-3xl font-extrabold text-white">
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-white/45">Paid this year</div>
+              <div className="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">
                 {paymentsQuery.isLoading ? "…" : fmt(ytdPaid)}
               </div>
-              <p className="mt-2 max-w-md text-xs text-white/50">
+              <p className="mt-2 max-w-md text-xs text-slate-500 dark:text-white/50">
                 {walletQuery.data?.payment_count != null
                   ? `${walletQuery.data.payment_count} payments on file`
                   : "Totals from your payment history"}
@@ -123,7 +123,7 @@ export default function TenantWalletPage() {
                   {Object.entries(walletQuery.data.by_method).map(([key, val]) => (
                     <span
                       key={key}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] text-white/70"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] px-2 py-1 text-[10px] text-slate-600 dark:text-white/70"
                     >
                       <PaymentMethodIcon method={key} className="h-5 w-5 rounded" />
                       {fmt(val)}
@@ -135,11 +135,11 @@ export default function TenantWalletPage() {
           </div>
         </div>
         <div className="card-glass flex flex-col justify-center p-5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-white/45">Invoice balance due</div>
-          <div className="mt-1 text-2xl font-bold text-amber-200">
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-white/45">Invoice balance due</div>
+          <div className="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-200">
             {invoicesQuery.isLoading ? "…" : fmt(outstanding)}
           </div>
-          <p className="mt-2 text-xs text-white/45">From open invoices on your account.</p>
+          <p className="mt-2 text-xs text-slate-500 dark:text-white/45">From open invoices on your account.</p>
         </div>
       </div>
 
@@ -147,7 +147,7 @@ export default function TenantWalletPage() {
         <div className="grid gap-4 lg:grid-cols-2">
           {Array.isArray(receiptsQuery.data) && receiptsQuery.data.length > 0 && (
             <div className="card-glass space-y-3 p-5">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-white/40">Blockchain receipts</h2>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">Blockchain receipts</h2>
               {receiptsQuery.data.slice(0, 5).map((r) => (
                 <BlockchainReceiptCard key={r.id} receipt={r} />
               ))}
@@ -158,19 +158,19 @@ export default function TenantWalletPage() {
       )}
 
       <div className="card-glass overflow-hidden">
-        <div className="border-b border-white/[0.08] px-5 py-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white/40">Payment history</h2>
+        <div className="border-b border-slate-200 dark:border-white/[0.08] px-5 py-4">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-white/40">Payment history</h2>
         </div>
         <div className="overflow-x-auto">
           {paymentsQuery.isLoading ? (
-            <div className="p-8 text-center text-sm text-white/45">Loading…</div>
+            <div className="p-8 text-center text-sm text-slate-400 dark:text-white/45">Loading…</div>
           ) : paymentsQuery.isError && !noProfile ? (
             <div className="p-8 text-center text-sm text-red-300">Could not load payments.</div>
           ) : transactions.length === 0 ? (
-            <div className="p-8 text-center text-sm text-white/45">No payments on file yet.</div>
+            <div className="p-8 text-center text-sm text-slate-400 dark:text-white/45">No payments on file yet.</div>
           ) : (
             <table className="w-full min-w-[520px] text-left text-sm">
-              <thead className="border-b border-white/[0.06] bg-white/[0.03] text-[11px] font-bold uppercase tracking-wide text-white/40">
+              <thead className="border-b border-slate-100 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.03] text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-white/40">
                 <tr>
                   <th className="px-5 py-3">Description</th>
                   <th className="px-5 py-3">Date</th>
@@ -178,14 +178,14 @@ export default function TenantWalletPage() {
                   <th className="px-5 py-3 text-right">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.06]">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                 {transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-white/[0.02]">
-                    <td className="px-5 py-3 font-medium text-white">
+                  <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                    <td className="px-5 py-3 font-medium text-slate-900 dark:text-white">
                       {t.property_name ? `${t.property_name}` : "Rent payment"}
                       {t.unit_number ? ` · ${t.unit_number}` : ""}
                     </td>
-                    <td className="px-5 py-3 text-white/50">{t.payment_date ?? "—"}</td>
+                    <td className="px-5 py-3 text-slate-500 dark:text-white/50">{t.payment_date ?? "—"}</td>
                     <td className="px-5 py-3">
                       <PaymentMethodBadge method={t.payment_method} />
                     </td>

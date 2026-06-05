@@ -120,11 +120,12 @@ export default function AuthenticatedAppShell({ children }) {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="relative z-40 flex h-14 flex-shrink-0 items-center gap-3 border-b border-white/10 bg-rd-elevated/80 px-4 shadow-sm backdrop-blur-xl">
+        {/* Top bar */}
+        <header className="relative z-40 flex h-14 flex-shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 shadow-sm">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-white/55 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:hidden"
           >
             <Menu size={20} />
           </button>
@@ -134,10 +135,12 @@ export default function AuthenticatedAppShell({ children }) {
           <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
             {crumbs.map((c, i) => (
               <div key={`${c}-${i}`} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight size={13} className="flex-shrink-0 text-white/25" />}
+                {i > 0 && <ChevronRight size={13} className="flex-shrink-0 text-slate-300" />}
                 <span
                   className={
-                    i === crumbs.length - 1 ? "truncate font-bold text-white" : "text-xs text-white/45"
+                    i === crumbs.length - 1
+                      ? "truncate font-bold text-brand-dark"
+                      : "text-xs text-slate-400"
                   }
                 >
                   {c}
@@ -153,11 +156,12 @@ export default function AuthenticatedAppShell({ children }) {
           </div>
         </header>
 
-        <div className="hidden border-b border-white/[0.06] bg-black/20 px-4 py-1.5 lg:flex lg:justify-end">
+        <div className="hidden border-b border-slate-100 bg-white px-4 py-1.5 lg:flex lg:justify-end">
           <SystemStatusBar compact />
         </div>
+
         <main
-          className="overflow-panel-y min-h-0 flex-1 bg-rd-gradient bg-rd-mesh p-4 lg:p-6"
+          className="overflow-panel-y min-h-0 flex-1 bg-brand-bg p-4 lg:p-6"
           data-app-role={role}
         >
           <div className="mx-auto max-w-7xl animate-fade-in">{children}</div>

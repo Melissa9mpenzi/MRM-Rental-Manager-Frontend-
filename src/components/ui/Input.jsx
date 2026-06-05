@@ -30,7 +30,7 @@ export const Input = forwardRef(function Input(
         {Icon && (
           <Icon
             size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-mid"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
         )}
         <input
@@ -45,7 +45,7 @@ export const Input = forwardRef(function Input(
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-mid hover:text-brand-teal transition-colors"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-teal transition-colors"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
