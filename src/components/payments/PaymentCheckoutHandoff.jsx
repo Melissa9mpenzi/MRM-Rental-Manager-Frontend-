@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ExternalLink, Lock, ShieldCheck } from "lucide-react";
 import BrandMark from "../brand/BrandMark";
 
@@ -40,9 +41,9 @@ export default function PaymentCheckoutHandoff({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-[#0a1210]/92 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[300] flex items-start justify-center overflow-y-auto bg-[#0a1210]/92 p-4 pt-[max(5rem,18vh)] backdrop-blur-md sm:pt-24"
       role="dialog"
       aria-modal="true"
       aria-labelledby="checkout-handoff-title"
@@ -124,6 +125,7 @@ export default function PaymentCheckoutHandoff({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
