@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Home } from "lucide-react";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { apiErrorMessage } from "../../lib/apiError";
+import useAuthStore from "../../store/authStore";
+import { postLoginDestination } from "../../lib/onboardingAuth";
 
 function TenantAcceptInvite() {
   const [searchParams] = useSearchParams();
@@ -61,9 +63,27 @@ function TenantAcceptInvite() {
     setVerifying(true);
 
     try {
-      await tenantPortalApi.acceptInvite({ token, password });
-      toast.success("Account created successfully! Please log in.");
-      navigate("/login");
+      const result = await tenantPortalApi.acceptInvite({ token, password });
+      const access = result?.access_token;
+      const refresh = result?.refresh_token;
+      if (access) {
+        await useAuthStore.getState().loginWithPrivy({
+          access_token: access,
+          refresh_token: refresh,
+          user: { email: result?.email || email, role: "tenant" },
+        });
+        toast.success(result?.message || "You are signed in.");
+        navigate(postLoginDestination(useAuthStore.getState().user) || "/tenant/dashboard", {
+          replace: true,
+        });
+        return;
+      }
+      if (result?.already_active) {
+        toast.success("Invite already used. Sign in with the same email as the invite.");
+      } else {
+        toast.success("Account ready. Sign in with the email on this invite.");
+      }
+      navigate("/login", { state: { email: result?.email || email } });
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to create account."));
     } finally {

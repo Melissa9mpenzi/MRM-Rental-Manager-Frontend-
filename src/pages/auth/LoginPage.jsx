@@ -1,8 +1,8 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Shield } from "lucide-react";
 import { Input } from "../../components/ui/Input";
 import useAuthStore from "../../store/authStore";
 import { pathAllowedForRole } from "../../config/access";
@@ -13,10 +13,13 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const login = useAuthStore((s) => s.login);
+  const verifyTotpLogin = useAuthStore((s) => s.verifyTotpLogin);
   const isLoading = useAuthStore((s) => s.isLoading);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const from = location.state?.from?.pathname;
+  const [totpStep, setTotpStep] = useState(null);
+  const [totpCode, setTotpCode] = useState("");
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -55,23 +58,92 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     try {
-      await login(data);
-      const user = useAuthStore.getState().user;
-      toast.success("Welcome back!");
-      if (
-        from &&
-        pathAllowedForRole(from, user?.role) &&
-        from !== "/auth/kyc" &&
-        !mustCompleteKycBeforeApp(user)
-      ) {
-        navigate(from, { replace: true });
+      const result = await login(data);
+      if (result?.needsTotp) {
+        setTotpStep({
+          token: result.totpPendingToken,
+          email: data.email,
+        });
+        toast("Enter the 6-digit code from your authenticator app.");
         return;
       }
-      navigate(postLoginDestination(user), { replace: true });
+      const user = useAuthStore.getState().user;
+      toast.success("Welcome back!");
+      goAfterLogin(user);
     } catch (err) {
       toast.error(err.message || "Invalid email or password.");
     }
   };
+
+  const goAfterLogin = (loggedInUser) => {
+    if (
+      from &&
+      pathAllowedForRole(from, loggedInUser?.role) &&
+      from !== "/auth/kyc" &&
+      !mustCompleteKycBeforeApp(loggedInUser)
+    ) {
+      navigate(from, { replace: true });
+      return;
+    }
+    navigate(postLoginDestination(loggedInUser), { replace: true });
+  };
+
+  const onVerifyTotp = async (e) => {
+    e.preventDefault();
+    if (!totpStep?.token || totpCode.trim().length < 6) {
+      toast.error("Enter your 6-digit code.");
+      return;
+    }
+    try {
+      await verifyTotpLogin({ totpPendingToken: totpStep.token, code: totpCode.trim() });
+      toast.success("Welcome back!");
+      goAfterLogin(useAuthStore.getState().user);
+    } catch (err) {
+      toast.error(err.message || "Invalid code.");
+    }
+  };
+
+  if (totpStep) {
+    return (
+      <div className="card-glass rounded-2xl border border-white/[0.1] p-4 shadow-card sm:p-5">
+        <div className="mb-3 text-center">
+          <Shield className="mx-auto mb-2 text-brand-teal" size={28} />
+          <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Two-factor authentication</h1>
+          <p className="mt-0.5 text-xs text-white/55 sm:text-sm">
+            Enter the code from your authenticator app for {totpStep.email}
+          </p>
+        </div>
+        <form onSubmit={onVerifyTotp} className="space-y-3">
+          <Input
+            label="Authenticator code"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="000000"
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || totpCode.length < 6}
+            className="btn-primary w-full rounded-xl py-2.5 text-sm font-bold shadow-md hover:shadow-lg sm:py-3 disabled:opacity-50"
+          >
+            {isLoading ? "Verifying…" : "Verify and sign in"}
+          </button>
+          <button
+            type="button"
+            className="w-full text-xs font-semibold text-white/45 hover:text-white"
+            onClick={() => {
+              setTotpStep(null);
+              setTotpCode("");
+            }}
+          >
+            Back to sign in
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="card-glass rounded-2xl border border-white/[0.1] p-4 shadow-card sm:p-5">

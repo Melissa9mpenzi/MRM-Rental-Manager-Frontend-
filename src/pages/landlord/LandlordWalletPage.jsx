@@ -16,6 +16,8 @@ import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import EscrowStatusPanel from "../../components/blockchain/EscrowStatusPanel";
 import { paymentsApi } from "../../api/paymentsApi";
 import { blockchainApi } from "../../api/blockchainApi";
+import { apiErrorMessage } from "../../lib/apiError";
+import { PLATFORM_API_URL } from "../../api/config";
 import { ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
 
 function fmt(n) {
@@ -25,10 +27,12 @@ function fmt(n) {
 const METHOD_LABELS = {
   mtn_momo: "MTN MoMo",
   airtel: "Airtel Money",
-  cash: "Cash",
-  bank: "Bank",
+  bank: "Bank transfer",
   sui: "Sui wallet",
-  other: "Other",
+  pesapal: "Pesapal / Card",
+  card: "Card",
+  other: "Pesapal",
+  cash: "Cash (legacy)",
 };
 
 export default function LandlordWalletPage() {
@@ -64,7 +68,7 @@ export default function LandlordWalletPage() {
       variant="ledger"
       icon={Wallet}
       title="Wallet"
-      description="Rent collected on your ledger — MoMo, Pesapal, bank, cash, and Sui escrow"
+      description="Rent collected on your ledger — MTN MoMo, Airtel, Pesapal, bank transfer, and Sui"
       actions={
         <div className="flex flex-wrap gap-2">
           <Link to="/landlord/payments/new" className="btn-primary inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold">
@@ -84,7 +88,13 @@ export default function LandlordWalletPage() {
       ) : walletQuery.isError ? (
         <ErrorPanel
           title="Could not load wallet"
-          description="Check that you are logged in as a landlord and the API is running."
+          description={
+            apiErrorMessage(
+              walletQuery.error,
+              "Could not load payment totals from the API."
+            ) +
+            ` (GET ${PLATFORM_API_URL}/api/v1/payments/wallet-summary)`
+          }
           onRetry={() => walletQuery.refetch()}
         />
       ) : (
@@ -134,11 +144,11 @@ export default function LandlordWalletPage() {
               <p className="mt-2 text-xs text-white/45">
                 {onlineConfigured
                   ? `Gateway: ${gw.provider || "configured"} (${gw.mode || "live"}) — tenants can pay from the app.`
-                  : "Online gateway not configured — tenants use manual recording or cash until MoMo/Pesapal keys are set."}
+                  : "Online gateway not configured — set MTN MoMo or Pesapal keys on the API to enable tenant payments."}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {Object.entries(w.by_method || {})
-                  .filter(([k]) => !["cash", "bank", "other"].includes(k))
+                  .filter(([k]) => !["cash", "bank"].includes(k))
                   .map(([key, val]) => (
                     <span
                       key={key}
@@ -154,14 +164,14 @@ export default function LandlordWalletPage() {
             <div className="card-glass p-5">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
                 <Landmark size={16} className="text-white/60" />
-                Manual / bank & cash
+                Bank transfers (recorded)
               </h3>
               <div className="text-2xl font-bold text-white">{fmt(w.by_method_manual_ugx)}</div>
               <p className="mt-2 text-xs text-white/45">
-                Recorded in the office — bank transfer, cash, or other. Not auto-settled to your bank; use for your books.
+                Bank transfers you record manually — not auto-settled via MoMo or Pesapal.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {["cash", "bank", "other"].map((key) =>
+                {["bank"].map((key) =>
                   w.by_method?.[key] ? (
                     <span
                       key={key}

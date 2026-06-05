@@ -1,6 +1,7 @@
 import BrandMark from "../brand/BrandMark";
 import PaymentMethodIcon from "../payments/PaymentMethodIcon";
 import { methodLabel, qrImageUrl, receiptTypeConfig } from "../../lib/receiptTheme";
+import { receiptForDocument } from "../../lib/receiptRedaction";
 
 function Row({ label, value, mono }) {
   if (value == null || value === "" || value === "—") return null;
@@ -12,25 +13,28 @@ function Row({ label, value, mono }) {
   );
 }
 
-/** Printable white receipt document — matches RentDirect UG mockup */
+/** Printable official payment receipt — minimal PII, no internal hashes. */
 export default function ReceiptDocument({ receipt, className = "" }) {
   if (!receipt) return null;
 
-  const theme = receiptTypeConfig(receipt);
-  const verifyUrl = receipt.verification_url || "";
-  const issued = receipt.issued_at
-    ? new Date(receipt.issued_at).toLocaleDateString("en-UG", { day: "numeric", month: "long", year: "numeric" })
+  const doc = receiptForDocument(receipt);
+  const theme = receiptTypeConfig(doc);
+  const verifyUrl = doc.verification_url || "";
+  const issued = doc.issued_at
+    ? new Date(doc.issued_at).toLocaleDateString("en-UG", { day: "numeric", month: "long", year: "numeric" })
     : "—";
-  const lease =
-    receipt.lease_start && receipt.lease_end
-      ? `${receipt.lease_start} → ${receipt.lease_end}`
-      : receipt.period_label || "—";
+  const period = doc.period_label || "—";
 
-  const type = receipt.receipt_type || "rent_payment";
-  const isEscrow = type === "security_deposit" || receipt.status === "escrowed";
+  const type = doc.receipt_type || "rent_payment";
+  const isEscrow = type === "security_deposit" || doc.status === "escrowed";
   const isTax = type === "government_tax";
   const isCommission = type === "commission";
-  const isChain = Boolean(receipt.tx_hash) || type === "blockchain";
+  const statusLabel =
+    doc.status === "escrowed"
+      ? "HELD IN ESCROW"
+      : doc.status === "paid"
+        ? "PAID"
+        : (doc.status || "PAID").toUpperCase();
 
   return (
     <article
@@ -40,15 +44,16 @@ export default function ReceiptDocument({ receipt, className = "" }) {
       <header className="receipt-doc__header">
         <div className="receipt-doc__brand">
           <BrandMark imgClassName="receipt-doc__logo h-12 w-auto max-w-[200px] object-contain" />
+          <p className="receipt-doc__tagline">Official payment receipt</p>
         </div>
-        <span className={`receipt-doc__badge receipt-doc__badge--${theme.badgeClass}`}>{theme.badge}</span>
+        <span className={`receipt-doc__badge receipt-doc__badge--${theme.badgeClass}`}>{statusLabel}</span>
       </header>
 
       <div className="receipt-doc__title-block">
         <h1>{theme.title}</h1>
         <div className="receipt-doc__meta">
           <span>
-            <strong>Receipt ID</strong> {receipt.receipt_number}
+            <strong>Receipt No.</strong> {doc.receipt_number}
           </span>
           <span>
             <strong>Date issued</strong> {issued}
@@ -56,111 +61,75 @@ export default function ReceiptDocument({ receipt, className = "" }) {
         </div>
       </div>
 
+      <section className="receipt-doc__amount-hero">
+        <span>{isEscrow ? "Deposit amount" : isTax ? "Tax amount" : isCommission ? "Commission" : "Amount received"}</span>
+        <strong>
+          {doc.currency || "UGX"} {Number(doc.amount || 0).toLocaleString()}
+        </strong>
+      </section>
+
       <section className="receipt-doc__property">
-        <div className="receipt-doc__property-img" aria-hidden>
-          <svg viewBox="0 0 64 64" fill="none">
-            <rect width="64" height="64" rx="8" fill="#e2e8f0" />
-            <path d="M12 40 L32 22 L52 40 V52 H12 Z" fill="#94a3b8" />
-            <rect x="26" y="36" width="12" height="16" fill="#64748b" />
-          </svg>
-        </div>
         <div className="receipt-doc__property-info">
-          <p className="receipt-doc__section-label">Property</p>
-          <p className="receipt-doc__property-name">{receipt.property_name || "—"}</p>
-          <p className="receipt-doc__muted">{receipt.property_address || "—"}</p>
-          <Row label="Landlord" value={receipt.landlord_name} />
-          <Row label="Lease period" value={lease} />
-          {!isCommission && <Row label="Tenant" value={receipt.tenant_name} />}
+          <p className="receipt-doc__section-label">Tenancy</p>
+          <p className="receipt-doc__property-name">{doc.property_name || "—"}</p>
+          <p className="receipt-doc__muted">{doc.property_address || "—"}</p>
+          <Row label="Unit" value={doc.unit_number} />
+          <Row label="Billing period" value={period} />
+          {!isCommission && <Row label="Paid by" value={doc.tenant_name} />}
+          <Row label="Received by" value={doc.landlord_name} />
         </div>
       </section>
 
       <section className="receipt-doc__section">
-        <p className="receipt-doc__section-label">
-          {isEscrow ? "Deposit details" : isTax ? "Tax details" : isCommission ? "Commission" : "Payment details"}
-        </p>
-
-        <div className="receipt-doc__amount-box">
-          <span>{isEscrow ? "Deposit amount" : isTax ? "Total tax paid" : isCommission ? "Commission amount" : "Amount paid"}</span>
-          <strong>
-            {receipt.currency || "UGX"} {Number(receipt.amount || 0).toLocaleString()}
-          </strong>
-        </div>
+        <p className="receipt-doc__section-label">Payment details</p>
 
         <div className="receipt-doc__method-row">
           {!isTax && (
-            <PaymentMethodIcon method={receipt.payment_method || "other"} className="receipt-doc__method-icon" />
+            <PaymentMethodIcon method={doc.payment_method || "other"} className="receipt-doc__method-icon" />
           )}
           <div>
-            <Row label="Payment method" value={methodLabel(receipt.payment_method)} />
-            {isEscrow && (
-              <>
-                <Row label="Escrow ID" value={receipt.receipt_number} />
-                <Row label="Smart contract" value={receipt.contract_id || "Sui Network (pending deploy)"} mono />
-                <Row
-                  label="Release conditions"
-                  value="At end of lease period, subject to property inspection"
-                />
-                <Row label="Status" value="Held in Escrow" />
-              </>
-            )}
-            {isCommission && (
-              <>
-                <Row label="Agent" value={receipt.tenant_name} />
-                <Row label="Commission rate" value="5%" />
-              </>
-            )}
+            <Row label="Payment method" value={methodLabel(doc.payment_method)} />
+            <Row label="Payment reference" value={doc.transaction_reference} mono />
+            {isEscrow && <Row label="Status" value="Held in escrow until lease end" />}
             {isTax && (
               <>
-                <Row label="Tax type" value="Rental Income Tax" />
-                <Row label="VAT (18%)" value={receipt.vat_amount ? `UGX ${Number(receipt.vat_amount).toLocaleString()}` : "—"} />
-                <Row label="URA ref" value={receipt.ura_compliance_code || receipt.tax_id} />
-                <Row label="Tax period" value={receipt.period_label} />
+                <Row label="Tax type" value="Rental income tax" />
+                <Row
+                  label="VAT"
+                  value={doc.vat_amount ? `UGX ${Number(doc.vat_amount).toLocaleString()}` : "—"}
+                />
+                <Row label="URA reference" value={doc.ura_compliance_code || doc.tax_id} />
               </>
             )}
-            {isChain && (
-              <>
-                <Row label="Network" value="Sui Mainnet" />
-                <Row label="Wallet address" value={receipt.wallet_address} mono />
-                <Row label="Transaction hash" value={receipt.tx_hash} mono />
-                <Row label="Smart contract" value={receipt.contract_id} mono />
-                <Row label="Gas fee" value={receipt.gas_fees_mist ? `${receipt.gas_fees_mist} MIST` : "—"} />
-              </>
-            )}
-            {!isEscrow && !isTax && !isCommission && (
-              <>
-                <Row label="Transaction ID" value={receipt.transaction_reference} mono />
-                <Row label="Reference" value={receipt.receipt_number} />
-                <Row label="Payment status" value="Successful" />
-                <Row label="Period" value={receipt.period_label} />
-              </>
-            )}
+            {isCommission && <Row label="Agent" value={doc.tenant_name} />}
           </div>
         </div>
       </section>
 
-      {receipt.smart_summary && (
-        <p className="receipt-doc__summary">{receipt.smart_summary}</p>
+      {doc.tx_hash && (
+        <section className="receipt-doc__section receipt-doc__section--muted">
+          <p className="receipt-doc__section-label">Digital verification</p>
+          <Row label="Record status" value="Registered on RentDirect UG" />
+          <Row label="Transaction" value={doc.tx_hash} mono />
+        </section>
       )}
 
       {verifyUrl && (
         <section className="receipt-doc__qr">
-          <img src={qrImageUrl(verifyUrl, 100)} alt="Verify receipt QR" width={100} height={100} />
+          <img src={qrImageUrl(verifyUrl, 100)} alt="Verify receipt" width={100} height={100} />
           <div>
-            <p className="receipt-doc__qr-title">Scan to Verify Receipt</p>
-            <p className="receipt-doc__qr-url">{verifyUrl.replace(/^https?:\/\//, "")}</p>
+            <p className="receipt-doc__qr-title">Verify this receipt</p>
+            <p className="receipt-doc__qr-hint">
+              Scan to confirm authenticity. Use receipt number <strong>{doc.receipt_number}</strong> if asked by
+              your bank or landlord.
+            </p>
           </div>
         </section>
       )}
 
-      {receipt.walrus_blob_id && (
-        <p className="receipt-doc__walrus">
-          Secured on Sui Blockchain · Stored on Walrus: <code>{receipt.walrus_blob_id.slice(0, 24)}…</code>
-        </p>
-      )}
-
       <footer className="receipt-doc__footer">
-        <span>System-generated receipt · RentDirect UG</span>
-        <span>support@rentdirect.ug · +256 700 000 000</span>
+        <p>System-generated document · RentDirect UG · Uganda</p>
+        <p>For support, quote your receipt number. This receipt is not a tax invoice unless marked URA compliant.</p>
       </footer>
     </article>
   );

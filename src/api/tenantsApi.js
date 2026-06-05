@@ -26,4 +26,8 @@ export const tenantsApi = {
 
   moveOut: (id) =>
     api.post(`/tenants/${id}/move-out`).then((r) => r.data),
+
+  /** Email portal invite to tenant (landlord only). */
+  sendPortalInvite: (tenantId, email) =>
+    api.post("/tenant/invite/send", { tenant_id: tenantId, email }).then((r) => r.data),
 };

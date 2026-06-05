@@ -25,6 +25,21 @@ Official **React** single-page application for **RentDirect UG** (MRM Rental Man
 
 ## Features at a glance
 
+## Surface strategy (web vs mobile)
+
+This web app is intentionally the **management/control surface**.  
+The mobile app is intentionally the **quick action surface**.
+
+- **Web-first roles:** landlord management, government officers (NIRA/KCCA/URA), system admin
+- **Mobile-first roles:** tenant daily actions and field agent workflows
+- **Web-only:** government and system admin operations
+
+See backend architecture policy: `docs/ROLE_SURFACE_MATRIX.md` in the backend repo.
+
+---
+
+## Features at a glance
+
 ### Public & marketing
 
 - Landing, about, pricing, contact
@@ -282,7 +297,10 @@ Brand logo and PWA assets use `src/assets/rentdirect-logo.png`, copied under `pu
 - `apple-touch-icon.png`
 - `site.webmanifest`
 
-After updating the logo, replace those files and redeploy.
+After updating the logo, run `python scripts/generate-brand-assets.py` to refresh:
+
+- `favicon.ico`, `favicon-16.png`, `favicon-32.png`
+- `apple-touch-icon.png`, `logo-icon.png`
 
 ---
 

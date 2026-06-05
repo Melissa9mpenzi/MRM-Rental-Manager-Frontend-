@@ -66,9 +66,9 @@ export async function runTenantCheckoutUi({
     throw new Error("Airtel not supported");
   }
   const methodCfg = resolvePaymentMethod(methodId);
-  if (methodId === "card" && !supports.card) {
-    toast.error("Card payments need Pesapal on the server (PAYMENT_GATEWAY_PROVIDER=pesapal).");
-    throw new Error("Card not supported");
+  if (methodId === "pesapal" && !supports.card) {
+    toast.error("Card / Pesapal payments need PAYMENT_GATEWAY_PROVIDER=pesapal on the API server.");
+    throw new Error("Pesapal not supported");
   }
 
   try {

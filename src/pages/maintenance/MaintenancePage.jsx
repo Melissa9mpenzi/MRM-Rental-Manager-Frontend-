@@ -10,9 +10,7 @@ import { propertiesApi } from "../../api/propertiesApi";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import { EmptyPanel, ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
 
-import { platformApiOrigin } from "../../api/config";
-
-const BASE_URL = platformApiOrigin();
+import { listingImageUrl } from "../../lib/mediaUrl";
 
 const STATUS_CONFIG = {
   open:        { label: "Open",        color: "bg-red-500/15 text-red-200 ring-1 ring-red-500/25",     icon: AlertTriangle },
@@ -207,8 +205,8 @@ function RequestCard({ req, onUpdate }) {
           <div className="text-xs text-brand-mid mt-0.5">{req.property_name}{req.unit_number && ` · Unit ${req.unit_number}`}</div>
         </div>
         {req.photo_path && (
-          <a href={`${BASE_URL}${req.photo_path}`} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-brand-tealLt">
-            <img src={`${BASE_URL}${req.photo_path}`} alt="photo" className="w-full h-full object-cover" />
+          <a href={listingImageUrl(req.photo_path)} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-brand-tealLt">
+            <img src={listingImageUrl(req.photo_path)} alt="photo" className="w-full h-full object-cover" />
           </a>
         )}
       </div>

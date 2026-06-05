@@ -28,6 +28,15 @@ const STATUS_COLORS = {
   maintenance: "border-l-amber-400",
 };
 
+function floorLabel(floorNumber) {
+  if (floorNumber === null || floorNumber === undefined) return "";
+  const value = Number(floorNumber);
+  if (Number.isNaN(value)) return "";
+  if (value === 0) return "Ground floor";
+  if (value > 0) return `Floor ${value}`;
+  return `Basement ${Math.abs(value)}`;
+}
+
 export default function UnitCard({ unit, propertyId }) {
   const qc = useQueryClient();
   const [menuOpen, setMenuOpen]     = useState(false);
@@ -64,7 +73,7 @@ export default function UnitCard({ unit, propertyId }) {
             </div>
             <div className="text-xs text-brand-mid mt-0.5">
               {UNIT_TYPE_LABELS[unit.unit_type] || unit.unit_type}
-              {unit.floor_number > 0 && ` · Floor ${unit.floor_number}`}
+              {floorLabel(unit.floor_number) && ` · ${floorLabel(unit.floor_number)}`}
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -11,8 +11,6 @@ export const RECEIPT_FILTERS = [
 
 export function receiptTypeConfig(receipt) {
   const type = receipt?.receipt_type || "rent_payment";
-  const method = (receipt?.payment_method || "").toLowerCase();
-  const hasChain = Boolean(receipt?.tx_hash);
 
   const defaults = {
     rent_payment: {
@@ -59,17 +57,6 @@ export function receiptTypeConfig(receipt) {
 
   const base = defaults[type] || defaults.rent_payment;
 
-  if (hasChain && type === "rent_payment" && method === "sui") {
-    return {
-      title: "Blockchain Receipt",
-      accent: "#14b8a6",
-      accentSoft: "rgba(20,184,166,0.12)",
-      badge: "CONFIRMED",
-      badgeClass: "confirmed",
-      icon: "blockchain",
-    };
-  }
-
   if (receipt?.status === "escrowed") {
     return { ...base, badge: "ESCROWED", badgeClass: "escrowed" };
   }
@@ -83,9 +70,11 @@ export function methodLabel(method) {
     mtn_momo: "MTN Mobile Money",
     airtel: "Airtel Money",
     bank: "Bank Transfer",
-    cash: "Cash",
-    sui: "SUI Wallet Payment",
-    other: "Card / Other",
+    sui: "Sui Wallet",
+    pesapal: "Card / Pesapal",
+    card: "Card / Pesapal",
+    other: "Pesapal",
+    cash: "Cash (legacy)",
   };
   return map[m] || m.replace(/_/g, " ");
 }

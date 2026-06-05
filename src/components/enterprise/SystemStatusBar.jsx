@@ -34,10 +34,23 @@ export default function SystemStatusBar({ compact = false }) {
   if (!data) return null;
 
   if (compact) {
+    const issues = Array.isArray(data.issues) ? data.issues : [];
+    const degraded =
+      issues.length > 0 ||
+      data.database === "misconfigured" ||
+      data.api !== "operational";
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300/90">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-        All systems operational
+      <span
+        className={`inline-flex items-center gap-1 text-[10px] font-semibold ${
+          degraded ? "text-amber-300/90" : "text-emerald-300/90"
+        }`}
+      >
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${
+            degraded ? "bg-amber-400" : "animate-pulse bg-emerald-400"
+          }`}
+        />
+        {degraded ? "Some services need attention" : "All systems operational"}
       </span>
     );
   }

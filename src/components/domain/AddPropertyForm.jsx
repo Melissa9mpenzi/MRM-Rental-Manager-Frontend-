@@ -318,14 +318,17 @@ export default function AddPropertyForm({ mode = "page", onCancel, onSuccess }) 
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input
-                label="First unit number"
-                placeholder="e.g. A1"
+                label="First unit code/name"
+                placeholder="e.g. A1, B-02, Shop G3"
                 required
                 error={errors.unit_number?.message}
                 {...register("unit_number", { required: "Unit number is required" })}
               />
-              <Input label="Floor" type="number" {...register("floor_number")} />
+              <Input label="Floor number" type="number" placeholder="0 = Ground floor, 1 = First floor" {...register("floor_number")} />
             </div>
+            <p className="text-[11px] text-white/45">
+              Use any naming format for units (A1-E2, 101-112, Shop-01). Add more units later from the property details page.
+            </p>
 
             <ListingDetailsFields
               register={register}

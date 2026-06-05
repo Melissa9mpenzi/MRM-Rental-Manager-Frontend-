@@ -8,6 +8,7 @@ export const authApi = {
   privySignIn: (data) => api.post("/auth/privy", data).then((r) => r.data),
   verifyEmail: (data) => api.post("/auth/verify-email", data).then((r) => r.data),
   login: (data) => api.post("/auth/login", data).then((r) => r.data),
+  verifyTotp: (data) => api.post("/auth/verify-totp", data).then((r) => r.data),
   logout: () => api.post("/auth/logout").then((r) => r.data),
   me: () => api.get("/auth/me").then((r) => r.data),
   forgotPassword: (data) => api.post("/auth/forgot-password", data).then((r) => r.data),

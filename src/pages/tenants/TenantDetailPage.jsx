@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Phone, Mail, Home, Calendar, Download,
-         CreditCard, AlertCircle, Trash2, LogOut } from "lucide-react";
+         CreditCard, AlertCircle, Trash2, LogOut, Pencil, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { tenantsApi } from "../../api/tenantsApi.js";
 import { paymentsApi } from "../../api/paymentsApi.js";
@@ -41,6 +41,14 @@ export default function TenantDetailPage() {
   const [showPayForm, setShowPayForm] = useState(false);
   const [deletingId, setDeletingId]   = useState(null);
   const [moveOutOpen, setMoveOutOpen] = useState(false);
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editingContact, setEditingContact] = useState(false);
+
+  const syncContactForm = (t) => {
+    setEditEmail(t?.email || "");
+    setEditPhone(t?.phone || "");
+  };
 
   const { data: tenant, isLoading, isError } = useQuery({
     queryKey: ["tenant", tenantId],
@@ -64,6 +72,46 @@ export default function TenantDetailPage() {
     },
   });
 
+  const updateContactMutation = useMutation({
+    mutationFn: () => {
+      const fd = new FormData();
+      if (editEmail.trim()) fd.append("email", editEmail.trim());
+      else fd.append("email", "");
+      if (editPhone.trim()) fd.append("phone", editPhone.trim());
+      return tenantsApi.update(tenantId, fd);
+    },
+    onSuccess: (updated) => {
+      qc.invalidateQueries({ queryKey: ["tenant", tenantId] });
+      qc.invalidateQueries({ queryKey: ["tenants"] });
+      syncContactForm(updated);
+      setEditingContact(false);
+      toast.success("Contact details updated.");
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.detail?.message || err?.message || "Could not update tenant.");
+    },
+  });
+
+  const inviteMutation = useMutation({
+    mutationFn: () => {
+      const email = editEmail.trim();
+      if (!email) throw new Error("Enter an email before sending an invite.");
+      return tenantsApi.sendPortalInvite(tenantId, email);
+    },
+    onSuccess: (res) => {
+      const email = editEmail.trim();
+      const sent = res?.data?.email_sent !== false;
+      toast.success(
+        sent
+          ? `Portal invite emailed to ${email}. They can also accept it on the tenant dashboard after signing in.`
+          : `Invite ready for ${email}. Ask them to sign in as a tenant with that email and tap Accept on the dashboard.`,
+      );
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.detail?.message || err?.message || "Could not send invite.");
+    },
+  });
+
   const moveOutMutation = useMutation({
     mutationFn: () => tenantsApi.moveOut(tenantId),
     onSuccess: () => {
@@ -73,6 +121,10 @@ export default function TenantDetailPage() {
       setMoveOutOpen(false);
     },
   });
+
+  useEffect(() => {
+    if (tenant && !editingContact) syncContactForm(tenant);
+  }, [tenant, editingContact]);
 
   if (isLoading) return <div className="card h-32 animate-pulse bg-brand-tealLt/30" />;
   if (isError) {
@@ -125,6 +177,94 @@ export default function TenantDetailPage() {
             </Button>
           )}
         </div>
+      </div>
+
+      <div className="card">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-bold text-brand-dark flex items-center gap-2">
+            <Pencil size={14} className="text-brand-teal" /> Contact & portal access
+          </h3>
+          {!editingContact && (
+            <button
+              type="button"
+              className="text-xs font-bold text-brand-teal hover:underline"
+              onClick={() => {
+                syncContactForm(tenant);
+                setEditingContact(true);
+              }}
+            >
+              Edit email / phone
+            </button>
+          )}
+        </div>
+        <p className="mb-4 text-xs text-brand-mid">
+          Portal login uses this <strong>email</strong>. After you change it, send a new invite so the tenant can link
+          Pay rent to the correct address.
+        </p>
+        {editingContact ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-brand-mid">Email</label>
+              <input
+                type="email"
+                className="input-field w-full"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="tenant@email.com"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-brand-mid">Phone</label>
+              <input
+                type="tel"
+                className="input-field w-full"
+                value={editPhone}
+                onChange={(e) => setEditPhone(e.target.value)}
+                placeholder="256700000000"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 sm:col-span-2">
+              <Button
+                type="button"
+                onClick={() => updateContactMutation.mutate()}
+                disabled={updateContactMutation.isPending}
+              >
+                {updateContactMutation.isPending ? "Saving…" : "Save"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  syncContactForm(tenant);
+                  setEditingContact(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="inline-flex items-center gap-1.5 text-brand-teal"
+                onClick={() => inviteMutation.mutate()}
+                disabled={inviteMutation.isPending || !editEmail.trim()}
+              >
+                <Send size={14} />
+                {inviteMutation.isPending ? "Sending…" : "Send portal invite"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-brand-dark">
+            <p>
+              <span className="text-brand-mid">Email: </span>
+              {tenant.email || <span className="italic text-brand-mid">Not set — add email to enable portal</span>}
+            </p>
+            <p className="mt-1">
+              <span className="text-brand-mid">Phone: </span>
+              {tenant.phone || "—"}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Balance + payment form row */}

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, Download, Share2, Link2 } from "lucide-react";
 import ReceiptDocument from "./ReceiptDocument";
+import { maskPersonName } from "../../lib/receiptRedaction";
 import { receiptsApi } from "../../api/receiptsApi";
 import api from "../../api/client";
 import toast from "react-hot-toast";
@@ -52,7 +53,7 @@ export default function PaymentReceiptSuccess({ receipt, onClose, receiptsPath =
 
         <ul className="receipt-success-modal__summary">
           <li><span>Property</span><strong>{receipt.property_name || "—"}</strong></li>
-          <li><span>Landlord</span><strong>{receipt.landlord_name || "—"}</strong></li>
+          <li><span>Received by</span><strong>{maskPersonName(receipt.landlord_name) || "—"}</strong></li>
           <li><span>Method</span><strong>{(receipt.payment_method || "").replace(/_/g, " ")}</strong></li>
           <li><span>Date</span><strong>{receipt.issued_at ? new Date(receipt.issued_at).toLocaleDateString() : "—"}</strong></li>
           <li><span>Status</span><strong className="text-emerald-400">{(receipt.status || "paid").toUpperCase()}</strong></li>
@@ -72,7 +73,7 @@ export default function PaymentReceiptSuccess({ receipt, onClose, receiptsPath =
           className="receipt-success-modal__chain"
           onClick={() => navigate(`${receiptsPath}/${receipt.id}`)}
         >
-          <Link2 size={14} /> View full receipt & blockchain proof
+          <Link2 size={14} /> View full receipt
         </button>
 
         {onClose && (

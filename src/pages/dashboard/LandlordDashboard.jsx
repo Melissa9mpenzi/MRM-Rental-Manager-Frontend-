@@ -6,13 +6,12 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { dashboardApi } from "../../api/dashboardApi";
-import { listingImageUrl } from "../../lib/mediaUrl";
+import { propertyPhotoUrl } from "../../lib/mediaUrl";
 import useAuthStore from "../../store/authStore";
 import PlatformDistributionHint from "../../components/layout/PlatformDistributionHint";
 import KycStatusBanner from "../../components/domain/KycStatusBanner";
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import ActivityTimeline from "../../components/enterprise/ActivityTimeline";
-import SystemStatusBar from "../../components/enterprise/SystemStatusBar";
 import { platformApi } from "../../api/platformApi";
 
 function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
@@ -77,9 +76,9 @@ function RecentProperty({ p }) {
       className="group flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-white/[0.06]"
     >
       <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-brand-tealLt/30">
-        {p.photo_path ? (
+        {propertyPhotoUrl(p.photo_path) ? (
           <img
-            src={p.photo_path.startsWith("http") ? p.photo_path : `${listingImageUrl(p.photo_path)}`}
+            src={propertyPhotoUrl(p.photo_path)}
             alt={p.name}
             className="h-full w-full object-cover"
           />
@@ -131,8 +130,6 @@ export default function LandlordDashboard() {
       </div>
 
       <KycStatusBanner user={user} roleLabel="landlord" />
-
-      <SystemStatusBar />
 
       {isError && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
