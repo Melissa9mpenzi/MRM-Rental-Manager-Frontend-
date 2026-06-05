@@ -65,8 +65,9 @@ function PricingContent() {
   return (
     <Shell title="Pricing" eyebrow="Plans">
       <p className="max-w-2xl text-base leading-relaxed text-white/60">
-        Tenants browse free. Landlords pay per active unit. Agents: commission tooling on enterprise plans —
-        contact sales for volume.
+        Tenants browse free. Landlords pay <strong className="text-white/80">1.5%</strong> on online rent
+        collected plus <strong className="text-white/80">UGX 8,000</strong> per occupied unit per month.
+        Agents: enterprise volume pricing — contact sales.
       </p>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -111,8 +112,11 @@ function PricingContent() {
               <Check size={16} className="mt-0.5 flex-shrink-0 text-[#00C896]" /> Maintenance &amp; messaging
             </li>
           </ul>
-          <p className="mt-6 text-sm font-semibold text-white/45">Starts from a simple per-unit rate</p>
-          <p className="text-xs text-white/35">Exact numbers depend on portfolio size — we&apos;ll confirm on signup.</p>
+          <p className="mt-6 text-2xl font-extrabold text-white">
+            1.5% <span className="text-sm font-semibold text-white/40">online rent</span>
+          </p>
+          <p className="text-sm text-white/55">+ UGX 8,000 / occupied unit / month</p>
+          <p className="mt-2 text-xs text-white/35">Example: UGX 3M rent → UGX 45,000 fee, landlord nets UGX 2.955M</p>
         </div>
 
         <div className="flex flex-col rounded-2xl border border-white/[0.1] bg-white/[0.04] p-6 backdrop-blur-sm">

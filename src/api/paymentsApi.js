@@ -2,6 +2,11 @@ import api from "./client";
 
 export const paymentsApi = {
   gatewayStatus: () => api.get("/payments/gateway/status").then((r) => r.data),
+  platformFees: () => api.get("/payments/platform-fees").then((r) => r.data),
+  landlordBalance: () => api.get("/payments/landlord-balance").then((r) => r.data),
+  landlordLedger: (params = {}) =>
+    api.get("/payments/landlord-ledger", { params }).then((r) => r.data),
+  accrueUnitFees: () => api.post("/payments/accrue-unit-fees").then((r) => r.data),
   walletSummary: () => api.get("/payments/wallet-summary").then((r) => r.data),
   initiateCheckout: (data) =>
     api.post("/payments/checkout/initiate", data).then((r) => r.data),
