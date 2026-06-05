@@ -76,18 +76,6 @@ export default function PaymentFlowPage() {
   }, [invoicesQuery.data]);
 
   const totalDue = Number(openInvoice?.balance_due ?? 0);
-  const suiPaymentsEnabled = blockchainQuery.data?.enabled === true;
-
-  const tenantPayMethods = useMemo(
-    () => TENANT_PAY_METHODS.filter((m) => m.id !== "sui" || suiPaymentsEnabled),
-    [suiPaymentsEnabled],
-  );
-
-  useEffect(() => {
-    if (method === "sui" && blockchainQuery.isSuccess && !suiPaymentsEnabled) {
-      setMethod("mtn_momo");
-    }
-  }, [method, blockchainQuery.isSuccess, suiPaymentsEnabled]);
 
   const history = useMemo(() => {
     const rows = Array.isArray(paymentsQuery.data) ? paymentsQuery.data : [];
@@ -154,13 +142,6 @@ export default function PaymentFlowPage() {
   }
 
   function handleMethodSelect(id) {
-    if (id === "sui" && !suiPaymentsEnabled) {
-      toast.error(
-        "Sui wallet pay is not configured on the API yet. Use Mobile Money or Pesapal.",
-        { duration: 6000 },
-      );
-      return;
-    }
     setMethod(id);
     const blocked = explainPayBlocked();
     if (blocked) toast.error(blocked, { duration: 5000 });
@@ -174,10 +155,6 @@ export default function PaymentFlowPage() {
     }
     if (method !== "sui" && !phone.trim()) {
       toast.error("Enter your Mobile Money phone (256…).");
-      return;
-    }
-    if (method === "sui" && !suiPaymentsEnabled) {
-      toast.error("Sui payments are not available. Choose MTN MoMo, Airtel, or Pesapal.");
       return;
     }
     if (method === "sui" && suiExternalWallet && !account?.address) {
@@ -362,7 +339,7 @@ export default function PaymentFlowPage() {
           <div>
             <h3 className="mb-1 text-sm font-bold text-white">Payment methods</h3>
             <div className="flex flex-col gap-2" role="radiogroup" aria-label="Payment method">
-              {tenantPayMethods.map((m) => (
+              {TENANT_PAY_METHODS.map((m) => (
                 <MethodRadio
                   key={m.id}
                   config={m}

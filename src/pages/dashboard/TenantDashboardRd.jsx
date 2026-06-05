@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { formatDistanceToNow } from "date-fns";
 import {
+  CheckCircle2,
   CreditCard,
   Heart,
   MessageSquare,
@@ -32,6 +33,7 @@ function fmtPaidYtd(n) {
 export default function TenantDashboardRd() {
   const user = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
+  const [rentalSaved, setRentalSaved] = useState(false);
 
   const { data: savedRows = [] } = useQuery({
     queryKey: ["saved-units"],
@@ -64,12 +66,16 @@ export default function TenantDashboardRd() {
 
   const acceptRentalMutation = useMutation({
     mutationFn: () => tenantPortalApi.acceptRental(),
-    onSuccess: () => {
-      toast.success("Rental linked to your account.");
+    onSuccess: (res) => {
+      const already = res?.already_linked === true;
+      setRentalSaved(true);
+      queryClient.setQueryData(["tenant-pending-invitation"], null);
+      toast.success(already ? "Rental already saved on your account." : "Rental saved to your account.");
       queryClient.invalidateQueries({ queryKey: ["tenant-pending-invitation"] });
       queryClient.invalidateQueries({ queryKey: ["tenant-my-lease"] });
       queryClient.invalidateQueries({ queryKey: ["tenant-my-payments"] });
       queryClient.invalidateQueries({ queryKey: ["tenant-my-invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-me-pay"] });
     },
     onError: (err) => {
       const msg =
@@ -116,7 +122,14 @@ export default function TenantDashboardRd() {
   const noTenantProfile =
     leaseQuery.isError && leaseQuery.error?.response?.status === 404;
 
-  const pendingInvite = pendingInviteQuery.data?.data ?? pendingInviteQuery.data ?? null;
+  const hasLinkedRental = Boolean(lease || leasePayload?.tenant?.id);
+
+  const pendingInvite = useMemo(() => {
+    if (hasLinkedRental || rentalSaved) return null;
+    const row = pendingInviteQuery.data;
+    if (!row || typeof row !== "object" || row.tenant_id == null) return null;
+    return row;
+  }, [pendingInviteQuery.data, hasLinkedRental, rentalSaved]);
 
   const ytdTotal = useMemo(() => {
     const y = new Date().getFullYear();
@@ -188,7 +201,18 @@ export default function TenantDashboardRd() {
         <p className="mt-0.5 text-sm text-white/55">Welcome back, {user?.full_name?.split(" ")[0]}</p>
       </div>
 
-      {pendingInvite ? (
+      {rentalSaved ? (
+        <div className="flex items-start gap-3 rounded-xl border border-[#00C896]/35 bg-[#00C896]/10 px-4 py-4">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#00C896]" />
+          <div>
+            <p className="text-sm font-bold text-white">Rental saved</p>
+            <p className="mt-1 text-sm text-white/60">
+              Your rental is linked to <span className="font-semibold text-white">{user?.email}</span>. You can pay
+              rent and view your lease below.
+            </p>
+          </div>
+        </div>
+      ) : pendingInvite ? (
         <div className="rounded-xl border border-[#00C896]/35 bg-[#00C896]/10 px-4 py-4">
           <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Rental invitation</p>
           <h3 className="mt-1 text-lg font-bold text-white">
@@ -210,7 +234,7 @@ export default function TenantDashboardRd() {
             disabled={acceptRentalMutation.isPending}
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#00C896] px-5 py-2.5 text-sm font-bold text-[#041208] shadow-glow transition hover:brightness-110 disabled:opacity-60"
           >
-            {acceptRentalMutation.isPending ? "Linking…" : "Accept rental invitation"}
+            {acceptRentalMutation.isPending ? "Saving…" : "Accept rental invitation"}
           </button>
         </div>
       ) : null}
