@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Home, CreditCard, FileText, Wrench, User, LogOut, Bell } from "lucide-react";
+import {
+  Home,
+  CreditCard,
+  FileText,
+  Wrench,
+  User,
+  LogOut,
+  Bell,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import useAuthStore from "../../store/authStore";
@@ -50,16 +58,18 @@ function TenantDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-slate-900 shadow-sm border-b dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-brand-teal/10 flex items-center justify-center">
                 <Home className="w-5 h-5 text-brand-teal" />
               </div>
-              <h1 className="text-xl font-bold text-brand-dark">Tenant Portal</h1>
+              <h1 className="text-xl font-bold text-brand-dark dark:text-white">
+                Tenant Portal
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <button className="p-2 text-gray-400 hover:text-gray-600">
@@ -67,7 +77,7 @@ function TenantDashboard() {
               </button>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-red-600"
+                className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400 hover:text-red-600"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -80,37 +90,43 @@ function TenantDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Welcome, {tenantData?.full_name || "Tenant"}
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-slate-400 mt-1">
             {lease?.property?.name} - Unit {lease?.unit?.unit_number}
           </p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-slate-800">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                 <CreditCard className="w-5 h-5 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">Monthly Rent</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Monthly Rent
+              </h3>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               UGX {lease?.tenant?.monthly_rent?.toLocaleString() || "0"}
             </p>
-            <p className="text-sm text-gray-500 mt-1">Due on the 1st of each month</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Due on the 1st of each month
+            </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-slate-800">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
                 <FileText className="w-5 h-5 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">Lease Status</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Lease Status
+              </h3>
             </div>
-            <p className="text-2xl font-bold text-gray-900 capitalize">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white capitalize">
               {lease?.tenant?.status || "Active"}
             </p>
             <p className="text-sm text-gray-500 mt-1">
@@ -118,14 +134,16 @@ function TenantDashboard() {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-slate-800">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
                 <User className="w-5 h-5 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">Deposit</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Deposit
+              </h3>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
               UGX {lease?.tenant?.deposit_amount?.toLocaleString() || "0"}
             </p>
             <p className="text-sm text-gray-500 mt-1">
@@ -175,19 +193,27 @@ function TenantDashboard() {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Property Details</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Property Details
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Property</p>
-                      <p className="font-medium text-gray-900">{lease?.property?.name || "N/A"}</p>
+                      <p className="font-medium text-gray-900">
+                        {lease?.property?.name || "N/A"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500">Unit Number</p>
-                      <p className="font-medium text-gray-900">{lease?.unit?.unit_number || "N/A"}</p>
+                      <p className="font-medium text-gray-900">
+                        {lease?.unit?.unit_number || "N/A"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500">Address</p>
-                      <p className="font-medium text-gray-900">{lease?.property?.address || "N/A"}</p>
+                      <p className="font-medium text-gray-900">
+                        {lease?.property?.address || "N/A"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500">Unit Type</p>
@@ -199,15 +225,21 @@ function TenantDashboard() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Lease Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Lease Information
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Lease Start</p>
-                      <p className="font-medium text-gray-900">{lease?.tenant?.lease_start || "N/A"}</p>
+                      <p className="font-medium text-gray-900">
+                        {lease?.tenant?.lease_start || "N/A"}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500">Lease End</p>
-                      <p className="font-medium text-gray-900">{lease?.tenant?.lease_end || "N/A"}</p>
+                      <p className="font-medium text-gray-900">
+                        {lease?.tenant?.lease_end || "N/A"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -216,7 +248,9 @@ function TenantDashboard() {
 
             {activeTab === "payments" && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment History</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Payment History
+                </h3>
                 {payments.length === 0 ? (
                   <p className="text-gray-500">No payment records found.</p>
                 ) : (
@@ -224,16 +258,26 @@ function TenantDashboard() {
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">Date</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">Amount</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">Period</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-600">Method</th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                            Date
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                            Amount
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                            Period
+                          </th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-600">
+                            Method
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {payments.map((payment) => (
                           <tr key={payment.id}>
-                            <td className="px-4 py-3 text-gray-900">{payment.payment_date}</td>
+                            <td className="px-4 py-3 text-gray-900">
+                              {payment.payment_date}
+                            </td>
                             <td className="px-4 py-3 font-medium text-gray-900">
                               UGX {parseFloat(payment.amount).toLocaleString()}
                             </td>
@@ -254,11 +298,15 @@ function TenantDashboard() {
 
             {activeTab === "maintenance" && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Maintenance Requests</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Maintenance Requests
+                </h3>
                 <div className="flex items-center justify-center py-12">
                   <div className="text-center">
                     <Wrench className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 mb-4">Submit maintenance requests to your landlord</p>
+                    <p className="text-gray-500 mb-4">
+                      Submit maintenance requests to your landlord
+                    </p>
                     <button className="px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/90">
                       New Request (Coming Soon)
                     </button>
