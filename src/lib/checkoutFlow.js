@@ -24,24 +24,15 @@ export async function pollCheckoutUntilDone(reference, { maxAttempts = 40, inter
   return { done: false, timeout: true };
 }
 
-export async function startTenantCheckout({ invoiceId, methodId, phone }) {
-  const payment_method = apiMethodFromUiId(methodId);
-  return paymentsApi.initiateCheckout({
-    invoice_id: invoiceId,
-    payment_method,
-    phone: phone?.trim() || undefined,
-  });
+export function classifyCheckoutFlow(checkout) {
+  const next = checkout?.next_action || {};
+  const provider = String(checkout?.provider || "").toLowerCase();
+  if (next.payment_link) return "pesapal_redirect";
+  if (next.type === "ussd_prompt" || provider === "mtn_momo") return "momo_in_app";
+  return "unknown";
 }
 
-/**
- * Real Flutterwave checkout: opens hosted pay page, verifies with provider via API poll.
- */
-export async function runTenantCheckoutUi({
-  invoiceId,
-  methodId,
-  phone,
-  onCompleted,
-}) {
+export async function validateTenantCheckoutGateway(methodId) {
   const gw = await fetchGatewayStatus();
   if (!gw?.configured) {
     toast.error(
@@ -65,25 +56,81 @@ export async function runTenantCheckoutUi({
     );
     throw new Error("Airtel not supported");
   }
-  const methodCfg = resolvePaymentMethod(methodId);
   if (methodId === "pesapal" && !supports.card) {
     toast.error("Card / Pesapal payments need PAYMENT_GATEWAY_PROVIDER=pesapal on the API server.");
     throw new Error("Pesapal not supported");
   }
 
-  try {
-    const checkout = await startTenantCheckout({ invoiceId, methodId, phone });
-    const ref = checkout?.reference;
-    const next = checkout?.next_action || {};
-    const link = next.payment_link;
+  return gw;
+}
 
-    if (link) {
-      window.open(link, "_blank", "noopener,noreferrer");
-      toast(
-        "Complete payment on the secure page (MTN, Airtel, or card). We record when the provider confirms.",
-        { duration: 6000 },
-      );
-    } else if (next.type === "ussd_prompt" || gw.provider === "mtn_momo") {
+export async function startTenantCheckout({ invoiceId, methodId, phone }) {
+  const payment_method = apiMethodFromUiId(methodId);
+  return paymentsApi.initiateCheckout({
+    invoice_id: invoiceId,
+    payment_method,
+    phone: phone?.trim() || undefined,
+  });
+}
+
+/**
+ * Initiate checkout and return flow metadata for branded UI handoff.
+ */
+export async function initiateTenantCheckout({ invoiceId, methodId, phone }) {
+  await validateTenantCheckoutGateway(methodId);
+  const checkout = await startTenantCheckout({ invoiceId, methodId, phone });
+  return {
+    checkout,
+    flow: classifyCheckoutFlow(checkout),
+    next: checkout?.next_action || {},
+    reference: checkout?.reference,
+  };
+}
+
+/**
+ * Tenant checkout with optional UI hooks for Pesapal handoff and MTN in-app polling.
+ * When hooks are omitted, falls back to toast + background poll (legacy).
+ */
+export async function runTenantCheckoutUi({
+  invoiceId,
+  methodId,
+  phone,
+  onCompleted,
+  onPesapalHandoff,
+  onMomoProcessing,
+}) {
+  try {
+    const { checkout, flow, next, reference } = await initiateTenantCheckout({
+      invoiceId,
+      methodId,
+      phone,
+    });
+
+    if (flow === "pesapal_redirect" && next.payment_link) {
+      if (onPesapalHandoff) {
+        await onPesapalHandoff({
+          checkout,
+          paymentLink: next.payment_link,
+          reference,
+          amount: checkout.amount,
+        });
+        return checkout;
+      }
+      window.location.assign(next.payment_link);
+      toast("Complete payment on the secure Pesapal page. We record when confirmed.", {
+        duration: 6000,
+      });
+    } else if (flow === "momo_in_app") {
+      if (onMomoProcessing) {
+        await onMomoProcessing({
+          checkout,
+          reference,
+          message: next.message,
+          phone: phone?.trim(),
+          amount: checkout.amount,
+        });
+        return checkout;
+      }
       toast(
         next.message ||
           "Check your MTN phone and approve the MoMo prompt. Payment records when MTN confirms.",
@@ -94,9 +141,9 @@ export async function runTenantCheckoutUi({
       throw new Error("Missing payment action");
     }
 
-    if (!ref) return checkout;
+    if (!reference) return checkout;
 
-    const result = await pollCheckoutUntilDone(ref);
+    const result = await pollCheckoutUntilDone(reference);
     if (result.done) {
       toast.success("Payment confirmed and recorded.");
       onCompleted?.(result.data);

@@ -11,6 +11,8 @@ import PlatformSuiWallet from "../../components/blockchain/PlatformSuiWallet";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
+import PaymentCheckoutHandoff from "../../components/payments/PaymentCheckoutHandoff";
+import PaymentMomoProcessing from "../../components/payments/PaymentMomoProcessing";
 import { apiErrorMessage } from "../../lib/apiError";
 import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from "../../lib/suiCheckout";
 import useAuthStore from "../../store/authStore";
@@ -33,6 +35,8 @@ export default function PaymentFlowPage() {
   const [suiExternalWallet, setSuiExternalWallet] = useState(false);
   const [successReceipt, setSuccessReceipt] = useState(null);
   const [linking, setLinking] = useState(false);
+  const [pesapalHandoff, setPesapalHandoff] = useState(null);
+  const [momoProcessing, setMomoProcessing] = useState(null);
   const account = useCurrentAccount();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
@@ -193,6 +197,56 @@ export default function PaymentFlowPage() {
           methodId: method,
           phone,
           onCompleted: onDone,
+          onPesapalHandoff: ({ paymentLink, reference, amount }) =>
+            new Promise((resolve) => {
+              setPesapalHandoff({
+                paymentLink,
+                reference,
+                amount,
+                invoiceLabel: openInvoice.invoice_number
+                  ? `Invoice ${openInvoice.invoice_number}`
+                  : null,
+                onRedirect: (link) => {
+                  window.location.assign(link);
+                  resolve();
+                },
+                onCancel: () => {
+                  setPesapalHandoff(null);
+                  resolve();
+                },
+              });
+            }),
+          onMomoProcessing: ({ reference, message, amount }) =>
+            new Promise((resolve) => {
+              setMomoProcessing({
+                reference,
+                message,
+                amount,
+                phone: phone.trim(),
+                invoiceLabel: openInvoice.invoice_number
+                  ? `Invoice ${openInvoice.invoice_number}`
+                  : null,
+                onComplete: async () => {
+                  setMomoProcessing(null);
+                  toast.success("Payment confirmed and recorded.");
+                  await onDone();
+                  resolve();
+                },
+                onFailed: (reason) => {
+                  setMomoProcessing(null);
+                  toast.error(reason);
+                  resolve();
+                },
+                onTimeout: () => {
+                  toast("Still processing. Check Wallet in a minute.");
+                  resolve();
+                },
+                onCancel: () => {
+                  setMomoProcessing(null);
+                  resolve();
+                },
+              });
+            }),
         });
       }
     } catch (err) {
@@ -214,6 +268,30 @@ export default function PaymentFlowPage() {
       {successReceipt && (
         <PaymentReceiptSuccess receipt={successReceipt} onClose={() => setSuccessReceipt(null)} />
       )}
+      {pesapalHandoff && (
+        <PaymentCheckoutHandoff
+          open
+          amount={pesapalHandoff.amount}
+          invoiceLabel={pesapalHandoff.invoiceLabel}
+          paymentLink={pesapalHandoff.paymentLink}
+          onRedirect={pesapalHandoff.onRedirect}
+          onCancel={pesapalHandoff.onCancel}
+        />
+      )}
+      {momoProcessing && (
+        <PaymentMomoProcessing
+          open
+          reference={momoProcessing.reference}
+          phone={momoProcessing.phone}
+          amount={momoProcessing.amount}
+          invoiceLabel={momoProcessing.invoiceLabel}
+          message={momoProcessing.message}
+          onComplete={momoProcessing.onComplete}
+          onFailed={momoProcessing.onFailed}
+          onTimeout={momoProcessing.onTimeout}
+          onCancel={momoProcessing.onCancel}
+        />
+      )}
     <AppPageScaffold
       variant="ledger"
       icon={CreditCard}
@@ -229,9 +307,14 @@ export default function PaymentFlowPage() {
       {gatewayQuery.data?.configured && (
         <div className="mb-4 rounded-xl border border-brand-teal/30 bg-brand-teal/10 px-4 py-3 text-sm text-brand-teal">
           {gatewayQuery.data.setup_hint}
+          {gatewayQuery.data.supports?.mtn_momo_in_app && (
+            <span className="mt-1 block text-white/70">
+              MTN MoMo stays in-app (USSD on your phone). Airtel and card use Pesapal&apos;s secure page.
+            </span>
+          )}
           {gatewayQuery.data.provider === "mtn_momo" && !gatewayQuery.data.supports?.airtel && (
             <span className="mt-1 block text-white/70">
-              Airtel/card: set <code className="text-xs">PAYMENT_GATEWAY_PROVIDER=pesapal</code> on the API.
+              Airtel/card: add Pesapal keys on the API, or set <code className="text-xs">PAYMENT_GATEWAY_PROVIDER=pesapal</code>.
             </span>
           )}
         </div>
