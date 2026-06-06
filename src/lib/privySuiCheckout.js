@@ -8,6 +8,7 @@ import { paymentsApi } from "../api/paymentsApi";
 import { blockchainApi } from "../api/blockchainApi";
 import { apiErrorMessage } from "./apiError";
 import { isPrivyConfigured } from "./privyConfig";
+import { ensurePrivySuiWalletPolicy } from "./privySuiWallet";
 import {
   isInsufficientSuiError,
   requestTestnetGas,
@@ -29,7 +30,7 @@ function formatSuiPayError(err, network) {
   const msg = apiErrorMessage(err, err?.message || "Privy Sui payment failed.");
   if (/raw_sign|could not sign|policy/i.test(msg)) {
     return new SuiPaymentError(
-      "Privy blocked this Sui payment. In Privy Dashboard → Policies, allow Sui SplitCoins and TransferObjects for embedded wallets.",
+      "Privy blocked this Sui payment. In Dashboard → Policies, create an ALLOW rule for Sui signTransactionBytes with SplitCoins, TransferObjects, and MergeCoins. Then attach that policy to your embedded Sui wallet (Dashboard → Wallets), or set PRIVY_SUI_POLICY_ID on the API and redeploy.",
       { alreadyToasted: false },
     );
   }
@@ -240,6 +241,7 @@ export async function runPrivyServerSuiCheckout({
   if (wallet?.address) {
     toast("Checking testnet SUI balance…", { duration: 4000 });
     await requestTestnetGas(wallet.address, { network: chain.network, openOnFail: false });
+    await ensurePrivySuiWalletPolicy(wallet.address, getAccessToken);
   }
 
   token = (await getAccessToken?.()) || token;
