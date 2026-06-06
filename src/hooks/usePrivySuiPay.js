@@ -1,17 +1,18 @@
 import { useCallback, useRef } from "react";
 import toast from "react-hot-toast";
 import { usePrivy } from "@privy-io/react-auth";
-import { useCreateWallet, useSignRawHash } from "@privy-io/react-auth/extended-chains";
+import { useCreateWallet } from "@privy-io/react-auth/extended-chains";
 import { findPrivySuiWallet, privyAuthErrorMessage } from "../lib/privySocialSignIn";
 import { isPrivyConfigured } from "../lib/privyConfig";
 import { isPrivySessionActive, waitForPrivySession } from "../lib/privySession";
 import { runPrivyServerSuiCheckout } from "../lib/privySuiCheckout";
+import { usePrivySuiIntentSign } from "./usePrivySuiIntentSign";
 
 /** Privy embedded Sui wallet checkout for Pay rent. */
 export function usePrivySuiPay() {
   const { authenticated, login, getAccessToken, user: privyUser } = usePrivy();
   const { createWallet } = useCreateWallet();
-  const { signRawHash } = useSignRawHash();
+  const { signSuiIntent } = usePrivySuiIntentSign();
   const sessionRef = useRef({ authenticated: false, user: null });
   sessionRef.current = { authenticated, user: privyUser };
 
@@ -46,7 +47,7 @@ export function usePrivySuiPay() {
       return runPrivyServerSuiCheckout({
         invoiceId,
         getAccessToken,
-        signRawHash,
+        signSuiIntent,
         createSuiWallet: async () => {
           const currentUser = sessionRef.current.user;
           const existing = findPrivySuiWallet(currentUser);
@@ -61,6 +62,7 @@ export function usePrivySuiPay() {
               ? {
                   address: wallet.address,
                   publicKey: wallet.publicKey || wallet.public_key || null,
+                  walletId: wallet.id || wallet.wallet_id || null,
                 }
               : null)
           );
@@ -69,7 +71,7 @@ export function usePrivySuiPay() {
         onCompleted,
       });
     },
-    [ensurePrivySession, getAccessToken, createWallet, signRawHash],
+    [ensurePrivySession, getAccessToken, createWallet, signSuiIntent],
   );
 
   const wallet = findPrivySuiWallet(privyUser);

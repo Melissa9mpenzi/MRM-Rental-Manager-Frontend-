@@ -11,7 +11,7 @@ export default defineConfig({
     include: [
       "@privy-io/react-auth",
       "@privy-io/react-auth/extended-chains",
-      "@noble/hashes/blake2.js",
+      "@privy-io/js-sdk-core",
       "@mysten/sui/jsonRpc",
       "@mysten/sui/transactions",
       "@mysten/sui/cryptography",

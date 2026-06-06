@@ -1,10 +1,8 @@
 import toast from "react-hot-toast";
-import { blake2b } from "@noble/hashes/blake2.js";
 import { Transaction } from "@mysten/sui/transactions";
 import { messageWithIntent, toSerializedSignature } from "@mysten/sui/cryptography";
 import { publicKeyFromRawBytes } from "@mysten/sui/verify";
 import { SuiJsonRpcClient, getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
-import { toHex } from "@mysten/sui/utils";
 import { paymentsApi } from "../api/paymentsApi";
 import { blockchainApi } from "../api/blockchainApi";
 import { apiErrorMessage } from "./apiError";
@@ -51,6 +49,12 @@ function formatSuiPayError(err, network) {
     );
   }
   const msg = apiErrorMessage(err, err?.message || "Privy Sui payment failed.");
+  if (/raw_sign|could not sign|policy/i.test(msg)) {
+    return new SuiPaymentError(
+      "Privy blocked this Sui payment. In Privy Dashboard → Policies, allow Sui SplitCoins and TransferObjects for embedded wallets.",
+      { alreadyToasted: false },
+    );
+  }
   if (/public key/i.test(msg)) {
     return new SuiPaymentError(
       "Privy wallet is missing a public key. Disconnect and reconnect your Sui wallet below, then retry.",
@@ -124,11 +128,11 @@ function suiPayload(checkout) {
   return body?.next_action?.sui_payload || body?.next_action?.sui || null;
 }
 
-async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signRawHash }) {
+async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signSuiIntent }) {
   if (!wallet?.address) {
     throw new Error("No Privy Sui wallet address.");
   }
-  if (!signRawHash) {
+  if (!signSuiIntent) {
     throw new Error("Privy signing is not available in this browser session.");
   }
 
@@ -143,14 +147,8 @@ async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signRawHash 
 
   const txBytes = await tx.build({ client });
   const intentMessage = messageWithIntent("TransactionData", txBytes);
-  const digest = blake2b(intentMessage, { dkLen: 32 });
-  const hash = `0x${toHex(digest)}`;
 
-  const { signature } = await signRawHash({
-    address: wallet.address,
-    chainType: "sui",
-    hash,
-  });
+  const { signature } = await signSuiIntent(wallet.address, intentMessage);
 
   const publicKey = decodeSuiPublicKey(wallet.publicKey);
   const serialized = toSerializedSignature({
@@ -165,11 +163,11 @@ async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signRawHash 
     options: { showEffects: true },
   });
 
-  const digest = result?.digest;
-  if (!digest) {
+  const txDigest = result?.digest;
+  if (!txDigest) {
     throw new Error("Sui network did not return a transaction digest.");
   }
-  return { digest, sender: wallet.address };
+  return { digest: txDigest, sender: wallet.address };
 }
 
 async function confirmOnServer(reference, digest, walletAddress) {
@@ -185,7 +183,7 @@ async function confirmOnServer(reference, digest, walletAddress) {
 export async function runPrivyClientSuiCheckout({
   checkout,
   wallet,
-  signRawHash,
+  signSuiIntent,
   network,
   rpcUrl,
 }) {
@@ -203,7 +201,7 @@ export async function runPrivyClientSuiCheckout({
     sui,
     network,
     rpcUrl,
-    signRawHash,
+    signSuiIntent,
   });
 
   await confirmOnServer(ref, digest, sender);
@@ -218,7 +216,7 @@ export async function runPrivyServerSuiCheckout({
   getAccessToken,
   createSuiWallet,
   resolveWallet,
-  signRawHash,
+  signSuiIntent,
   onCompleted,
 }) {
   const chain = await blockchainApi.status();
@@ -250,7 +248,7 @@ export async function runPrivyServerSuiCheckout({
   if (!wallet?.address) {
     wallet = (await resolveWallet?.()) || null;
   }
-  if (!wallet?.address && !token && !signRawHash) {
+  if (!wallet?.address && !token && !signSuiIntent) {
     toast.error("Connect your Sui wallet below to pay with Sui.");
     throw new Error("Privy session required");
   }
@@ -291,7 +289,7 @@ export async function runPrivyServerSuiCheckout({
     }
   }
 
-  if (!signRawHash) {
+  if (!signSuiIntent) {
     toast.error("Privy wallet signing is unavailable. Try MTN MoMo or Pesapal.");
     throw new SuiPaymentError("Privy client signing unavailable");
   }
@@ -305,7 +303,7 @@ export async function runPrivyServerSuiCheckout({
     await runPrivyClientSuiCheckout({
       checkout,
       wallet,
-      signRawHash,
+      signSuiIntent,
       network: chain.network,
       rpcUrl: chain.rpc_url,
     });
