@@ -257,7 +257,7 @@ export async function runPrivyServerSuiCheckout({
   if (!wallet?.address) {
     wallet = (await resolveWallet?.()) || null;
   }
-  if (!wallet?.address && !token) {
+  if (!wallet?.address && !token && !signRawHash) {
     toast.error("Connect your Sui wallet below to pay with Sui.");
     throw new Error("Privy session required");
   }

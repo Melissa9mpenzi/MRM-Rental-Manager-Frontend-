@@ -1,51 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { AppleBrandIcon, GoogleBrandIcon } from "../auth/BrandSignInIcons";
 import PrivyEmailOtpLogin from "../auth/PrivyEmailOtpLogin";
 import toast from "react-hot-toast";
 import { privyAuthErrorMessage } from "../../lib/privySocialSignIn";
 
-async function waitForPrivyToken(getAccessToken, attempts = 15) {
-  for (let i = 0; i < attempts; i += 1) {
-    const token = await getAccessToken?.();
-    if (token) return token;
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  return null;
-}
+const AUTH_WAIT_MS = 45_000;
 
 /**
  * Privy auth for Sui payments only — does not create or replace RentDirect login session.
- * Sui wallet is created when the user taps Pay (not here — avoids 401 before session is ready).
+ * Wallet is created when the user taps Pay.
  */
 export default function PrivySuiConnect({ disabled = false }) {
-  const { login, ready, getAccessToken } = usePrivy();
+  const { login, ready, authenticated, user } = usePrivy();
   const [busy, setBusy] = useState(null);
   const [showEmail, setShowEmail] = useState(false);
+  const awaitingAuth = useRef(false);
+
+  useEffect(() => {
+    if (!awaitingAuth.current) return;
+    if (!authenticated && !user?.id) return;
+
+    awaitingAuth.current = false;
+    setBusy(null);
+    toast.success("Sui wallet connected — tap Pay when ready.");
+  }, [authenticated, user]);
+
+  useEffect(() => {
+    if (!awaitingAuth.current) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      if (!awaitingAuth.current) return;
+      awaitingAuth.current = false;
+      setBusy(null);
+      toast.error(
+        "Privy sign-in did not finish. Check that this site URL is in Privy allowed domains, then try again.",
+        { duration: 8000 },
+      );
+    }, AUTH_WAIT_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [busy]);
+
+  function markConnected() {
+    awaitingAuth.current = false;
+    setBusy(null);
+    toast.success("Sui wallet connected — tap Pay when ready.");
+  }
 
   async function runSocial(provider, loginMethods) {
     if (disabled || !ready || busy) return;
+    if (authenticated || user?.id) {
+      markConnected();
+      return;
+    }
+
     setBusy(provider);
+    awaitingAuth.current = true;
+
     try {
       await login({ loginMethods });
-      const token = await waitForPrivyToken(getAccessToken);
-      if (!token) {
-        toast.error("Privy sign-in did not finish. Try again.");
-        return;
-      }
-      toast.success("Sui wallet connected — tap Pay when ready.");
     } catch (err) {
+      awaitingAuth.current = false;
+      setBusy(null);
       const msg = privyAuthErrorMessage(err);
       if (msg) toast.error(msg);
-    } finally {
-      setBusy(null);
     }
   }
 
   if (showEmail) {
     return (
       <div className="mt-3 space-y-2">
-        <PrivyEmailOtpLogin compact autoFinishSession={false} disabled={disabled || !ready} />
+        <PrivyEmailOtpLogin
+          compact
+          autoFinishSession={false}
+          disabled={disabled || !ready}
+          onConnected={markConnected}
+        />
         <button
           type="button"
           className="text-[11px] font-semibold text-white/45 hover:text-white"

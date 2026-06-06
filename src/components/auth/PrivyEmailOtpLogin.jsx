@@ -13,6 +13,7 @@ export default function PrivyEmailOtpLogin({
   registerRole = "tenant",
   onSession,
   onError,
+  onConnected,
   compact = false,
   autoFinishSession = true,
 }) {
@@ -66,6 +67,8 @@ export default function PrivyEmailOtpLogin({
       const result = await loginWithCode({ code: trimmedCode, email: email.trim().toLowerCase() });
       if (autoFinishSession) {
         await finishSession(result?.user);
+      } else {
+        onConnected?.();
       }
     } catch (err) {
       onError?.(err, "Email");

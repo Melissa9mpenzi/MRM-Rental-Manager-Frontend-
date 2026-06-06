@@ -66,11 +66,19 @@ export default function PrivySuiWalletPanel({ compact = false, className = "" })
   }
 
   if (!address) {
+    const label =
+      privyUser?.email?.address ||
+      privyUser?.google?.email ||
+      privyUser?.apple?.email ||
+      "Privy account";
     return (
       <div className={`rounded-xl border border-brand-teal/25 bg-brand-teal/10 p-3 ${className}`}>
         <p className="text-xs font-bold text-brand-teal">Privy Sui wallet</p>
-        <p className="mt-1.5 text-[11px] text-white/55">
-          Your embedded wallet will be created when you pay with Sui.
+        <p className="mt-1.5 text-[11px] text-white/70">
+          Connected as <span className="font-semibold text-white">{label}</span>
+        </p>
+        <p className="mt-1 text-[10px] text-white/45">
+          Your embedded Sui address is created when you tap Pay.
         </p>
       </div>
     );
