@@ -46,7 +46,7 @@ function formatSuiPayError(err, network) {
   }
   if (/public key/i.test(msg)) {
     return new SuiPaymentError(
-      "Could not load your Privy Sui wallet public key. Disconnect, reconnect with Google or email on the Sui panel, then retry.",
+      "Sui payment could not finish — the server could not read your wallet public key. Hard refresh and pay again after the backend redeploys (browser sign + server submit).",
       { alreadyToasted: false },
     );
   }
@@ -104,17 +104,29 @@ function suiPayload(checkout) {
   return body?.next_action?.sui_payload || body?.next_action?.sui || null;
 }
 
-async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signSuiIntent, enrichWallet }) {
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+async function signAndSubmitPrivyTx({
+  wallet,
+  sui,
+  network,
+  rpcUrl,
+  signSuiIntent,
+  enrichWallet,
+  getAccessToken,
+  reference,
+}) {
   if (!wallet?.address) {
     throw new Error("No Privy Sui wallet address.");
   }
   if (!signSuiIntent) {
     throw new Error("Privy signing is not available in this browser session.");
-  }
-
-  let resolvedWallet = wallet;
-  if (!resolvedWallet.publicKey && enrichWallet) {
-    resolvedWallet = await enrichWallet(resolvedWallet);
   }
 
   const net = (network || "testnet").toLowerCase();
@@ -129,7 +141,39 @@ async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signSuiInten
   const txBytes = await tx.build({ client });
   const intentMessage = messageWithIntent("TransactionData", txBytes);
 
-  const { signature } = await signSuiIntent(resolvedWallet.address, intentMessage);
+  const { signature } = await signSuiIntent(wallet.address, intentMessage);
+
+  const walletId = wallet.walletId || wallet.id;
+  const token = getAccessToken ? await getAccessToken() : null;
+  if (token && reference) {
+    try {
+      await paymentsApi.submitPrivySui(reference, {
+        access_token: token,
+        sui_address: wallet.address,
+        wallet_id: walletId || undefined,
+        transaction_block: bytesToBase64(txBytes),
+        signature,
+      });
+      return { digest: null, sender: wallet.address, confirmed: true };
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 404 || status === 405) {
+        /* backend not deployed yet — fall through to client submit */
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  let resolvedWallet = wallet;
+  if (!resolvedWallet.publicKey && enrichWallet) {
+    resolvedWallet = await enrichWallet(resolvedWallet);
+  }
+  if (!resolvedWallet.publicKey) {
+    throw new Error(
+      "Could not load Privy Sui public key. Redeploy the backend, then pay again (browser sign + server submit).",
+    );
+  }
 
   const publicKey = decodeSuiPublicKey(resolvedWallet.publicKey);
   const serialized = toSerializedSignature({
@@ -148,7 +192,7 @@ async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signSuiInten
   if (!txDigest) {
     throw new Error("Sui network did not return a transaction digest.");
   }
-  return { digest: txDigest, sender: resolvedWallet.address };
+  return { digest: txDigest, sender: resolvedWallet.address, confirmed: false };
 }
 
 async function confirmOnServer(reference, digest, walletAddress) {
@@ -166,6 +210,7 @@ export async function runPrivyClientSuiCheckout({
   wallet,
   signSuiIntent,
   enrichWallet,
+  getAccessToken,
   network,
   rpcUrl,
 }) {
@@ -178,16 +223,20 @@ export async function runPrivyClientSuiCheckout({
 
   toast("Approve the SUI payment with your Privy wallet…", { duration: 6000 });
 
-  const { digest, sender } = await signAndSubmitPrivyTx({
+  const { digest, sender, confirmed } = await signAndSubmitPrivyTx({
     wallet,
     sui,
     network,
     rpcUrl,
     signSuiIntent,
     enrichWallet,
+    getAccessToken,
+    reference: ref,
   });
 
-  await confirmOnServer(ref, digest, sender);
+  if (!confirmed) {
+    await confirmOnServer(ref, digest, sender);
+  }
   return body;
 }
 
@@ -311,6 +360,7 @@ export async function runPrivyServerSuiCheckout({
       wallet,
       signSuiIntent,
       enrichWallet,
+      getAccessToken,
       network: chain.network,
       rpcUrl: chain.rpc_url,
     });

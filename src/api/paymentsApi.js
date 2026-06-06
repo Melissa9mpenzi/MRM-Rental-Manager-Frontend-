@@ -22,6 +22,8 @@ export const paymentsApi = {
     api.post(`/payments/checkout/${reference}/confirm-sui`, data).then((r) => r.data),
   payPrivySui: (reference, data) =>
     api.post(`/payments/checkout/${reference}/pay-privy-sui`, data).then((r) => r.data),
+  submitPrivySui: (reference, data) =>
+    api.post(`/payments/checkout/${reference}/submit-privy-sui`, data).then((r) => r.data),
   uploadProof: (id, formData) =>
     api.post(`/payments/${id}/proof`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
