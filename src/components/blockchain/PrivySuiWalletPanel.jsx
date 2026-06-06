@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Copy, Wallet } from "lucide-react";
+import { Copy, Droplets, Wallet } from "lucide-react";
 import toast from "react-hot-toast";
 import { findPrivySuiWallet } from "../../lib/privySocialSignIn";
 import { isPrivyConfigured } from "../../lib/privyConfig";
+import { requestTestnetGas, suiFaucetWebUrl } from "../../lib/suiFaucet";
 import PrivyEmailOtpLogin from "../auth/PrivyEmailOtpLogin";
 import PlatformSuiWallet from "./PlatformSuiWallet";
 
@@ -13,6 +14,7 @@ import PlatformSuiWallet from "./PlatformSuiWallet";
 export default function PrivySuiWalletPanel({ compact = false, className = "" }) {
   const { authenticated, user: privyUser } = usePrivy();
   const [showEmail, setShowEmail] = useState(false);
+  const [faucetBusy, setFaucetBusy] = useState(false);
   const privyWallet = findPrivySuiWallet(privyUser);
 
   if (!isPrivyConfigured()) {
@@ -26,6 +28,28 @@ export default function PrivySuiWalletPanel({ compact = false, className = "" })
     navigator.clipboard.writeText(address);
     toast.success("Sui address copied");
   };
+
+  async function fundWallet() {
+    if (!address || faucetBusy) return;
+    setFaucetBusy(true);
+    try {
+      const result = await requestTestnetGas(address, { network: "testnet", openOnFail: true });
+      if (result.ok) {
+        toast.success("Testnet SUI requested — wait about 60 seconds, then tap Pay again.", {
+          duration: 8000,
+        });
+      } else {
+        toast("Opened the Sui faucet in a new tab. Request SUI, wait a minute, then pay again.", {
+          duration: 9000,
+        });
+      }
+    } catch {
+      window.open(suiFaucetWebUrl(address, "testnet"), "_blank", "noopener,noreferrer");
+      toast("Use the faucet page to fund your wallet, then try paying again.", { duration: 8000 });
+    } finally {
+      setFaucetBusy(false);
+    }
+  }
 
   if (!authenticated) {
     return (
@@ -97,16 +121,28 @@ export default function PrivySuiWalletPanel({ compact = false, className = "" })
       </div>
       <p className="mt-2 break-all font-mono text-[11px] text-white/80">{address}</p>
       <p className="mt-1.5 text-[10px] leading-snug text-white/45">
-        Linked to your Google / Apple / email login. Sui payments are signed in your browser.
+        Sui pay needs a small amount of <strong className="text-white/70">testnet SUI</strong> for gas
+        (rent is paid in SUI converted from UGX).
       </p>
-      <button
-        type="button"
-        onClick={copy}
-        className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-brand-teal hover:underline"
-      >
-        <Copy size={12} />
-        Copy address
-      </button>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={fundWallet}
+          disabled={faucetBusy}
+          className="inline-flex items-center gap-1 rounded-lg bg-brand-teal/20 px-3 py-1.5 text-[11px] font-bold text-brand-teal hover:bg-brand-teal/30 disabled:opacity-50"
+        >
+          <Droplets size={12} />
+          {faucetBusy ? "Requesting…" : "Get testnet SUI"}
+        </button>
+        <button
+          type="button"
+          onClick={copy}
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-teal hover:underline"
+        >
+          <Copy size={12} />
+          Copy address
+        </button>
+      </div>
     </div>
   );
 }

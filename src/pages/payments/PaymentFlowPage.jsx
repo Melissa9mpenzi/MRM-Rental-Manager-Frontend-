@@ -253,8 +253,10 @@ export default function PaymentFlowPage() {
         });
       }
     } catch (err) {
-      const msg = apiErrorMessage(err, "Payment could not be started. Try another method.");
-      toast.error(msg, { duration: 7000 });
+      if (!err?.alreadyToasted) {
+        const msg = apiErrorMessage(err, err?.message || "Payment could not be started. Try another method.");
+        toast.error(msg, { duration: 7000 });
+      }
     } finally {
       setPaying(false);
     }

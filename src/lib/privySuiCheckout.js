@@ -8,6 +8,56 @@ import { paymentsApi } from "../api/paymentsApi";
 import { blockchainApi } from "../api/blockchainApi";
 import { apiErrorMessage } from "./apiError";
 import { isPrivyConfigured } from "./privyConfig";
+import {
+  isInsufficientSuiError,
+  requestTestnetGas,
+  SuiPaymentError,
+  suiFaucetWebUrl,
+} from "./suiFaucet";
+
+const SERVER_CHECKOUT_KEY = "rd:privy-server-checkout";
+
+function serverCheckoutEnabled() {
+  if (import.meta.env.VITE_PRIVY_SERVER_CHECKOUT === "true") return true;
+  try {
+    return sessionStorage.getItem(SERVER_CHECKOUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markServerCheckoutUnavailable() {
+  try {
+    sessionStorage.setItem(SERVER_CHECKOUT_KEY, "0");
+  } catch {
+    /* ignore */
+  }
+}
+
+function markServerCheckoutAvailable() {
+  try {
+    sessionStorage.setItem(SERVER_CHECKOUT_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+function formatSuiPayError(err, network) {
+  if (isInsufficientSuiError(err)) {
+    return new SuiPaymentError(
+      "Your Privy wallet has no testnet SUI for gas. Tap “Get testnet SUI” on the wallet panel, wait one minute, then pay again.",
+      { alreadyToasted: true, needsFaucet: true },
+    );
+  }
+  const msg = apiErrorMessage(err, err?.message || "Privy Sui payment failed.");
+  if (/public key/i.test(msg)) {
+    return new SuiPaymentError(
+      "Privy wallet is missing a public key. Sign out, sign in again with Google or email, then retry.",
+      { alreadyToasted: false },
+    );
+  }
+  return new SuiPaymentError(msg);
+}
 
 function hexToBytes(hex) {
   const text = String(hex || "").trim().replace(/^0x/, "");
@@ -223,34 +273,39 @@ export async function runPrivyServerSuiCheckout({
     throw new Error("Missing checkout reference");
   }
 
-  let serverError = null;
-  if (token) {
+  if (wallet?.address) {
+    toast("Checking testnet SUI balance…", { duration: 4000 });
+    await requestTestnetGas(wallet.address, { network: chain.network, openOnFail: false });
+  }
+
+  const tryServer = serverCheckoutEnabled() && token;
+
+  if (tryServer) {
     try {
       toast("Signing with your Privy Sui wallet…", { duration: 6000 });
       await paymentsApi.payPrivySui(ref, { access_token: token });
+      markServerCheckoutAvailable();
       toast.success("Sui payment sent — on-chain receipt recorded.");
       onCompleted?.(checkout);
       return checkout;
     } catch (err) {
       const status = err?.response?.status;
-      if (status && status !== 404 && status !== 405) {
-        throw err;
+      if (status === 404 || status === 405) {
+        markServerCheckoutUnavailable();
+      } else if (status) {
+        throw formatSuiPayError(err, chain.network);
       }
-      serverError = err;
     }
   }
 
   if (!signRawHash) {
-    if (serverError) {
-      throw serverError;
-    }
-    toast.error("Privy wallet signing is unavailable. Try MoMo or Pesapal.");
-    throw new Error("Privy client signing unavailable");
+    toast.error("Privy wallet signing is unavailable. Try MTN MoMo or Pesapal.");
+    throw new SuiPaymentError("Privy client signing unavailable");
   }
 
   if (!wallet?.address) {
     toast.error("Create a Privy Sui wallet first (sign in with Google / Apple / email).");
-    throw new Error("No Privy Sui wallet");
+    throw new SuiPaymentError("No Privy Sui wallet");
   }
 
   try {
@@ -262,14 +317,14 @@ export async function runPrivyServerSuiCheckout({
       rpcUrl: chain.rpc_url,
     });
   } catch (err) {
-    const msg = apiErrorMessage(err, err?.message || "Privy Sui payment failed.");
-    if (/insufficient|gas|coin/i.test(msg)) {
-      toast.error(
-        "Your Privy Sui wallet needs testnet SUI for gas. Use a faucet, then try again.",
-        { duration: 8000 },
-      );
+    const formatted = formatSuiPayError(err, chain.network);
+    if (formatted.needsFaucet) {
+      toast.error(formatted.message, { duration: 9000 });
+      toast(`Open the Sui faucet: ${suiFaucetWebUrl(wallet.address, chain.network)}`, {
+        duration: 12000,
+      });
     }
-    throw err;
+    throw formatted;
   }
 
   toast.success("Sui payment verified — blockchain receipt recorded.");
