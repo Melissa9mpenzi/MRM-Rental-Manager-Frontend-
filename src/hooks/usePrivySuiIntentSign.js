@@ -3,9 +3,9 @@ import { usePrivy } from "@privy-io/react-auth";
 import { rawSign, isUnifiedWallet } from "@privy-io/js-sdk-core";
 import { toHex } from "@mysten/sui/utils";
 
-/** Same internals used by @privy-io/react-auth/extended-chains signRawHash. */
-import { u as useInternalPrivy } from "@privy-io/react-auth/dist/esm/internal-context-DyNFsPl6.mjs";
-import { u as useSignWithUserSigner } from "@privy-io/react-auth/dist/esm/use-sign-with-user-signer-CgSNwxWB.mjs";
+/** Privy signing helpers (resolved via vite alias — not public package exports). */
+import { u as useInternalPrivy } from "privy-sign-internal/context";
+import { u as useSignWithUserSigner } from "privy-sign-internal/user-signer";
 
 function unifiedSuiWallets(user) {
   return (user?.linkedAccounts || []).filter((acct) => {
