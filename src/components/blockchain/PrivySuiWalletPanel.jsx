@@ -4,6 +4,7 @@ import { Copy, Droplets, Wallet } from "lucide-react";
 import toast from "react-hot-toast";
 import { findPrivySuiWallet } from "../../lib/privySocialSignIn";
 import { isPrivyConfigured } from "../../lib/privyConfig";
+import { isPrivySessionActive } from "../../lib/privySession";
 import { requestTestnetGas, suiFaucetWebUrl } from "../../lib/suiFaucet";
 import PrivySuiConnect from "./PrivySuiConnect";
 import PlatformSuiWallet from "./PlatformSuiWallet";
