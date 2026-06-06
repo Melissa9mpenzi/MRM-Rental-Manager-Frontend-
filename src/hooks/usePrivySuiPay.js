@@ -12,7 +12,7 @@ import { usePrivySuiIntentSign } from "./usePrivySuiIntentSign";
 export function usePrivySuiPay() {
   const { authenticated, login, getAccessToken, user: privyUser } = usePrivy();
   const { createWallet } = useCreateWallet();
-  const { signSuiIntent } = usePrivySuiIntentSign();
+  const { signSuiIntent, resolveWalletForPay, enrichWallet } = usePrivySuiIntentSign();
   const sessionRef = useRef({ authenticated: false, user: null });
   sessionRef.current = { authenticated, user: privyUser };
 
@@ -48,15 +48,19 @@ export function usePrivySuiPay() {
         invoiceId,
         getAccessToken,
         signSuiIntent,
+        enrichWallet,
         createSuiWallet: async () => {
           const currentUser = sessionRef.current.user;
-          const existing = findPrivySuiWallet(currentUser);
-          if (existing?.address) return existing;
+          const found = findPrivySuiWallet(currentUser);
+          if (found?.address) {
+            const existing = await resolveWalletForPay(found.address);
+            if (existing?.address) return existing;
+          }
 
           const { user: freshUser, wallet } = await createWallet({ chainType: "sui" });
           if (freshUser) sessionRef.current.user = freshUser;
 
-          return (
+          const created =
             findPrivySuiWallet(freshUser || currentUser) ||
             (wallet?.address
               ? {
@@ -64,14 +68,18 @@ export function usePrivySuiPay() {
                   publicKey: wallet.publicKey || wallet.public_key || null,
                   walletId: wallet.id || wallet.wallet_id || null,
                 }
-              : null)
-          );
+              : null);
+
+          return created?.address ? resolveWalletForPay(created.address) : null;
         },
-        resolveWallet: async () => findPrivySuiWallet(sessionRef.current.user),
+        resolveWallet: async () => {
+          const current = findPrivySuiWallet(sessionRef.current.user);
+          return current?.address ? resolveWalletForPay(current.address) : null;
+        },
         onCompleted,
       });
     },
-    [ensurePrivySession, getAccessToken, createWallet, signSuiIntent],
+    [ensurePrivySession, getAccessToken, createWallet, signSuiIntent, resolveWalletForPay, enrichWallet],
   );
 
   const wallet = findPrivySuiWallet(privyUser);

@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { rawSign, isUnifiedWallet } from "@privy-io/js-sdk-core";
 import { toHex } from "@mysten/sui/utils";
+import { enrichPrivySuiWalletPubkey, resolvePrivySuiWalletForPay } from "../lib/privySuiWallet";
 
 /** Privy signing helpers (resolved via vite alias — not public package exports). */
 import { u as useInternalPrivy } from "privy-sign-internal/context";
@@ -51,5 +52,10 @@ export function usePrivySuiIntentSign() {
     [user, privy, signWithUserSigner],
   );
 
-  return { signSuiIntent };
+  const resolveWalletForPay = useCallback(
+    async (address) => resolvePrivySuiWalletForPay(user, privy, address),
+    [user, privy],
+  );
+
+  return { signSuiIntent, resolveWalletForPay, enrichWallet: (wallet) => enrichPrivySuiWalletPubkey(wallet, privy) };
 }

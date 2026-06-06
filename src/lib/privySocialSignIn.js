@@ -21,7 +21,8 @@ export function findPrivySuiWallet(privyUser) {
   for (const acct of linked) {
     const chain = acct.chainType || acct.chain_type;
     const addr = acct.address;
-    if (chain === "sui" && addr) {
+    const isWallet = acct.type === "wallet" || chain === "sui";
+    if (isWallet && chain === "sui" && addr) {
       return {
         address: addr,
         publicKey: acct.publicKey || acct.public_key || null,
