@@ -2,6 +2,7 @@
  * Google / Apple / email via Privy → POST /api/v1/auth/privy
  * Requires VITE_PRIVY_APP_ID and API PRIVY_APP_ID + PRIVY_APP_SECRET.
  */
+import { isUnifiedWallet } from "@privy-io/js-sdk-core";
 import { authApi } from "../api/authApi";
 
 export function isPrivySocialAvailable() {
@@ -17,6 +18,22 @@ export function findPrivySuiAddress(privyUser) {
 /** @returns {{ address: string, publicKey?: string, walletId?: string } | null} */
 export function findPrivySuiWallet(privyUser) {
   if (!privyUser) return null;
+
+  const unified = (privyUser.linkedAccounts || []).filter((acct) => {
+    if (acct.type !== "wallet") return false;
+    if (acct.chainType !== "sui") return false;
+    if (acct.walletClientType !== "privy" || acct.imported) return false;
+    return isUnifiedWallet({ id: acct.id, recovery_method: acct.recoveryMethod });
+  });
+  if (unified.length) {
+    const acct = unified[0];
+    return {
+      address: acct.address,
+      publicKey: acct.publicKey || acct.public_key || null,
+      walletId: acct.id || acct.wallet_id || null,
+    };
+  }
+
   const linked = privyUser.linkedAccounts || privyUser.linked_accounts || [];
   for (const acct of linked) {
     const chain = acct.chainType || acct.chain_type;

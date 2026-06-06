@@ -15,31 +15,8 @@ import {
   suiFaucetWebUrl,
 } from "./suiFaucet";
 
-const SERVER_CHECKOUT_KEY = "rd:privy-server-checkout";
-
-function serverCheckoutEnabled() {
-  if (import.meta.env.VITE_PRIVY_SERVER_CHECKOUT === "true") return true;
-  try {
-    return sessionStorage.getItem(SERVER_CHECKOUT_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markServerCheckoutUnavailable() {
-  try {
-    sessionStorage.setItem(SERVER_CHECKOUT_KEY, "0");
-  } catch {
-    /* ignore */
-  }
-}
-
-function markServerCheckoutAvailable() {
-  try {
-    sessionStorage.setItem(SERVER_CHECKOUT_KEY, "1");
-  } catch {
-    /* ignore */
-  }
+function serverCheckoutDisabled() {
+  return import.meta.env.VITE_PRIVY_SERVER_CHECKOUT === "false";
 }
 
 function formatSuiPayError(err, network) {
@@ -265,20 +242,20 @@ export async function runPrivyServerSuiCheckout({
     await requestTestnetGas(wallet.address, { network: chain.network, openOnFail: false });
   }
 
-  const tryServer = serverCheckoutEnabled() && token;
+  token = (await getAccessToken?.()) || token;
+  const tryServer = Boolean(token) && !serverCheckoutDisabled();
 
   if (tryServer) {
     try {
       toast("Signing with your Privy Sui wallet…", { duration: 6000 });
       await paymentsApi.payPrivySui(ref, { access_token: token });
-      markServerCheckoutAvailable();
       toast.success("Sui payment sent — on-chain receipt recorded.");
       onCompleted?.(checkout);
       return checkout;
     } catch (err) {
       const status = err?.response?.status;
       if (status === 404 || status === 405) {
-        markServerCheckoutUnavailable();
+        /* backend not deployed — fall through to browser sign */
       } else if (status) {
         throw formatSuiPayError(err, chain.network);
       }
@@ -293,6 +270,10 @@ export async function runPrivyServerSuiCheckout({
   if (!wallet?.address) {
     toast.error("Create a Privy Sui wallet first (sign in with Google / Apple / email).");
     throw new SuiPaymentError("No Privy Sui wallet");
+  }
+
+  if (!wallet.publicKey && enrichWallet) {
+    wallet = await enrichWallet(wallet);
   }
 
   try {

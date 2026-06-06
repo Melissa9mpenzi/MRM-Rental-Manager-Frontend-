@@ -22,7 +22,7 @@ function unifiedSuiWallets(user) {
  * Required for Sui — the public signRawHash hook only supports precomputed hash and returns 400 for Sui.
  */
 export function usePrivySuiIntentSign() {
-  const { user } = usePrivy();
+  const { user, getAccessToken } = usePrivy();
   const { privy } = useInternalPrivy();
   const { signWithUserSigner } = useSignWithUserSigner();
 
@@ -53,9 +53,13 @@ export function usePrivySuiIntentSign() {
   );
 
   const resolveWalletForPay = useCallback(
-    async (address) => resolvePrivySuiWalletForPay(user, privy, address),
-    [user, privy],
+    async (address) => resolvePrivySuiWalletForPay(user, privy, address, getAccessToken),
+    [user, privy, getAccessToken],
   );
 
-  return { signSuiIntent, resolveWalletForPay, enrichWallet: (wallet) => enrichPrivySuiWalletPubkey(wallet, privy) };
+  return {
+    signSuiIntent,
+    resolveWalletForPay,
+    enrichWallet: (wallet) => enrichPrivySuiWalletPubkey(wallet, privy, getAccessToken),
+  };
 }
