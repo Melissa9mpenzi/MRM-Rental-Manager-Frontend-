@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { blake2b } from "@noble/hashes/blake2.js";
 import { Transaction } from "@mysten/sui/transactions";
 import { messageWithIntent, toSerializedSignature } from "@mysten/sui/cryptography";
 import { publicKeyFromRawBytes } from "@mysten/sui/verify";
@@ -142,13 +143,13 @@ async function signAndSubmitPrivyTx({ wallet, sui, network, rpcUrl, signRawHash 
 
   const txBytes = await tx.build({ client });
   const intentMessage = messageWithIntent("TransactionData", txBytes);
+  const digest = blake2b(intentMessage, { dkLen: 32 });
+  const hash = `0x${toHex(digest)}`;
 
   const { signature } = await signRawHash({
     address: wallet.address,
     chainType: "sui",
-    bytes: toHex(intentMessage),
-    encoding: "hex",
-    hash_function: "blake2b256",
+    hash,
   });
 
   const publicKey = decodeSuiPublicKey(wallet.publicKey);
