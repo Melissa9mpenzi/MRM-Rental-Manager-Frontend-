@@ -5,7 +5,8 @@
 import { authApi } from "../api/authApi";
 
 export function isPrivySocialAvailable() {
-  return Boolean((import.meta.env.VITE_PRIVY_APP_ID || "").trim());
+  // Privy is not used for login/register — only for Sui payments.
+  return false;
 }
 
 /** Find embedded Sui wallet on Privy user object (linkedAccounts / wallets). */

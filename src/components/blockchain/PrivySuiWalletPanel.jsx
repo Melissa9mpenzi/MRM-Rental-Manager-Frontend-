@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { findPrivySuiWallet } from "../../lib/privySocialSignIn";
 import { isPrivyConfigured } from "../../lib/privyConfig";
 import { requestTestnetGas, suiFaucetWebUrl } from "../../lib/suiFaucet";
-import PrivyEmailOtpLogin from "../auth/PrivyEmailOtpLogin";
+import PrivySuiConnect from "./PrivySuiConnect";
 import PlatformSuiWallet from "./PlatformSuiWallet";
 
 /**
@@ -13,7 +13,6 @@ import PlatformSuiWallet from "./PlatformSuiWallet";
  */
 export default function PrivySuiWalletPanel({ compact = false, className = "" }) {
   const { authenticated, user: privyUser } = usePrivy();
-  const [showEmail, setShowEmail] = useState(false);
   const [faucetBusy, setFaucetBusy] = useState(false);
   const privyWallet = findPrivySuiWallet(privyUser);
 
@@ -58,28 +57,10 @@ export default function PrivySuiWalletPanel({ compact = false, className = "" })
       >
         <p className="text-xs font-bold text-brand-teal">Privy Sui wallet</p>
         <p className="mt-1.5 text-[11px] leading-snug text-white/55">
-          Sign in with Google, Apple, or email to get an embedded Sui wallet — no browser extension.
+          Connect a wallet to pay with Sui. This is separate from your RentDirect login — sign in below
+          only when you choose Sui as your payment method.
         </p>
-        {showEmail ? (
-          <div className="mt-3">
-            <PrivyEmailOtpLogin compact autoFinishSession={false} />
-            <button
-              type="button"
-              className="mt-2 text-[11px] font-semibold text-white/45 hover:text-white"
-              onClick={() => setShowEmail(false)}
-            >
-              Hide email login
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowEmail(true)}
-            className="mt-2 text-[11px] font-semibold text-brand-teal hover:underline"
-          >
-            Sign in with email code
-          </button>
-        )}
+        <PrivySuiConnect />
       </div>
     );
   }

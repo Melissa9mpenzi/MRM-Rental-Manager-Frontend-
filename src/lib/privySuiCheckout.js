@@ -52,7 +52,7 @@ function formatSuiPayError(err, network) {
   const msg = apiErrorMessage(err, err?.message || "Privy Sui payment failed.");
   if (/public key/i.test(msg)) {
     return new SuiPaymentError(
-      "Privy wallet is missing a public key. Sign out, sign in again with Google or email, then retry.",
+      "Privy wallet is missing a public key. Disconnect and reconnect your Sui wallet below, then retry.",
       { alreadyToasted: false },
     );
   }
@@ -238,7 +238,7 @@ export async function runPrivyServerSuiCheckout({
   }
 
   if (login) {
-    toast.error("Sign in with Google, Apple, or email using the Privy panel above, then tap Pay again.", {
+    toast.error("Connect your Sui wallet below (Google, Apple, or email), then tap Pay again.", {
       duration: 7000,
     });
     throw new Error("Privy session required");
@@ -258,7 +258,7 @@ export async function runPrivyServerSuiCheckout({
     wallet = (await resolveWallet?.()) || null;
   }
   if (!wallet?.address && !token) {
-    toast.error("Sign in with Google, Apple, or email (Privy) to pay with Sui.");
+    toast.error("Connect your Sui wallet below to pay with Sui.");
     throw new Error("Privy session required");
   }
 
