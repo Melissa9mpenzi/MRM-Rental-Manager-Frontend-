@@ -2,6 +2,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useCreateWallet } from "@privy-io/react-auth/extended-chains";
 import { exchangePrivyForApiSession } from "../../lib/privySocialSignIn";
 import { AppleBrandIcon, GoogleBrandIcon } from "./BrandSignInIcons";
+import PrivyEmailOtpLogin from "./PrivyEmailOtpLogin";
 
 /** Must render inside PrivyProvider. */
 export default function PrivySocialAuthInner({
@@ -86,6 +87,16 @@ export default function PrivySocialAuthInner({
       {authenticated && privyUser ? (
         <p className="mt-1 text-center text-[10px] text-cyan-300/70">Privy session active</p>
       ) : null}
+
+      <div className="mt-3">
+        <PrivyEmailOtpLogin
+          disabled={disabled || !ready}
+          registerRole={registerRole}
+          onSession={onSession}
+          onError={onError}
+          compact
+        />
+      </div>
     </div>
   );
 }

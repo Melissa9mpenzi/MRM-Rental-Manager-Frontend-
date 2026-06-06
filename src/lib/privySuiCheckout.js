@@ -188,7 +188,10 @@ export async function runPrivyServerSuiCheckout({
   }
 
   if (login) {
-    await login();
+    toast.error("Sign in with Google, Apple, or email using the Privy panel above, then tap Pay again.", {
+      duration: 7000,
+    });
+    throw new Error("Privy session required");
   }
 
   let token = await getAccessToken?.();
