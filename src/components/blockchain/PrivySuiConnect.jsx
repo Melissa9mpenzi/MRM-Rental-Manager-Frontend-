@@ -4,6 +4,7 @@ import { AppleBrandIcon, GoogleBrandIcon } from "../auth/BrandSignInIcons";
 import PrivyEmailOtpLogin from "../auth/PrivyEmailOtpLogin";
 import toast from "react-hot-toast";
 import { privyAuthErrorMessage } from "../../lib/privySocialSignIn";
+import { isPrivySessionActive, waitForPrivySession } from "../../lib/privySession";
 
 const AUTH_WAIT_MS = 45_000;
 
@@ -16,31 +17,17 @@ export default function PrivySuiConnect({ disabled = false }) {
   const [busy, setBusy] = useState(null);
   const [showEmail, setShowEmail] = useState(false);
   const awaitingAuth = useRef(false);
+  const sessionRef = useRef({ authenticated: false, user: null });
+  sessionRef.current = { authenticated, user };
 
   useEffect(() => {
     if (!awaitingAuth.current) return;
-    if (!authenticated && !user?.id) return;
+    if (!isPrivySessionActive(sessionRef.current)) return;
 
     awaitingAuth.current = false;
     setBusy(null);
     toast.success("Sui wallet connected — tap Pay when ready.");
   }, [authenticated, user]);
-
-  useEffect(() => {
-    if (!awaitingAuth.current) return undefined;
-
-    const timeout = window.setTimeout(() => {
-      if (!awaitingAuth.current) return;
-      awaitingAuth.current = false;
-      setBusy(null);
-      toast.error(
-        "Privy sign-in did not finish. Check that this site URL is in Privy allowed domains, then try again.",
-        { duration: 8000 },
-      );
-    }, AUTH_WAIT_MS);
-
-    return () => window.clearTimeout(timeout);
-  }, [busy]);
 
   function markConnected() {
     awaitingAuth.current = false;
@@ -50,7 +37,7 @@ export default function PrivySuiConnect({ disabled = false }) {
 
   async function runSocial(provider, loginMethods) {
     if (disabled || !ready || busy) return;
-    if (authenticated || user?.id) {
+    if (isPrivySessionActive(sessionRef.current)) {
       markConnected();
       return;
     }
@@ -60,6 +47,15 @@ export default function PrivySuiConnect({ disabled = false }) {
 
     try {
       await login({ loginMethods });
+      const readySession = await waitForPrivySession(sessionRef, AUTH_WAIT_MS);
+      if (!readySession) {
+        awaitingAuth.current = false;
+        setBusy(null);
+        toast.error(
+          "Privy sign-in did not finish. Add this site URL to Privy allowed domains, then try again.",
+          { duration: 8000 },
+        );
+      }
     } catch (err) {
       awaitingAuth.current = false;
       setBusy(null);

@@ -215,7 +215,6 @@ export async function runPrivyClientSuiCheckout({
 export async function runPrivyServerSuiCheckout({
   invoiceId,
   getAccessToken,
-  login,
   createSuiWallet,
   resolveWallet,
   signRawHash,
@@ -235,13 +234,6 @@ export async function runPrivyServerSuiCheckout({
       { duration: 7000 },
     );
     return null;
-  }
-
-  if (login) {
-    toast.error("Connect your Sui wallet below (Google, Apple, or email), then tap Pay again.", {
-      duration: 7000,
-    });
-    throw new Error("Privy session required");
   }
 
   let token = await getAccessToken?.();

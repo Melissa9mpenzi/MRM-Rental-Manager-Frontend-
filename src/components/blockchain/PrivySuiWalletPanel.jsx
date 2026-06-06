@@ -50,7 +50,7 @@ export default function PrivySuiWalletPanel({ compact = false, className = "" })
     }
   }
 
-  if (!authenticated) {
+  if (!isPrivySessionActive({ authenticated, user: privyUser })) {
     return (
       <div
         className={`rounded-xl border border-brand-teal/25 bg-gradient-to-br from-brand-teal/10 to-white/[0.03] p-3 ${className}`}

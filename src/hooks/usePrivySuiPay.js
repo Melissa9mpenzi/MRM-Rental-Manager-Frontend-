@@ -1,8 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import toast from "react-hot-toast";
 import { usePrivy } from "@privy-io/react-auth";
 import { useCreateWallet, useSignRawHash } from "@privy-io/react-auth/extended-chains";
-import { findPrivySuiWallet } from "../lib/privySocialSignIn";
+import { findPrivySuiWallet, privyAuthErrorMessage } from "../lib/privySocialSignIn";
 import { isPrivyConfigured } from "../lib/privyConfig";
+import { isPrivySessionActive, waitForPrivySession } from "../lib/privySession";
 import { runPrivyServerSuiCheckout } from "../lib/privySuiCheckout";
 
 /** Privy embedded Sui wallet checkout for Pay rent. */
@@ -10,37 +12,64 @@ export function usePrivySuiPay() {
   const { authenticated, login, getAccessToken, user: privyUser } = usePrivy();
   const { createWallet } = useCreateWallet();
   const { signRawHash } = useSignRawHash();
+  const sessionRef = useRef({ authenticated: false, user: null });
+  sessionRef.current = { authenticated, user: privyUser };
+
+  const ensurePrivySession = useCallback(async () => {
+    if (isPrivySessionActive(sessionRef.current)) return true;
+    if (!login) return false;
+
+    toast("Connect with Google, Apple, or email to pay with Sui…", { duration: 6000 });
+    try {
+      await login();
+    } catch (err) {
+      const msg = privyAuthErrorMessage(err);
+      if (msg) toast.error(msg);
+      return false;
+    }
+
+    const ready = await waitForPrivySession(sessionRef);
+    if (!ready) {
+      toast.error(
+        "Privy sign-in did not finish. Add this site URL to Privy allowed domains, then try again.",
+        { duration: 8000 },
+      );
+    }
+    return ready;
+  }, [login]);
 
   const pay = useCallback(
     async ({ invoiceId, onCompleted }) => {
+      const connected = await ensurePrivySession();
+      if (!connected) return null;
+
       return runPrivyServerSuiCheckout({
         invoiceId,
         getAccessToken,
-        login: authenticated ? undefined : login,
         signRawHash,
         createSuiWallet: async () => {
-          const existing = findPrivySuiWallet(privyUser);
+          const currentUser = sessionRef.current.user;
+          const existing = findPrivySuiWallet(currentUser);
           if (existing?.address) return existing;
-          const { user, wallet } = await createWallet({ chainType: "sui" });
-          const created =
-            findPrivySuiWallet(user) ||
+
+          const { user: freshUser, wallet } = await createWallet({ chainType: "sui" });
+          if (freshUser) sessionRef.current.user = freshUser;
+
+          return (
+            findPrivySuiWallet(freshUser || currentUser) ||
             (wallet?.address
               ? {
                   address: wallet.address,
                   publicKey: wallet.publicKey || wallet.public_key || null,
                 }
-              : null);
-          return created;
+              : null)
+          );
         },
-        resolveWallet: async () => {
-          const fromUser = findPrivySuiWallet(privyUser);
-          if (fromUser?.address) return fromUser;
-          return null;
-        },
+        resolveWallet: async () => findPrivySuiWallet(sessionRef.current.user),
         onCompleted,
       });
     },
-    [authenticated, login, getAccessToken, createWallet, signRawHash, privyUser],
+    [ensurePrivySession, getAccessToken, createWallet, signRawHash],
   );
 
   const wallet = findPrivySuiWallet(privyUser);
@@ -48,7 +77,7 @@ export function usePrivySuiPay() {
   return {
     pay,
     privyConfigured: isPrivyConfigured(),
-    privyAuthenticated: authenticated,
+    privyAuthenticated: isPrivySessionActive({ authenticated, user: privyUser }),
     suiAddress: wallet?.address ?? null,
   };
 }

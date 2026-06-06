@@ -4,8 +4,13 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 5173,
+  },
   optimizeDeps: {
     include: [
+      "@privy-io/react-auth",
+      "@privy-io/react-auth/extended-chains",
       "@mysten/sui/jsonRpc",
       "@mysten/sui/transactions",
       "@mysten/sui/cryptography",
