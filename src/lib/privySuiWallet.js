@@ -43,6 +43,7 @@ export async function enrichPrivySuiWalletPubkey(wallet, privyClient, getAccessT
         const data = await blockchainApi.privyWalletPubkey({
           access_token: token,
           sui_address: wallet.address,
+          wallet_id: walletId || undefined,
         });
         if (data?.public_key) {
           return {
@@ -61,7 +62,7 @@ export async function enrichPrivySuiWalletPubkey(wallet, privyClient, getAccessT
 }
 
 /** Ask API to attach PRIVY_SUI_POLICY_ID before browser or server raw_sign. */
-export async function ensurePrivySuiWalletPolicy(address, getAccessToken) {
+export async function ensurePrivySuiWalletPolicy(address, getAccessToken, walletId) {
   if (!address || !getAccessToken) return null;
   try {
     const token = await getAccessToken();
@@ -69,6 +70,7 @@ export async function ensurePrivySuiWalletPolicy(address, getAccessToken) {
     return await blockchainApi.privyWalletPolicy({
       access_token: token,
       sui_address: address,
+      wallet_id: walletId || undefined,
     });
   } catch {
     return null;

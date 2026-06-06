@@ -29,8 +29,11 @@ function formatSuiPayError(err, network) {
   }
   const msg = apiErrorMessage(err, err?.message || "Privy Sui payment failed.");
   if (/raw_sign|could not sign|policy/i.test(msg)) {
+    if (msg.includes("Privy policy blocked") || msg.length > 120) {
+      return new SuiPaymentError(msg, { alreadyToasted: false });
+    }
     return new SuiPaymentError(
-      "Privy blocked this Sui payment. In Dashboard → Policies, create an ALLOW rule for Sui signTransactionBytes with SplitCoins, TransferObjects, and MergeCoins. Then attach that policy to your embedded Sui wallet (Dashboard → Wallets), or set PRIVY_SUI_POLICY_ID on the API and redeploy.",
+      "Privy blocked this Sui payment. Add an ALLOW rule for signTransactionBytes (SplitCoins, TransferObjects, MergeCoins) with no DENY rules, attach it to your Sui wallet in Dashboard → Wallets, and set PRIVY_SUI_POLICY_ID on the API.",
       { alreadyToasted: false },
     );
   }
@@ -241,7 +244,17 @@ export async function runPrivyServerSuiCheckout({
   if (wallet?.address) {
     toast("Checking testnet SUI balance…", { duration: 4000 });
     await requestTestnetGas(wallet.address, { network: chain.network, openOnFail: false });
-    await ensurePrivySuiWalletPolicy(wallet.address, getAccessToken);
+    const policyStatus = await ensurePrivySuiWalletPolicy(
+      wallet.address,
+      getAccessToken,
+      wallet.walletId || wallet.id,
+    );
+    if (policyStatus?.configured && policyStatus.attached === false) {
+      toast.error(
+        `Privy policy not attached to wallet (${policyStatus.detail || "check PRIVY_SUI_POLICY_ID"}). Open Dashboard → Wallets and attach your ALLOW policy manually.`,
+        { duration: 10000 },
+      );
+    }
   }
 
   token = (await getAccessToken?.()) || token;

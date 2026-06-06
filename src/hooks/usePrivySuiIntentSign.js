@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { rawSign, isUnifiedWallet } from "@privy-io/js-sdk-core";
 import { toHex } from "@mysten/sui/utils";
-import { enrichPrivySuiWalletPubkey, resolvePrivySuiWalletForPay } from "../lib/privySuiWallet";
+import { enrichPrivySuiWalletPubkey, ensurePrivySuiWalletPolicy, resolvePrivySuiWalletForPay } from "../lib/privySuiWallet";
 
 /** Privy signing helpers (resolved via vite alias — not public package exports). */
 import { u as useInternalPrivy } from "privy-sign-internal/context";
@@ -34,6 +34,8 @@ export function usePrivySuiIntentSign() {
         throw new Error("Privy Sui wallet not found. Reconnect with Google, Apple, or email.");
       }
 
+      await ensurePrivySuiWalletPolicy(address, getAccessToken, wallet.id);
+
       const response = await rawSign(privy, signWithUserSigner, {
         wallet_id: wallet.id,
         params: {
@@ -45,11 +47,17 @@ export function usePrivySuiIntentSign() {
 
       const signature = response?.data?.signature ?? response?.signature;
       if (!signature) {
+        const errText = JSON.stringify(response?.data || response || {});
+        if (/policy/i.test(errText)) {
+          throw new Error(
+            `Privy policy blocked signing: ${errText}. In Dashboard → Wallets, attach your ALLOW policy to this Sui wallet (same wallet id ${wallet.id.slice(0, 8)}…).`,
+          );
+        }
         throw new Error("Privy could not sign this Sui payment.");
       }
       return { signature };
     },
-    [user, privy, signWithUserSigner],
+    [user, privy, signWithUserSigner, getAccessToken],
   );
 
   const resolveWalletForPay = useCallback(
