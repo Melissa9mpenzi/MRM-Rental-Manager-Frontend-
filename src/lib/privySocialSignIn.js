@@ -10,17 +10,34 @@ export function isPrivySocialAvailable() {
 
 /** Find embedded Sui wallet on Privy user object (linkedAccounts / wallets). */
 export function findPrivySuiAddress(privyUser) {
+  return findPrivySuiWallet(privyUser)?.address ?? null;
+}
+
+/** @returns {{ address: string, publicKey?: string, walletId?: string } | null} */
+export function findPrivySuiWallet(privyUser) {
   if (!privyUser) return null;
   const linked = privyUser.linkedAccounts || privyUser.linked_accounts || [];
   for (const acct of linked) {
     const chain = acct.chainType || acct.chain_type;
     const addr = acct.address;
-    if (chain === "sui" && addr) return addr;
+    if (chain === "sui" && addr) {
+      return {
+        address: addr,
+        publicKey: acct.publicKey || acct.public_key || null,
+        walletId: acct.id || acct.wallet_id || null,
+      };
+    }
   }
   const wallets = privyUser.wallets || [];
   for (const w of wallets) {
     const chain = w.chainType || w.chain_type;
-    if (chain === "sui" && w.address) return w.address;
+    if (chain === "sui" && w.address) {
+      return {
+        address: w.address,
+        publicKey: w.publicKey || w.public_key || null,
+        walletId: w.id || w.wallet_id || null,
+      };
+    }
   }
   return null;
 }
