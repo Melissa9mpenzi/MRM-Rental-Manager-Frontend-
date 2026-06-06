@@ -7,14 +7,16 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-ki
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import ConnectWalletButton from "../../components/blockchain/ConnectWalletButton";
-import PlatformSuiWallet from "../../components/blockchain/PlatformSuiWallet";
+import PrivySuiWalletPanel from "../../components/blockchain/PrivySuiWalletPanel";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
 import PaymentCheckoutHandoff from "../../components/payments/PaymentCheckoutHandoff";
 import PaymentMomoProcessing from "../../components/payments/PaymentMomoProcessing";
 import { apiErrorMessage } from "../../lib/apiError";
-import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from "../../lib/suiCheckout";
+import { fetchBlockchainStatus, runSuiCheckout } from "../../lib/suiCheckout";
+import { usePrivySuiPay } from "../../hooks/usePrivySuiPay";
+import { isPrivyConfigured } from "../../lib/privyConfig";
 import useAuthStore from "../../store/authStore";
 import { receiptsApi } from "../../api/receiptsApi";
 import PaymentReceiptSuccess from "../../components/receipts/PaymentReceiptSuccess";
@@ -39,6 +41,7 @@ export default function PaymentFlowPage() {
   const [momoProcessing, setMomoProcessing] = useState(null);
   const account = useCurrentAccount();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const { pay: payWithPrivySui, privyConfigured } = usePrivySuiPay();
 
   const profileQuery = useQuery({
     queryKey: ["tenant-me-pay"],
@@ -185,7 +188,7 @@ export default function PaymentFlowPage() {
             onCompleted: onDone,
           });
         } else {
-          checkout = await runPlatformSuiCheckout({
+          checkout = await payWithPrivySui({
             invoiceId: openInvoice.id,
             onCompleted: onDone,
           });
@@ -296,7 +299,7 @@ export default function PaymentFlowPage() {
       variant="ledger"
       icon={CreditCard}
       title="Pay rent"
-      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui — your wallet is created with your email account."
+      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui via Privy embedded wallet."
     >
       {gatewayQuery.data && !gatewayQuery.data.configured && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -393,7 +396,7 @@ export default function PaymentFlowPage() {
             <div className="space-y-3">
               <label className="mb-1 block text-xs font-semibold text-white/60">Your Sui wallet</label>
               {!suiExternalWallet ? (
-                <PlatformSuiWallet />
+                <PrivySuiWalletPanel />
               ) : (
                 <ConnectWalletButton />
               )}
@@ -406,6 +409,18 @@ export default function PaymentFlowPage() {
                 />
                 Use browser wallet instead (Slush, Suiet, Nightly — advanced)
               </label>
+              {privyConfigured && !suiExternalWallet && (
+                <p className="text-[10px] leading-snug text-white/40">
+                  Recommended: Privy signs in your browser — no server pysui required. Use MoMo if Privy is
+                  unavailable.
+                </p>
+              )}
+              {!privyConfigured && !suiExternalWallet && (
+                <p className="text-[10px] leading-snug text-amber-200/70">
+                  Set <code className="text-[10px]">VITE_PRIVY_APP_ID</code> for embedded Sui wallets, or check
+                  “browser wallet” above.
+                </p>
+              )}
             </div>
           ) : (
             <div>

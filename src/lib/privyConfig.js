@@ -7,7 +7,6 @@ export function isPrivyConfigured() {
 }
 
 export function privyProviderConfig() {
-  const suiNetwork = import.meta.env.VITE_SUI_NETWORK || "testnet";
   return {
     loginMethods: ["google", "apple", "email"],
     appearance: {
@@ -15,13 +14,16 @@ export function privyProviderConfig() {
       accentColor: "#14b8a6",
     },
     embeddedWallets: {
-      createOnLogin: "users-without-wallets",
       showWalletUIs: false,
+      // Sui wallet is created via extended-chains (useCreateWallet) on pay / login — not EVM.
+      ethereum: {
+        createOnLogin: "off",
+      },
+      solana: {
+        createOnLogin: "off",
+      },
     },
-    // Sui embedded wallet on social login (Privy extended chains)
-    supportedChains: [],
-    defaultChain: undefined,
-    // Documented in Privy dashboard: enable Sui under Embedded wallets → Extended chains
-    _suiNetworkHint: suiNetwork,
+    // Do not pass supportedChains: [] — Privy requires at least one chain or omit for defaults.
+    // Sui payments use @privy-io/react-auth/extended-chains + useSignRawHash.
   };
 }
