@@ -1,11 +1,11 @@
-/* Government auth — two-column split layout (light theme) */
+/* Government auth — two-column split layout */
 
 .gov-auth-split {
   display: grid;
   min-height: 100vh;
   grid-template-columns: 1fr;
-  background: #f0f2f8;
-  color: #111827;
+  background: #0b0e14;
+  color: #e2e8f0;
 }
 
 @media (min-width: 960px) {
@@ -21,8 +21,8 @@
   align-items: center;
   justify-content: center;
   padding: 2.5rem 2rem;
-  background: #1e293b;
-  border-bottom: 1px solid #334155;
+  background: linear-gradient(165deg, #0d1219 0%, #0b0e14 45%, #071a14 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   overflow: hidden;
 }
 
@@ -30,7 +30,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 50% at 20% 0%, rgba(79, 110, 247, 0.12), transparent 55%);
+  background: radial-gradient(ellipse 70% 50% at 20% 0%, rgba(0, 200, 150, 0.12), transparent 55%);
   pointer-events: none;
 }
 
@@ -59,7 +59,8 @@
   max-width: min(168px, 42vw);
   max-height: 180px;
   object-fit: contain;
-  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.3));
+  image-rendering: -webkit-optimize-contrast;
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
 }
 
 .gov-auth-split__republic {
@@ -67,14 +68,14 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .gov-auth-split__portal {
   margin-top: 0.35rem;
   font-size: 1rem;
   font-weight: 500;
-  color: rgba(203, 213, 225, 0.85);
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .gov-auth-split__product {
@@ -82,7 +83,7 @@
   font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: #7eb8f7;
+  color: #00c896;
   line-height: 1.15;
 }
 
@@ -90,7 +91,7 @@
   margin-top: 0.65rem;
   font-size: 0.8rem;
   line-height: 1.45;
-  color: rgba(148, 163, 184, 0.75);
+  color: rgba(148, 163, 184, 0.65);
   max-width: 320px;
 }
 
@@ -101,10 +102,10 @@
   padding: 0.85rem 1rem;
   border-radius: 12px;
   border: 1px solid rgba(245, 158, 11, 0.35);
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(245, 158, 11, 0.08);
   font-size: 0.72rem;
   line-height: 1.5;
-  color: rgba(254, 215, 170, 0.9);
+  color: rgba(253, 230, 138, 0.92);
 }
 
 .gov-auth-split__brand-footer {
@@ -112,11 +113,12 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   font-size: 0.72rem;
-  color: rgba(148, 163, 184, 0.5);
+  color: rgba(148, 163, 184, 0.55);
   margin-top: auto;
   padding-top: 0.5rem;
 }
 
+/* Agency logos — left panel full width */
 .gov-auth-split__brand .gov-agency-logos {
   width: 100%;
   justify-content: flex-start;
@@ -133,7 +135,8 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
-  background: #f0f2f8;
+  background: #0b0e14;
+  background-image: radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 200, 150, 0.04), transparent);
 }
 
 .gov-auth-split__form-inner {
@@ -142,17 +145,19 @@
 }
 
 .gov-auth-form-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 20px;
   padding: 2rem 2rem 1.75rem;
-  box-shadow: 0 1px 8px rgba(17, 24, 39, 0.08);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
 }
 
 .gov-auth-form-card h2 {
   font-size: 1.35rem;
   font-weight: 700;
-  color: #111827;
+  color: #fff;
   letter-spacing: -0.02em;
 }
 
@@ -160,7 +165,7 @@
   margin-top: 0.35rem;
   font-size: 0.8rem;
   line-height: 1.45;
-  color: #6b7280;
+  color: rgba(148, 163, 184, 0.75);
 }
 
 .gov-auth-form-card .gov-auth-submit {
@@ -170,17 +175,17 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: 12px;
-  background: #4F6EF7;
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
   padding: 0.85rem 1rem;
   font-size: 0.9rem;
   font-weight: 700;
   color: #fff;
-  box-shadow: 0 2px 10px rgba(79, 110, 247, 0.2);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 
 .gov-auth-form-card .gov-auth-submit:hover:not(:disabled) {
-  opacity: 0.9;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
   transform: translateY(-1px);
 }
 
@@ -193,19 +198,19 @@
   margin-top: 1.25rem;
   text-align: center;
   font-size: 0.78rem;
-  color: #9ca3af;
+  color: rgba(148, 163, 184, 0.6);
 }
 
 .gov-auth-form-footer a {
   font-weight: 600;
-  color: #4F6EF7;
+  color: #34d399;
 }
 
 .gov-auth-form-footer a:hover {
   text-decoration: underline;
 }
 
-/* Mobile: stack */
+/* Mobile: stack — form first for usability, brand below */
 @media (max-width: 959px) {
   .gov-auth-split {
     grid-template-rows: auto 1fr;
@@ -243,11 +248,11 @@
 
 /* Shared card (accept-invite, 2FA) */
 .gov-auth-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 1px 8px rgba(17, 24, 39, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* Agency strip (shared) */
@@ -263,8 +268,8 @@
   align-items: center;
   padding: 0.45rem 0.75rem;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.55);
   min-width: 5rem;
 }
 
@@ -272,11 +277,11 @@
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.06em;
-  color: var(--agency-color, #7eb8f7);
+  color: var(--agency-color, #00c896);
 }
 
 .gov-agency-logos__sub {
   font-size: 0.58rem;
-  color: rgba(148, 163, 184, 0.7);
+  color: rgba(148, 163, 184, 0.65);
   margin-top: 0.1rem;
 }

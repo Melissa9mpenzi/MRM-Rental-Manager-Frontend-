@@ -16,20 +16,20 @@ import { platformApi } from "../../api/platformApi";
 
 function StatCard({ icon: Icon, label, value, sub, color = "teal" }) {
   const colors = {
-    teal: "bg-brand-tealLt text-brand-teal",
-    blue: "bg-sky-100 text-sky-700",
-    red: "bg-red-100 text-red-600",
-    gray: "bg-slate-100 text-slate-500",
+    teal: "bg-brand-tealLt/60 text-brand-teal",
+    blue: "bg-sky-500/15 text-sky-300",
+    red: "bg-red-500/15 text-red-300",
+    gray: "bg-white/10 text-white/50",
   };
   return (
     <div className="stat-card">
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${colors[color]}">
+      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${colors[color]}`}>
         <Icon size={18} />
       </div>
       <div className="min-w-0">
-        <div className="truncate text-2xl font-bold leading-tight text-brand-dark">{value}</div>
-        <div className="mt-0.5 text-xs font-semibold text-brand-mid">{label}</div>
-        {sub && <div className="mt-0.5 text-xs text-slate-400">{sub}</div>}
+        <div className="truncate text-2xl font-bold leading-tight text-white">{value}</div>
+        <div className="mt-0.5 text-xs font-semibold text-white/50">{label}</div>
+        {sub && <div className="mt-0.5 text-xs text-white/40">{sub}</div>}
       </div>
     </div>
   );
@@ -93,8 +93,8 @@ function RecentProperty({ p }) {
         <div className="text-xs text-white/45">
           {p.occupied_units}/{p.total_units} occupied
         </div>
-        <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-200">
-          <div className="h-full rounded-full bg-brand-teal" style={{ width: `${p.occupancy_rate}%` }} />
+        <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+          <div className="h-full rounded-full bg-[#00C896]" style={{ width: `${p.occupancy_rate}%` }} />
         </div>
       </div>
       <ChevronRight size={14} className="flex-shrink-0 text-white/35 group-hover:text-[#00C896]" />
@@ -188,17 +188,17 @@ export default function LandlordDashboard() {
                     v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v
                   }
                 />
-        <Tooltip
+                <Tooltip
                   formatter={(v) => [`UGX ${Number(v).toLocaleString()}`, "Collected"]}
                   contentStyle={{
                     borderRadius: 10,
-                    border: "1px solid #e2e8f0",
+                    border: "1px solid rgba(255,255,255,0.12)",
                     fontSize: 12,
-                    background: "#ffffff",
-                    color: "#111827",
+                    background: "rgba(18,26,34,0.95)",
+                    color: "#f1f5f9",
                   }}
                 />
-                <Bar dataKey="collected" fill="#4F6EF7" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="collected" fill="#00C896" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

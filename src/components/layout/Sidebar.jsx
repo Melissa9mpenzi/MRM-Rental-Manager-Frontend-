@@ -88,16 +88,16 @@ function navForRole(role) {
 
 function navLinkClass(isActive, variant = "default") {
   if (variant === "sui") {
-    return `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150 group ${
+    return `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-150 group ${
       isActive
-        ? "border border-violet-200 bg-violet-50 text-violet-700"
-        : "border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+        ? "border border-violet-500/35 bg-violet-500/12 text-violet-200"
+        : "border border-transparent text-white/50 hover:bg-white/[0.06] hover:text-white/80"
     }`;
   }
-  return `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150 group ${
+  return `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-150 group ${
     isActive
-      ? "border border-brand-teal/20 bg-brand-tealLt text-brand-teal"
-      : "border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+      ? "border border-brand-teal/30 bg-brand-teal/15 text-brand-teal"
+      : "border border-transparent text-white/55 hover:bg-white/[0.08] hover:text-white"
   }`;
 }
 
@@ -126,36 +126,34 @@ export default function Sidebar({ open, onClose }) {
   return (
     <>
       {open && (
-        <div className="fixed inset-0 z-20 bg-black/30 lg:hidden" onClick={onClose} aria-hidden />
+        <div className="fixed inset-0 z-20 bg-black/50 backdrop-blur-sm lg:hidden" onClick={onClose} aria-hidden />
       )}
 
       <aside
         className={`
           fixed inset-y-0 left-0 z-30 flex h-dvh max-h-dvh w-64 min-h-0 flex-col
-          border-r border-slate-200 bg-white
+          border-r border-white/[0.06] bg-gradient-to-b from-[#0c1219] to-[#060a0e]
           transform transition-transform duration-300 ease-in-out
           ${open ? "translate-x-0" : "-translate-x-full"}
           lg:static lg:h-full lg:max-h-none lg:translate-x-0 lg:flex
         `}
       >
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <BrandMark imgClassName="h-9 w-auto max-w-[170px] object-contain" />
-            <div className="text-[10px] font-bold uppercase tracking-widest text-brand-teal/90">{role}</div>
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-brand-teal/90">{role}</div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="min-h-0 flex-1 space-y-0.5 overflow-panel-y px-3 py-4">
-          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Menu</div>
+          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-white/30">Menu</div>
           {items.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -173,7 +171,7 @@ export default function Sidebar({ open, onClose }) {
                 <>
                   <Icon
                     size={17}
-                    className={`flex-shrink-0 ${isActive ? "text-brand-teal" : "text-slate-400 group-hover:text-slate-600"}`}
+                    className={`flex-shrink-0 ${isActive ? "text-brand-teal" : "text-white/45 group-hover:text-white/80"}`}
                   />
                   {label}
                 </>
@@ -183,8 +181,8 @@ export default function Sidebar({ open, onClose }) {
 
           {showBlockchain && (
             <>
-              <div className="mx-1 my-3 border-t border-slate-100" />
-              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-violet-400/80">
+              <div className="mx-1 my-3 border-t border-white/[0.08]" />
+              <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-violet-300/50">
                 Blockchain (Sui)
               </div>
               {SUI_SIDEBAR_ITEMS.map(({ to, icon: Icon, label, end }) => (
@@ -199,7 +197,7 @@ export default function Sidebar({ open, onClose }) {
                     <>
                       <Icon
                         size={16}
-                        className={`flex-shrink-0 ${isActive ? "text-violet-600" : "text-slate-400 group-hover:text-slate-600"}`}
+                        className={`flex-shrink-0 ${isActive ? "text-violet-300" : "text-white/40 group-hover:text-white/70"}`}
                       />
                       {label}
                     </>
@@ -213,7 +211,7 @@ export default function Sidebar({ open, onClose }) {
                 className={navLinkClass(false, "sui")}
                 onClick={onClose}
               >
-                <ExtIcon size={16} className="text-slate-400" />
+                <ExtIcon size={16} className="text-white/40" />
                 {SUI_SIDEBAR_EXTERNAL.label}
                 <ExtIcon size={11} className="ml-auto opacity-40" />
               </a>
@@ -221,21 +219,20 @@ export default function Sidebar({ open, onClose }) {
           )}
         </nav>
 
-        {/* User footer */}
-        <div className="shrink-0 space-y-3 border-t border-slate-100 px-4 py-4">
+        <div className="shrink-0 space-y-3 border-t border-white/10 px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-teal text-sm font-bold text-white ring-2 ring-brand-teal/20">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-teal text-sm font-bold text-[#041208] ring-2 ring-brand-teal/30">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-xs font-bold text-brand-dark">{user?.full_name}</div>
-              <div className="truncate text-[11px] text-slate-400">{user?.email}</div>
+              <div className="truncate text-xs font-bold text-white">{user?.full_name}</div>
+              <div className="truncate text-[11px] text-white/40">{user?.email}</div>
             </div>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-white/50 transition-colors hover:bg-white/10 hover:text-white"
           >
             <LogOut size={15} /> Logout
           </button>
