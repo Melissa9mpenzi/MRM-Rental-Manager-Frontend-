@@ -20,6 +20,13 @@ function serverCheckoutDisabled() {
   return import.meta.env.VITE_PRIVY_SERVER_CHECKOUT === "false";
 }
 
+function isPrivyAuthorizationError(err) {
+  const msg = apiErrorMessage(err, err?.message || "");
+  return /privy-authorization-signature|authorization.private.key|authorization signature|missing_or_empty_authorization/i.test(
+    msg,
+  );
+}
+
 function formatSuiPayError(err, network) {
   if (isInsufficientSuiError(err)) {
     return new SuiPaymentError(
@@ -250,10 +257,13 @@ export async function runPrivyServerSuiCheckout({
       wallet.walletId || wallet.id,
     );
     if (policyStatus?.configured && policyStatus.attached === false) {
-      toast.error(
-        `Privy policy not attached to wallet (${policyStatus.detail || "check PRIVY_SUI_POLICY_ID"}). Open Dashboard → Wallets and attach your ALLOW policy manually.`,
-        { duration: 10000 },
-      );
+      const detail = String(policyStatus.detail || "");
+      if (!isPrivyAuthorizationError({ message: detail })) {
+        toast.error(
+          `Privy policy not attached to wallet (${detail || "check PRIVY_SUI_POLICY_ID"}). Open Dashboard → Wallets and attach your ALLOW policy manually.`,
+          { duration: 10000 },
+        );
+      }
     }
   }
 
@@ -269,8 +279,12 @@ export async function runPrivyServerSuiCheckout({
       return checkout;
     } catch (err) {
       const status = err?.response?.status;
-      if (status === 404 || status === 405) {
-        /* backend not deployed — fall through to browser sign */
+      if (
+        status === 404 ||
+        status === 405 ||
+        ((status === 401 || status === 400) && isPrivyAuthorizationError(err))
+      ) {
+        /* server raw_sign unavailable — use browser sign */
       } else if (status) {
         throw formatSuiPayError(err, chain.network);
       }
