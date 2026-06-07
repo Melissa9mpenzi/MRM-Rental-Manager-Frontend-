@@ -1,5 +1,6 @@
 /** Privy app config — https://dashboard.privy.io */
 
+import { base } from "@privy-io/chains";
 import { PRODUCTION_FRONTEND_URL } from "../api/config";
 
 export const PRIVY_APP_ID = (import.meta.env.VITE_PRIVY_APP_ID || "").trim();
@@ -40,5 +41,9 @@ export function privyProviderConfig() {
       ethereum: { createOnLogin: "off" },
       solana: { createOnLogin: "off" },
     },
+    // Privy requires at least one EVM chain even when pay uses Sui (extended-chains).
+    // Never pass supportedChains: [] — it crashes on init.
+    defaultChain: base,
+    supportedChains: [base],
   };
 }
