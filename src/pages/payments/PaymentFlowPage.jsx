@@ -7,12 +7,16 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-ki
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import ConnectWalletButton from "../../components/blockchain/ConnectWalletButton";
-import PlatformSuiWallet from "../../components/blockchain/PlatformSuiWallet";
+import PrivySuiWalletPanel from "../../components/blockchain/PrivySuiWalletPanel";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
+import PaymentCheckoutHandoff from "../../components/payments/PaymentCheckoutHandoff";
+import PaymentMomoProcessing from "../../components/payments/PaymentMomoProcessing";
 import { apiErrorMessage } from "../../lib/apiError";
-import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from "../../lib/suiCheckout";
+import { fetchBlockchainStatus, runSuiCheckout } from "../../lib/suiCheckout";
+import { usePrivySuiPay } from "../../hooks/usePrivySuiPay";
+import { isPrivyConfigured } from "../../lib/privyConfig";
 import useAuthStore from "../../store/authStore";
 import { receiptsApi } from "../../api/receiptsApi";
 import PaymentReceiptSuccess from "../../components/receipts/PaymentReceiptSuccess";
@@ -33,8 +37,11 @@ export default function PaymentFlowPage() {
   const [suiExternalWallet, setSuiExternalWallet] = useState(false);
   const [successReceipt, setSuccessReceipt] = useState(null);
   const [linking, setLinking] = useState(false);
+  const [pesapalHandoff, setPesapalHandoff] = useState(null);
+  const [momoProcessing, setMomoProcessing] = useState(null);
   const account = useCurrentAccount();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const { pay: payWithPrivySui, privyConfigured } = usePrivySuiPay();
 
   const profileQuery = useQuery({
     queryKey: ["tenant-me-pay"],
@@ -181,7 +188,7 @@ export default function PaymentFlowPage() {
             onCompleted: onDone,
           });
         } else {
-          checkout = await runPlatformSuiCheckout({
+          checkout = await payWithPrivySui({
             invoiceId: openInvoice.id,
             onCompleted: onDone,
           });
@@ -193,12 +200,63 @@ export default function PaymentFlowPage() {
           methodId: method,
           phone,
           onCompleted: onDone,
+          onPesapalHandoff: ({ paymentLink, reference, amount }) =>
+            new Promise((resolve) => {
+              setPesapalHandoff({
+                paymentLink,
+                reference,
+                amount,
+                invoiceLabel: openInvoice.invoice_number
+                  ? `Invoice ${openInvoice.invoice_number}`
+                  : null,
+                onRedirect: (link) => {
+                  window.location.assign(link);
+                  resolve();
+                },
+                onCancel: () => {
+                  setPesapalHandoff(null);
+                  resolve();
+                },
+              });
+            }),
+          onMomoProcessing: ({ reference, message, amount }) =>
+            new Promise((resolve) => {
+              setMomoProcessing({
+                reference,
+                message,
+                amount,
+                phone: phone.trim(),
+                invoiceLabel: openInvoice.invoice_number
+                  ? `Invoice ${openInvoice.invoice_number}`
+                  : null,
+                onComplete: async () => {
+                  setMomoProcessing(null);
+                  toast.success("Payment confirmed and recorded.");
+                  await onDone();
+                  resolve();
+                },
+                onFailed: (reason) => {
+                  setMomoProcessing(null);
+                  toast.error(reason);
+                  resolve();
+                },
+                onTimeout: () => {
+                  toast("Still processing. Check Wallet in a minute.");
+                  resolve();
+                },
+                onCancel: () => {
+                  setMomoProcessing(null);
+                  resolve();
+                },
+              });
+            }),
         });
       }
     } catch (err) {
-      toast.error(apiErrorMessage(err, "Payment could not be started. Try another method."), {
-        duration: 6000,
-      });
+      if (!err?.alreadyToasted) {
+        const msg = apiErrorMessage(err, err?.message || "Payment could not be started. Try another method.");
+        toast.error(msg, { duration: 7000 });
+      }
     } finally {
       setPaying(false);
     }
@@ -214,11 +272,35 @@ export default function PaymentFlowPage() {
       {successReceipt && (
         <PaymentReceiptSuccess receipt={successReceipt} onClose={() => setSuccessReceipt(null)} />
       )}
+      {pesapalHandoff && (
+        <PaymentCheckoutHandoff
+          open
+          amount={pesapalHandoff.amount}
+          invoiceLabel={pesapalHandoff.invoiceLabel}
+          paymentLink={pesapalHandoff.paymentLink}
+          onRedirect={pesapalHandoff.onRedirect}
+          onCancel={pesapalHandoff.onCancel}
+        />
+      )}
+      {momoProcessing && (
+        <PaymentMomoProcessing
+          open
+          reference={momoProcessing.reference}
+          phone={momoProcessing.phone}
+          amount={momoProcessing.amount}
+          invoiceLabel={momoProcessing.invoiceLabel}
+          message={momoProcessing.message}
+          onComplete={momoProcessing.onComplete}
+          onFailed={momoProcessing.onFailed}
+          onTimeout={momoProcessing.onTimeout}
+          onCancel={momoProcessing.onCancel}
+        />
+      )}
     <AppPageScaffold
       variant="ledger"
       icon={CreditCard}
       title="Pay rent"
-      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui — your wallet is created with your email account."
+      description="Hybrid payments: MTN MoMo, Pesapal (Airtel/card), and Sui via Privy embedded wallet."
     >
       {gatewayQuery.data && !gatewayQuery.data.configured && (
         <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -229,9 +311,14 @@ export default function PaymentFlowPage() {
       {gatewayQuery.data?.configured && (
         <div className="mb-4 rounded-xl border border-brand-teal/30 bg-brand-teal/10 px-4 py-3 text-sm text-brand-teal">
           {gatewayQuery.data.setup_hint}
+          {gatewayQuery.data.supports?.mtn_momo_in_app && (
+            <span className="mt-1 block text-white/70">
+              MTN MoMo stays in-app (USSD on your phone). Airtel and card use Pesapal&apos;s secure page.
+            </span>
+          )}
           {gatewayQuery.data.provider === "mtn_momo" && !gatewayQuery.data.supports?.airtel && (
             <span className="mt-1 block text-white/70">
-              Airtel/card: set <code className="text-xs">PAYMENT_GATEWAY_PROVIDER=pesapal</code> on the API.
+              Airtel/card: add Pesapal keys on the API, or set <code className="text-xs">PAYMENT_GATEWAY_PROVIDER=pesapal</code>.
             </span>
           )}
         </div>
@@ -310,7 +397,7 @@ export default function PaymentFlowPage() {
             <div className="space-y-3">
               <label className="mb-1 block text-xs font-semibold text-white/60">Your Sui wallet</label>
               {!suiExternalWallet ? (
-                <PlatformSuiWallet />
+                <PrivySuiWalletPanel />
               ) : (
                 <ConnectWalletButton />
               )}
@@ -323,6 +410,18 @@ export default function PaymentFlowPage() {
                 />
                 Use browser wallet instead (Slush, Suiet, Nightly — advanced)
               </label>
+              {privyConfigured && !suiExternalWallet && (
+                <p className="text-[10px] leading-snug text-white/40">
+                  Recommended: Privy signs in your browser — no server pysui required. Use MoMo if Privy is
+                  unavailable.
+                </p>
+              )}
+              {!privyConfigured && !suiExternalWallet && (
+                <p className="text-[10px] leading-snug text-amber-200/70">
+                  Set <code className="text-[10px]">VITE_PRIVY_APP_ID</code> for embedded Sui wallets, or check
+                  “browser wallet” above.
+                </p>
+              )}
             </div>
           ) : (
             <div>

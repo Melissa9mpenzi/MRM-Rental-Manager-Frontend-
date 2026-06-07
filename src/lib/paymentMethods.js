@@ -40,7 +40,7 @@ export const PAYMENT_METHODS = [
     id: "sui",
     label: "Sui Wallet",
     shortLabel: "Sui",
-    sub: "On-chain payment with digital receipt",
+    sub: "On-chain payment via Privy embedded wallet",
     logo: "sui",
     apiValue: "sui",
   },

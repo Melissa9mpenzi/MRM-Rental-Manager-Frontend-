@@ -3,7 +3,7 @@ import { isPrivyConfigured, PRIVY_APP_ID, privyProviderConfig } from "../lib/pri
 
 /**
  * Wraps the app when VITE_PRIVY_APP_ID is set.
- * Enables Google / Apple / email login + embedded Sui wallet (configure Sui in Privy Dashboard).
+ * Privy is used for Sui wallet connect + signing on the payment page only.
  */
 export default function PrivyAppProvider({ children }) {
   if (!isPrivyConfigured()) {

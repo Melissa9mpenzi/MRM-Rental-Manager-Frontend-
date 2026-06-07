@@ -2,25 +2,61 @@
  * Google / Apple / email via Privy → POST /api/v1/auth/privy
  * Requires VITE_PRIVY_APP_ID and API PRIVY_APP_ID + PRIVY_APP_SECRET.
  */
+import { isUnifiedWallet } from "@privy-io/js-sdk-core";
 import { authApi } from "../api/authApi";
 
 export function isPrivySocialAvailable() {
-  return Boolean((import.meta.env.VITE_PRIVY_APP_ID || "").trim());
+  // Privy is not used for login/register — only for Sui payments.
+  return false;
 }
 
 /** Find embedded Sui wallet on Privy user object (linkedAccounts / wallets). */
 export function findPrivySuiAddress(privyUser) {
+  return findPrivySuiWallet(privyUser)?.address ?? null;
+}
+
+/** @returns {{ address: string, publicKey?: string, walletId?: string } | null} */
+export function findPrivySuiWallet(privyUser) {
   if (!privyUser) return null;
+
+  const unified = (privyUser.linkedAccounts || []).filter((acct) => {
+    if (acct.type !== "wallet") return false;
+    if (acct.chainType !== "sui") return false;
+    if (acct.walletClientType !== "privy" || acct.imported) return false;
+    return isUnifiedWallet({ id: acct.id, recovery_method: acct.recoveryMethod });
+  });
+  if (unified.length) {
+    const acct = unified[0];
+    return {
+      address: acct.address,
+      publicKey: acct.publicKey || acct.public_key || null,
+      walletId: acct.id || acct.wallet_id || null,
+    };
+  }
+
   const linked = privyUser.linkedAccounts || privyUser.linked_accounts || [];
   for (const acct of linked) {
     const chain = acct.chainType || acct.chain_type;
     const addr = acct.address;
-    if (chain === "sui" && addr) return addr;
+    const isWallet = acct.type === "wallet" || chain === "sui";
+    if (isWallet && chain === "sui" && addr) {
+      return {
+        address: addr,
+        publicKey: acct.publicKey || acct.public_key || null,
+        walletId: acct.id || acct.wallet_id || null,
+      };
+    }
   }
   const wallets = privyUser.wallets || [];
   for (const w of wallets) {
     const chain = w.chainType || w.chain_type;
-    if (chain === "sui" && w.address) return w.address;
+    if (chain === "sui" && w.address) {
+      return {
+        address: w.address,
+        publicKey: w.publicKey || w.public_key || null,
+        walletId: w.id || w.wallet_id || null,
+      };
+    }
   }
   return null;
 }
