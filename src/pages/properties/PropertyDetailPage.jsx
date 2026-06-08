@@ -15,6 +15,7 @@ import UnitCard from "../../components/domain/UnitCard";
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
 import { needsPhotoReupload, propertyPhotoUrl, uploadMediaUrl } from "../../lib/mediaUrl";
 import PropertyPhotoUpload from "../../components/domain/PropertyPhotoUpload";
+import PropertyVerificationBadges from "../../components/blockchain/PropertyVerificationBadges";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -145,6 +146,15 @@ export default function PropertyDetailPage() {
           </div>
         </div>
       ) : null}
+
+      <div className="card border border-white/10 bg-white/[0.03] p-4">
+        <PropertyVerificationBadges property={property} />
+        <p className="mt-3 text-xs leading-relaxed text-brand-mid">
+          <strong className="text-brand-dark">Sui listing identity</strong> is created automatically when you save the
+          property. <strong className="text-brand-dark">KCCA verification</strong> is a separate government review by a
+          compliance officer — both appear on the listing.
+        </p>
+      </div>
 
       {/* Description */}
       {property.description && (

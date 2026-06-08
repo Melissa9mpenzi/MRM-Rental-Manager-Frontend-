@@ -74,7 +74,51 @@ export const SUI_DEPLOYMENT = {
   rpc: "https://fullnode.testnet.sui.io:443",
   explorer: "https://suiscan.xyz/testnet",
   movePackagePath: "contracts/rentdirect",
-  modules: ["escrow", "receipt"],
+  modules: ["escrow", "receipt", "property_identity"],
+};
+
+export const PROPERTY_LISTING_IDENTITY = {
+  title: "Property Verification NFTs",
+  tagline:
+    "Every property listing receives a verifiable on-chain identity on Sui, alongside KCCA government compliance review.",
+  storedFields: ["Property ID", "Landlord wallet", "Location", "Timestamp"],
+  benefits: [
+    "Proves when the property was listed.",
+    "Prevents duplicate listings.",
+    "Creates an immutable record.",
+  ],
+};
+
+/** Public-facing pillars — connects the platform to Sui / blockchain value */
+export const SUI_BLOCKCHAIN_VALUE = {
+  title: "Blockchain value on Sui",
+  subtitle:
+    "RentDirect links everyday rental workflows to verifiable digital assets, transparent records, and object-centric ownership — not just a database with a crypto logo.",
+  pillars: [
+    {
+      key: "property",
+      title: "Property Verification",
+      body: "Property listings can be represented as verifiable digital assets on Sui, reducing fraud and duplicate listings.",
+      tagline: PROPERTY_LISTING_IDENTITY.tagline,
+      benefits: PROPERTY_LISTING_IDENTITY.benefits,
+      featured: true,
+    },
+    {
+      key: "agreements",
+      title: "Rental Agreements",
+      body: "Rental agreements can be stored and verified through Sui, creating transparent records.",
+    },
+    {
+      key: "payments",
+      title: "Payments",
+      body: "Future versions will support rental payments through Sui-based transactions.",
+    },
+    {
+      key: "ownership",
+      title: "Ownership",
+      body: "Sui's object-centric architecture makes it suitable for representing real-world assets such as rental properties.",
+    },
+  ],
 };
 
 export const WALRUS_USE_CASES = [
@@ -89,11 +133,16 @@ export const WALRUS_USE_CASES = [
 /** 60-second judge script */
 export const SUI_DEMO_FLOW = [
   { step: 1, title: "Account + wallet", detail: "Google via Privy → embedded Sui address (no extension)." },
-  { step: 2, title: "Rental agreement", detail: "Landlord creates lease → agreement hash + Walrus proof." },
-  { step: 3, title: "On-chain rent", detail: "Tenant pays from RentDirect wallet → Sui tx digest." },
-  { step: 4, title: "Receipt", detail: "QR verify + Walrus blob + explorer link." },
-  { step: 5, title: "Escrow", detail: "Create hold → release → Walrus release proof." },
-  { step: 6, title: "Gov trust", detail: "NIRA/KCCA/URA dashboards + fraud + audit export." },
+  {
+    step: 2,
+    title: "Property listing NFT",
+    detail: "Landlord lists a property → Sui object with property ID, wallet, location, timestamp.",
+  },
+  { step: 3, title: "Rental agreement", detail: "Landlord creates lease → agreement hash + Walrus proof." },
+  { step: 4, title: "On-chain rent", detail: "Tenant pays from RentDirect wallet → Sui tx digest." },
+  { step: 5, title: "Receipt", detail: "QR verify + Walrus blob + explorer link." },
+  { step: 6, title: "Escrow", detail: "Create hold → release → Walrus release proof." },
+  { step: 7, title: "Gov trust", detail: "NIRA/KCCA/URA dashboards + fraud + audit export." },
 ];
 
 export const ELEVATOR_PITCH = WINNING_POSITIONING;

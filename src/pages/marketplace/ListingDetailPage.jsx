@@ -20,6 +20,7 @@ import ListingSaveButton from "../../components/domain/ListingSaveButton";
 import { marketplaceApi } from "../../api/marketplaceApi";
 import ListingPhoto from "../../components/domain/ListingPhoto";
 import GovernmentComplianceBadges from "../../components/government/GovernmentComplianceBadges";
+import PropertyVerificationBadges from "../../components/blockchain/PropertyVerificationBadges";
 
 function BedIcon(props) {
   return <BedDouble {...props} />;
@@ -139,7 +140,19 @@ export default function ListingDetailPage() {
           <div className="card-glass p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <h1 className="text-2xl font-extrabold text-white">{p.title}</h1>
-              <GovernmentComplianceBadges compliance={p.compliance} className="flex-shrink-0" />
+              <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                <PropertyVerificationBadges
+                  property={{
+                    gov_verification_status: p.gov_verification_status,
+                    sui_identity_status: p.sui_identity_status,
+                    sui_identity_object_id: p.sui_identity_object_id,
+                    sui_identity_explorer_url: p.sui_identity_explorer_url,
+                    sui_identity_verify_url: p.sui_identity_verify_url,
+                  }}
+                  compact
+                />
+                <GovernmentComplianceBadges compliance={p.compliance} />
+              </div>
             </div>
             <p className="mt-2 flex items-center gap-2 text-sm text-white/50">
               <MapPin size={16} className="text-[#00C896]" /> {p.address}

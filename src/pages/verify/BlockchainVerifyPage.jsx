@@ -235,12 +235,23 @@ export default function BlockchainVerifyPage({ forcedKind }) {
             )}
 
             {display.kind === "property" && (
-              <div className="verify-card__section">
-                <p className="verify-card__title">Property record</p>
-                <VerifyRow label="Property" value={display.property_name} />
-                <VerifyRow label="District" value={display.district} />
-                <VerifyRow label="KCCA status" value={display.gov_verification_status} />
-              </div>
+              <>
+                <div className="verify-card__section">
+                  <p className="verify-card__title">Sui listing identity (automatic)</p>
+                  <VerifyRow label="Status" value={display.sui_identity_status} />
+                  <VerifyRow label="Sui object" value={display.sui_identity_object_id} mono />
+                  <VerifyRow
+                    label="Listed at"
+                    value={display.sui_listed_at_ms ? fmtDate(new Date(display.sui_listed_at_ms)) : null}
+                  />
+                </div>
+                <div className="verify-card__section">
+                  <p className="verify-card__title">KCCA compliance (government)</p>
+                  <VerifyRow label="Property" value={display.property_name} />
+                  <VerifyRow label="District" value={display.district} />
+                  <VerifyRow label="KCCA status" value={display.gov_verification_status} />
+                </div>
+              </>
             )}
 
             {display.kind === "compliance" && (

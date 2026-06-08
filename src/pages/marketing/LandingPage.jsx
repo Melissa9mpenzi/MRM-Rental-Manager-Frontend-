@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import BrandMark from "../../components/brand/BrandMark";
+import SuiBlockchainValueSection from "../../components/marketing/SuiBlockchainValueSection";
 
 /** Mockup primary — emerald green */
 const AC = "#10B981";
@@ -22,6 +23,7 @@ const NAV = [
   { label: "Browse Properties", to: "/browse-properties" },
   { label: "How It Works", to: "/#how" },
   { label: "Platform", to: "/#platform" },
+  { label: "Why Sui", to: "/#blockchain" },
   { label: "Pricing", to: "/pricing" },
   { label: "Agents", to: "/#agents" },
   { label: "About Us", to: "/about" },
@@ -341,6 +343,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <SuiBlockchainValueSection />
 
       {/* ── Demo narrative (judges) ── */}
       <section className="border-t border-white/[0.06] bg-gradient-to-b from-[#080d12] to-[#060a0e] py-16">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Search, SlidersHorizontal, MapPin, CheckCircle2, Lock, X, Store } from "lucide-react";
 import GovernmentComplianceBadges from "../../components/government/GovernmentComplianceBadges";
+import PropertyVerificationBadges from "../../components/blockchain/PropertyVerificationBadges";
 import { marketplaceApi } from "../../api/marketplaceApi";
 import ListingPhoto from "../../components/domain/ListingPhoto";
 import useAuthStore from "../../store/authStore";
@@ -408,6 +409,12 @@ export default function PropertySearchPage() {
                         className="flex-shrink-0 justify-end"
                       />
                     </div>
+                    <PropertyVerificationBadges
+                      property={p}
+                      compact
+                      showLinks={false}
+                      className="mt-2"
+                    />
                     <p className="mt-1 flex items-center gap-1 text-xs text-white/45">
                       <MapPin size={12} className="text-[#00C896]" /> {p.address}
                     </p>

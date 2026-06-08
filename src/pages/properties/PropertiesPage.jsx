@@ -16,6 +16,7 @@ import AppPageScaffold from "../../components/layout/AppPageScaffold";
 
 import { needsPhotoReupload, propertyPhotoUrl } from "../../lib/mediaUrl";
 import PropertyPhotoUpload from "../../components/domain/PropertyPhotoUpload";
+import PropertyVerificationBadges from "../../components/blockchain/PropertyVerificationBadges";
 
 // ── Property Card ─────────────────────────────────────────────────
 function PropertyCard({ property }) {
@@ -94,15 +95,7 @@ function PropertyCard({ property }) {
             label={property.is_active ? "Active" : "Archived"}
             variant={property.is_active ? "active" : "archived"}
           />
-          {property.gov_verification_status === "verified" ? (
-            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-              KCCA verified
-            </span>
-          ) : (
-            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-300" title="Visible to tenants; full trust badge after KCCA approval">
-              KCCA pending
-            </span>
-          )}
+          <PropertyVerificationBadges property={property} compact showLinks={false} />
         </div>
       </div>
 

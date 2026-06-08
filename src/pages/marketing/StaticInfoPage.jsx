@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, MapPin, Users, Building2, Briefcase, Check, ArrowRight } from "lucide-react";
+import SuiBlockchainValueSection from "../../components/marketing/SuiBlockchainValueSection";
 
 const AC = "#10B981";
 
@@ -57,6 +58,8 @@ function AboutContent() {
           </div>
         ))}
       </div>
+
+      <SuiBlockchainValueSection embedded compact />
     </Shell>
   );
 }

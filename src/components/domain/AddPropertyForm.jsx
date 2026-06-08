@@ -91,7 +91,9 @@ export default function AddPropertyForm({ mode = "page", onCancel, onSuccess }) 
     onSuccess: (prop) => {
       qc.invalidateQueries({ queryKey: ["properties"] });
       qc.invalidateQueries({ queryKey: ["marketplace-listings"] });
-      toast.success("Property listed — tenants can browse it now. KCCA approval adds the verified badge.");
+      toast.success(
+        "Property listed — Sui listing identity created automatically. KCCA review runs separately for the compliance badge.",
+      );
       reset();
       setPreview(null);
       setImageFile(null);
