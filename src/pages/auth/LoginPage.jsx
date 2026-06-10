@@ -105,15 +105,17 @@ export default function LoginPage() {
 
   if (totpStep) {
     return (
-      <div className="card-glass rounded-2xl border border-white/[0.1] p-4 shadow-card sm:p-5">
-        <div className="mb-3 text-center">
-          <Shield className="mx-auto mb-2 text-brand-teal" size={28} />
-          <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Two-factor authentication</h1>
-          <p className="mt-0.5 text-xs text-white/55 sm:text-sm">
+      <div className="card rounded-2xl p-6 shadow-card sm:p-8">
+        <div className="mb-5 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+            <Shield size={24} />
+          </div>
+          <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">Two-factor authentication</h1>
+          <p className="mt-1 text-xs text-gray-500 sm:text-sm">
             Enter the code from your authenticator app for {totpStep.email}
           </p>
         </div>
-        <form onSubmit={onVerifyTotp} className="space-y-3">
+        <form onSubmit={onVerifyTotp} className="space-y-4">
           <Input
             label="Authenticator code"
             type="text"
@@ -126,13 +128,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading || totpCode.length < 6}
-            className="btn-primary w-full rounded-xl py-2.5 text-sm font-bold shadow-md hover:shadow-lg sm:py-3 disabled:opacity-50"
+            className="btn-primary w-full py-3 text-sm font-bold"
           >
             {isLoading ? "Verifying…" : "Verify and sign in"}
           </button>
           <button
             type="button"
-            className="w-full text-xs font-semibold text-white/45 hover:text-white"
+            className="w-full text-xs font-semibold text-gray-400 hover:text-gray-700"
             onClick={() => {
               setTotpStep(null);
               setTotpCode("");
@@ -146,21 +148,21 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="card-glass rounded-2xl border border-white/[0.1] p-4 shadow-card sm:p-5">
-      <div className="mb-3 text-center">
-        <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Welcome back</h1>
-        <p className="mt-0.5 text-xs text-white/55 sm:text-sm">Sign in to RentDirect UG</p>
+    <div className="card rounded-2xl p-6 shadow-card sm:p-8">
+      <div className="mb-5 text-center">
+        <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">Welcome back</h1>
+        <p className="mt-1 text-xs text-gray-500 sm:text-sm">Sign in to RentDirect UG</p>
       </div>
 
       <SocialAuthButtons disabled={isLoading} />
 
-      <div className="my-3 flex items-center gap-2">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[10px] font-medium text-white/45">or sign in with email</span>
-        <div className="h-px flex-1 bg-white/10" />
+      <div className="my-4 flex items-center gap-2">
+        <div className="h-px flex-1 bg-gray-100" />
+        <span className="text-[11px] font-medium text-gray-400">or sign in with email</span>
+        <div className="h-px flex-1 bg-gray-100" />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <Input
           label="Email address"
           type="email"
@@ -186,8 +188,8 @@ export default function LoginPage() {
             error={errors.password?.message}
             {...register("password", { required: "Password is required" })}
           />
-          <div className="mt-1 text-right">
-            <Link to="/forgot-password" className="text-[11px] font-semibold text-brand-teal hover:underline">
+          <div className="mt-1.5 text-right">
+            <Link to="/forgot-password" className="text-[11px] font-semibold text-teal-600 hover:underline">
               Forgot password?
             </Link>
           </div>
@@ -196,7 +198,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary w-full rounded-xl py-2.5 text-sm font-bold shadow-md hover:shadow-lg sm:py-3"
+          className="btn-primary w-full py-3 text-sm font-bold"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
@@ -211,22 +213,25 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="my-3 flex items-center gap-2">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[10px] font-medium text-white/45">New here?</span>
-        <div className="h-px flex-1 bg-white/10" />
+      <div className="my-4 flex items-center gap-2">
+        <div className="h-px flex-1 bg-gray-100" />
+        <span className="text-[11px] font-medium text-gray-400">New here?</span>
+        <div className="h-px flex-1 bg-gray-100" />
       </div>
 
-      <Link to="/register" className="btn-outline flex w-full items-center justify-center rounded-xl py-2 text-xs font-bold sm:text-sm">
+      <Link
+        to="/register"
+        className="btn-outline flex w-full items-center justify-center py-2.5 text-sm font-bold"
+      >
         Create a free account
       </Link>
 
-      <p className="mt-3 text-center text-[10px] text-white/45 sm:text-xs">
-        <Link to="/auth/verify-otp" className="font-semibold text-brand-teal hover:underline">
+      <p className="mt-4 text-center text-[11px] text-gray-400">
+        <Link to="/auth/verify-otp" className="font-semibold text-teal-600 hover:underline">
           Try onboarding
         </Link>
         {" · "}
-        <Link to="/" className="font-semibold text-white/55 hover:text-white">
+        <Link to="/" className="font-semibold text-gray-500 hover:text-gray-700">
           Home
         </Link>
       </p>

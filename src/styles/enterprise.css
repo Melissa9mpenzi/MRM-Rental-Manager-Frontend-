@@ -5,34 +5,37 @@
   --rd-space-page: 1.5rem;
   --rd-radius-card: 1rem;
   --rd-radius-btn: 0.75rem;
-  --rd-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.28);
-  --rd-shadow-hover: 0 8px 32px rgba(0, 200, 150, 0.12);
+  --rd-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --rd-shadow-hover: 0 4px 20px rgba(13, 148, 136, 0.08);
   --rd-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .enterprise-card {
-  @apply rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-[var(--rd-shadow-card)] backdrop-blur-sm transition-[box-shadow,border-color] duration-200;
+  @apply rounded-2xl border border-gray-100 bg-white shadow-card transition-[box-shadow, border-color] duration-200;
 }
+
 .enterprise-card:hover {
-  @apply border-white/[0.12];
+  @apply border-gray-200;
 }
 
 .enterprise-btn {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-200 disabled:opacity-50;
 }
+
 .enterprise-btn-primary {
-  @apply enterprise-btn bg-[#00C896] text-[#041208] hover:brightness-110;
+  @apply enterprise-btn bg-teal-600 text-white hover:bg-teal-700;
 }
+
 .enterprise-btn-ghost {
-  @apply enterprise-btn border border-white/15 bg-white/5 text-white hover:bg-white/10;
+  @apply enterprise-btn border border-gray-200 bg-white text-gray-600 hover:border-teal-300 hover:text-teal-600;
 }
 
 .enterprise-skeleton {
-  @apply animate-pulse rounded-xl bg-white/[0.06];
+  @apply animate-pulse rounded-xl bg-gray-100;
 }
 
 .enterprise-empty {
-  @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-14 text-center;
+  @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-14 text-center;
 }
 
 .enterprise-retry {
@@ -41,5 +44,5 @@
 
 /* Align government portal glass with platform cards */
 .gov-glass {
-  @apply rounded-2xl border border-white/[0.08] bg-white/[0.04] shadow-[var(--rd-shadow-card)] backdrop-blur-sm;
+  @apply rounded-2xl border border-gray-100 bg-white shadow-card;
 }

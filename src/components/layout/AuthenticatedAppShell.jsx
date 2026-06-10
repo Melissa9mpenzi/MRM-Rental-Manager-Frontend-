@@ -116,15 +116,16 @@ export default function AuthenticatedAppShell({ children }) {
   }, [location.state]);
 
   return (
-    <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-brand-bg">
+    <div className="flex h-dvh min-h-0 w-full overflow-hidden" style={{ backgroundColor: "#F8FAFB" }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="relative z-40 flex h-14 flex-shrink-0 items-center gap-3 border-b border-white/10 bg-rd-elevated/80 px-4 shadow-sm backdrop-blur-xl">
+        {/* Top bar — white, clean */}
+        <header className="relative z-40 flex h-14 flex-shrink-0 items-center gap-3 border-b border-gray-100 bg-white px-4 shadow-sm">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-white/55 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 lg:hidden"
           >
             <Menu size={20} />
           </button>
@@ -134,10 +135,12 @@ export default function AuthenticatedAppShell({ children }) {
           <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
             {crumbs.map((c, i) => (
               <div key={`${c}-${i}`} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight size={13} className="flex-shrink-0 text-white/25" />}
+                {i > 0 && <ChevronRight size={13} className="flex-shrink-0 text-gray-300" />}
                 <span
                   className={
-                    i === crumbs.length - 1 ? "truncate font-bold text-white" : "text-xs text-white/45"
+                    i === crumbs.length - 1
+                      ? "truncate font-bold text-gray-800"
+                      : "text-xs text-gray-400"
                   }
                 >
                   {c}
@@ -153,11 +156,11 @@ export default function AuthenticatedAppShell({ children }) {
           </div>
         </header>
 
-        <div className="hidden border-b border-white/[0.06] bg-black/20 px-4 py-1.5 lg:flex lg:justify-end">
+        <div className="hidden border-b border-gray-100 bg-white px-4 py-1.5 lg:flex lg:justify-end">
           <SystemStatusBar compact />
         </div>
         <main
-          className="overflow-panel-y min-h-0 flex-1 bg-rd-gradient bg-rd-mesh p-4 lg:p-6"
+          className="overflow-panel-y min-h-0 flex-1 bg-[#F8FAFB] p-4 lg:p-6"
           data-app-role={role}
         >
           <div className="mx-auto max-w-7xl animate-fade-in">{children}</div>

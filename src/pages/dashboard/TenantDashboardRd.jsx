@@ -197,34 +197,34 @@ export default function TenantDashboardRd() {
       <PlatformDistributionHint role={user?.role} />
 
       <div>
-        <h2 className="text-xl font-bold text-white">Tenant hub</h2>
-        <p className="mt-0.5 text-sm text-white/55">Welcome back, {user?.full_name?.split(" ")[0]}</p>
+        <h2 className="text-xl font-bold text-gray-900">Tenant hub</h2>
+        <p className="mt-0.5 text-sm text-gray-500">Welcome back, {user?.full_name?.split(" ")[0]}</p>
       </div>
 
       {rentalSaved ? (
-        <div className="flex items-start gap-3 rounded-xl border border-[#00C896]/35 bg-[#00C896]/10 px-4 py-4">
-          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#00C896]" />
+        <div className="flex items-start gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-4">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-600" />
           <div>
-            <p className="text-sm font-bold text-white">Rental saved</p>
-            <p className="mt-1 text-sm text-white/60">
-              Your rental is linked to <span className="font-semibold text-white">{user?.email}</span>. You can pay
+            <p className="text-sm font-bold text-teal-800">Rental saved</p>
+            <p className="mt-1 text-sm text-teal-700">
+              Your rental is linked to <span className="font-semibold">{user?.email}</span>. You can pay
               rent and view your lease below.
             </p>
           </div>
         </div>
       ) : pendingInvite ? (
-        <div className="rounded-xl border border-[#00C896]/35 bg-[#00C896]/10 px-4 py-4">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Rental invitation</p>
-          <h3 className="mt-1 text-lg font-bold text-white">
+        <div className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-4">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-teal-600">Rental invitation</p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">
             {pendingInvite.property?.name ?? "Your rental"}
             {pendingInvite.unit?.unit_number ? ` · Unit ${pendingInvite.unit.unit_number}` : ""}
           </h3>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="mt-2 text-sm text-gray-600">
             Your landlord invited you to link this rental to{" "}
-            <span className="font-semibold text-white">{user?.email}</span>. Accept here — no email link required.
+            <span className="font-semibold text-gray-800">{user?.email}</span>. Accept here — no email link required.
           </p>
           {pendingInvite.monthly_rent != null ? (
-            <p className="mt-1 text-sm text-white/50">
+            <p className="mt-1 text-sm text-gray-500">
               Monthly rent: UGX {Number(pendingInvite.monthly_rent).toLocaleString()}
             </p>
           ) : null}
@@ -232,7 +232,7 @@ export default function TenantDashboardRd() {
             type="button"
             onClick={() => acceptRentalMutation.mutate()}
             disabled={acceptRentalMutation.isPending}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#00C896] px-5 py-2.5 text-sm font-bold text-[#041208] shadow-glow transition hover:brightness-110 disabled:opacity-60"
+            className="btn-primary mt-4"
           >
             {acceptRentalMutation.isPending ? "Saving…" : "Accept rental invitation"}
           </button>
@@ -241,19 +241,20 @@ export default function TenantDashboardRd() {
 
       <Link
         to="/tenant/saved"
-        className="flex items-start gap-3 rounded-xl border border-brand-teal/25 bg-brand-teal/5 px-4 py-3 text-sm leading-snug text-white/75 transition hover:bg-brand-teal/10"
+        className="flex items-start gap-3 rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm leading-snug text-gray-600 transition hover:bg-teal-100"
       >
-        <Heart className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-teal" />
+        <Heart className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-600" />
         <span>
-          <span className="font-bold text-white">Save listings:</span> use the heart on search cards or{" "}
-          <span className="font-semibold text-white">Save listing</span> on a property page — then open{" "}
-          <span className="font-semibold text-brand-teal">Saved properties</span> in the sidebar to compare and message landlords.
+          <span className="font-bold text-gray-800">Save listings:</span> use the heart on search cards or{" "}
+          <span className="font-semibold text-gray-800">Save listing</span> on a property page — then open{" "}
+          <span className="font-semibold text-teal-700">Saved properties</span> in the sidebar to compare and message landlords.
         </span>
       </Link>
 
-      <div className="card-glass overflow-hidden border-white/[0.12]">
+      {/* Lease card */}
+      <div className="card-glass overflow-hidden">
         <div className="grid gap-6 md:grid-cols-[1.1fr_1fr]">
-          <div className="relative h-44 overflow-hidden rounded-xl bg-[#0d1520] md:h-auto md:min-h-[200px]">
+          <div className="relative h-44 overflow-hidden rounded-xl bg-gray-100 md:h-auto md:min-h-[200px]">
             {leasePhoto ? (
               <img
                 src={leasePhoto}
@@ -262,72 +263,69 @@ export default function TenantDashboardRd() {
                 loading="lazy"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-xs text-white/40">
+              <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400">
                 {lease ? "No property photo on file" : "Lease photo when assigned"}
               </div>
             )}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10" />
-            <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
+            <div className="absolute bottom-3 left-3 rounded-lg border border-white/20 bg-black/40 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
               {lease ? "Active lease" : "Lease"}
             </div>
           </div>
           <div className="flex flex-col justify-center py-2">
             {leaseQuery.isLoading ? (
-              <p className="text-sm text-white/50">Loading lease…</p>
+              <p className="text-sm text-gray-500">Loading lease…</p>
             ) : noTenantProfile ? (
               <>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Current lease</p>
-                <h3 className="mt-1 text-lg font-bold text-white">No tenant profile linked</h3>
-                <p className="mt-2 text-sm text-white/50">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-teal-600">Current lease</p>
+                <h3 className="mt-1 text-lg font-bold text-gray-900">No tenant profile linked</h3>
+                <p className="mt-2 text-sm text-gray-500">
                   If your landlord added you with this email, refresh this page or use Accept above. Otherwise ask
                   them to set your email on the tenant record and send a portal invite.
                 </p>
                 <Link
                   to="/tenant/accept-invite"
-                  className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-sm font-bold text-white/85 transition hover:bg-white/10"
+                  className="btn-outline mt-4 w-fit"
                 >
                   Have an email link instead?
                 </Link>
               </>
             ) : !lease ? (
               <>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Current lease</p>
-                <h3 className="mt-1 text-lg font-bold text-white">No active lease on file</h3>
-                <p className="mt-2 text-sm text-white/50">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-teal-600">Current lease</p>
+                <h3 className="mt-1 text-lg font-bold text-gray-900">No active lease on file</h3>
+                <p className="mt-2 text-sm text-gray-500">
                   When your landlord activates a lease for your account, rent and history will show here.
                 </p>
                 <Link
                   to="/browse-properties"
-                  className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl bg-[#00C896] px-5 py-2.5 text-sm font-bold text-[#041208] shadow-glow transition hover:brightness-110"
+                  className="btn-primary mt-4 w-fit"
                 >
                   Browse listings
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-[#00C896]">Current lease</p>
-                <h3 className="mt-1 text-lg font-bold text-white">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-teal-600">Current lease</p>
+                <h3 className="mt-1 text-lg font-bold text-gray-900">
                   {property?.name ?? "Your unit"}
                   {unit?.unit_number ? ` · Unit ${unit.unit_number}` : ""}
                 </h3>
-                <p className="mt-1 flex items-center gap-1.5 text-sm text-white/50">
-                  <MapPin size={14} className="text-[#00C896]" />
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
+                  <MapPin size={14} className="text-teal-600" />
                   {property?.address ?? "Address on file"}
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <div>
-                    <div className="text-xs text-white/45">Monthly rent</div>
-                    <div className="text-xl font-extrabold text-white">
+                    <div className="text-xs text-gray-400">Monthly rent</div>
+                    <div className="text-xl font-extrabold text-gray-900">
                       UGX {Number(lease.monthly_rent || 0).toLocaleString()}
                     </div>
                   </div>
-                  <Link
-                    to="/tenant/pay"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#00C896] px-5 py-2.5 text-sm font-bold text-[#041208] shadow-glow transition hover:brightness-110"
-                  >
+                  <Link to="/tenant/pay" className="btn-primary">
                     <CreditCard size={16} /> Pay rent
                   </Link>
-                  <Link to="/tenant/contract" className="text-sm font-semibold text-white/60 hover:text-[#00C896]">
+                  <Link to="/tenant/contract" className="text-sm font-semibold text-teal-600 hover:underline">
                     View contract →
                   </Link>
                 </div>
@@ -337,82 +335,88 @@ export default function TenantDashboardRd() {
         </div>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map(({ icon: Icon, label, value, sub, to }) => (
           <Link key={label} to={to} className="stat-card block text-inherit no-underline">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#00C896]/15 text-[#00C896]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
               <Icon size={18} />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-2xl font-extrabold text-white">{value}</div>
-              <div className="text-xs font-semibold text-white/45">{label}</div>
-              <div className="text-[11px] text-white/35">{sub}</div>
+              <div className="text-2xl font-extrabold text-gray-900">{value}</div>
+              <div className="text-xs font-semibold text-gray-500">{label}</div>
+              <div className="text-[11px] text-gray-400">{sub}</div>
             </div>
           </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Listings */}
         <div className="card-glass">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Available listings</h3>
-            <Link to="/browse-properties" className="text-xs font-semibold text-[#00C896] hover:underline">
+            <h3 className="text-sm font-bold text-gray-800">Available listings</h3>
+            <Link to="/browse-properties" className="text-xs font-semibold text-teal-600 hover:underline">
               Browse all
             </Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {recommended.length === 0 ? (
-              <p className="px-3 py-6 text-center text-sm text-white/45">No vacant listings on the platform yet.</p>
+              <p className="px-3 py-6 text-center text-sm text-gray-400">No vacant listings on the platform yet.</p>
             ) : (
               recommended.map((l) => (
-              <Link
-                key={l.id}
-                to={`/property/${l.id}`}
-                className="w-[200px] flex-shrink-0 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] transition hover:border-[#00C896]/35"
-              >
-                <div className="relative h-28 overflow-hidden bg-[#0d1520]">
-                  <ListingPhoto path={l.image} wrapperClassName="h-28" emptyLabel="No photo" />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-                </div>
-                <div className="p-3">
-                  <div className="line-clamp-1 text-sm font-bold text-white">{l.title}</div>
-                  <div className="mt-0.5 line-clamp-1 text-xs text-white/45">{l.address}</div>
-                  <div className="mt-2 text-sm font-extrabold text-[#00C896]">
-                    UGX {Number(l.price || 0).toLocaleString()}
-                    <span className="text-xs font-semibold text-white/40">/mo</span>
+                <Link
+                  key={l.id}
+                  to={`/property/${l.id}`}
+                  className="w-[200px] flex-shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition hover:border-teal-200 hover:shadow-md"
+                >
+                  <div className="relative h-28 overflow-hidden bg-gray-100">
+                    <ListingPhoto path={l.image} wrapperClassName="h-28" emptyLabel="No photo" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   </div>
-                </div>
-              </Link>
+                  <div className="p-3">
+                    <div className="line-clamp-1 text-sm font-bold text-gray-800">{l.title}</div>
+                    <div className="mt-0.5 line-clamp-1 text-xs text-gray-500">{l.address}</div>
+                    <div className="mt-2 text-sm font-extrabold text-teal-600">
+                      UGX {Number(l.price || 0).toLocaleString()}
+                      <span className="text-xs font-semibold text-gray-400">/mo</span>
+                    </div>
+                  </div>
+                </Link>
               ))
             )}
           </div>
         </div>
 
+        {/* Recent activity */}
         <div className="card-glass">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Recent activity</h3>
-            <Link to="/tenant/wallet" className="text-xs font-semibold text-[#00C896] hover:underline">
+            <h3 className="text-sm font-bold text-gray-800">Recent activity</h3>
+            <Link to="/tenant/wallet" className="text-xs font-semibold text-teal-600 hover:underline">
               Payment history
             </Link>
           </div>
           <div className="space-y-3">
             {paymentsQuery.isLoading ? (
-              <p className="px-3 py-2 text-sm text-white/45">Loading…</p>
+              <p className="px-3 py-2 text-sm text-gray-400">Loading…</p>
             ) : activityRows.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-white/45">No payments recorded yet for your account.</p>
+              <p className="px-3 py-2 text-sm text-gray-400">No payments recorded yet for your account.</p>
             ) : (
               activityRows.map((a, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5"
+                  className="flex gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5"
                 >
-                  <MessageSquare size={16} className={`mt-0.5 flex-shrink-0 ${a.ok ? "text-[#00C896]" : "text-sky-400"}`} />
+                  <MessageSquare
+                    size={16}
+                    className={`mt-0.5 flex-shrink-0 ${a.ok ? "text-teal-600" : "text-sky-500"}`}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-bold text-white">{a.title}</span>
-                      <span className="text-[10px] text-white/35">{a.t}</span>
+                      <span className="text-sm font-bold text-gray-800">{a.title}</span>
+                      <span className="text-[10px] text-gray-400">{a.t}</span>
                     </div>
-                    <p className="mt-0.5 text-xs text-white/50">{a.body}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{a.body}</p>
                   </div>
                 </div>
               ))

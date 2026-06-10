@@ -1,18 +1,19 @@
-/** RentDirect UG — mockup-aligned tokens */
+/** RentDirect UG — light & lively design tokens (v2) */
 export const rd = {
-  base: "#060a0e",
-  surface: "rgba(255,255,255,0.05)",
-  stroke: "rgba(255,255,255,0.1)",
-  muted: "#8b9db0",
-  ink: "#f4f4f5",
-  green: "#00C853",
-  greenDim: "rgba(0,200,83,0.16)",
+  base: "#F0F4F8",
+  surface: "#FFFFFF",
+  stroke: "rgba(0,0,0,0.08)",
+  muted: "#6B7280",
+  ink: "#111827",
+  green: "#10B981",
+  greenDim: "rgba(16,185,129,0.12)",
+  sidebar: "#1B3A2D",
 };
 
 export const brand = {
-  dark: "#f1f5f9",
-  mid: "#8b9db0",
-  teal: "#00C853",
-  tealLt: "rgba(0,200,83,0.16)",
-  bg: "#080d12",
+  dark: "#111827",
+  mid: "#6B7280",
+  teal: "#10B981",
+  tealLt: "rgba(16,185,129,0.12)",
+  bg: "#F0F4F8",
 };
