@@ -20,7 +20,7 @@ export function usePrivySuiPay() {
     if (isPrivySessionActive(sessionRef.current)) return true;
     if (!login) return false;
 
-    toast("Connect with Google, Apple, or email to pay with Sui…", { duration: 6000 });
+    toast("Sign in to your Privy wallet (advanced option)…", { duration: 6000 });
     try {
       await login();
     } catch (err) {

@@ -58,8 +58,8 @@ export default function PrivySuiWalletPanel({ compact = false, className = "" })
       >
         <p className="text-xs font-bold text-brand-teal">Privy Sui wallet</p>
         <p className="mt-1.5 text-[11px] leading-snug text-white/55">
-          Connect a wallet to pay with Sui. This is separate from your RentDirect login — sign in below
-          only when you choose Sui as your payment method.
+          Advanced: self-custody Privy wallet (separate sign-in). Most tenants should use the default
+          RentDirect wallet above — no second login.
         </p>
         <PrivySuiConnect />
       </div>

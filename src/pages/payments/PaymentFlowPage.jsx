@@ -7,14 +7,15 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-ki
 import AppPageScaffold from "../../components/layout/AppPageScaffold";
 import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import ConnectWalletButton from "../../components/blockchain/ConnectWalletButton";
-import PrivySuiWalletPanel from "../../components/blockchain/PrivySuiWalletPanel";
+import TenantSuiPayWallet from "../../components/blockchain/TenantSuiPayWallet";
 import { tenantPortalApi } from "../../api/tenantPortalApi";
 import { TENANT_PAY_METHODS } from "../../lib/paymentMethods";
 import { fetchGatewayStatus, pollCheckoutUntilDone, runTenantCheckoutUi } from "../../lib/checkoutFlow";
 import PaymentCheckoutHandoff from "../../components/payments/PaymentCheckoutHandoff";
 import PaymentMomoProcessing from "../../components/payments/PaymentMomoProcessing";
 import { apiErrorMessage } from "../../lib/apiError";
-import { fetchBlockchainStatus, runSuiCheckout } from "../../lib/suiCheckout";
+import { fetchBlockchainStatus, runPlatformSuiCheckout, runSuiCheckout } from "../../lib/suiCheckout";
+import { blockchainApi } from "../../api/blockchainApi";
 import { usePrivySuiPay } from "../../hooks/usePrivySuiPay";
 import { isPrivyConfigured } from "../../lib/privyConfig";
 import useAuthStore from "../../store/authStore";
@@ -35,6 +36,7 @@ export default function PaymentFlowPage() {
   const [phone, setPhone] = useState(user?.phone || "");
   const [paying, setPaying] = useState(false);
   const [suiExternalWallet, setSuiExternalWallet] = useState(false);
+  const [suiUsePrivy, setSuiUsePrivy] = useState(false);
   const [successReceipt, setSuccessReceipt] = useState(null);
   const [linking, setLinking] = useState(false);
   const [pesapalHandoff, setPesapalHandoff] = useState(null);
@@ -105,6 +107,11 @@ export default function PaymentFlowPage() {
       }, 1500);
     }
   }
+
+  useEffect(() => {
+    if (!user?.id) return;
+    blockchainApi.ensureWallet().catch(() => {});
+  }, [user?.id]);
 
   useEffect(() => {
     if (!returnRef) return;
@@ -187,8 +194,13 @@ export default function PaymentFlowPage() {
             accountAddress: account.address,
             onCompleted: onDone,
           });
-        } else {
+        } else if (suiUsePrivy && privyConfigured) {
           checkout = await payWithPrivySui({
+            invoiceId: openInvoice.id,
+            onCompleted: onDone,
+          });
+        } else {
+          checkout = await runPlatformSuiCheckout({
             invoiceId: openInvoice.id,
             onCompleted: onDone,
           });
@@ -395,33 +407,42 @@ export default function PaymentFlowPage() {
 
           {method === "sui" ? (
             <div className="space-y-3">
-              <label className="mb-1 block text-xs font-semibold text-white/60">Your Sui wallet</label>
-              {!suiExternalWallet ? (
-                <PrivySuiWalletPanel />
-              ) : (
+              <label className="mb-1 block text-xs font-semibold text-white/60">Pay with Sui</label>
+              {suiExternalWallet ? (
                 <ConnectWalletButton />
+              ) : (
+                <TenantSuiPayWallet mode={suiUsePrivy && privyConfigured ? "privy" : "platform"} />
               )}
+              <p className="text-[10px] leading-snug text-white/45">
+                Uses the wallet tied to your RentDirect account — you do not need to sign in again for Sui pay.
+              </p>
               <label className="flex cursor-pointer items-center gap-2 text-xs text-white/55">
                 <input
                   type="checkbox"
                   checked={suiExternalWallet}
-                  onChange={(e) => setSuiExternalWallet(e.target.checked)}
+                  onChange={(e) => {
+                    setSuiExternalWallet(e.target.checked);
+                    if (e.target.checked) setSuiUsePrivy(false);
+                  }}
                   className="rounded border-white/20"
                 />
-                Use browser wallet instead (Slush, Suiet, Nightly — advanced)
+                Advanced: browser wallet (Slush, Suiet, Nightly)
               </label>
-              {privyConfigured && !suiExternalWallet && (
-                <p className="text-[10px] leading-snug text-white/40">
-                  Recommended: Privy signs in your browser — no server pysui required. Use MoMo if Privy is
-                  unavailable.
-                </p>
-              )}
-              {!privyConfigured && !suiExternalWallet && (
-                <p className="text-[10px] leading-snug text-amber-200/70">
-                  Set <code className="text-[10px]">VITE_PRIVY_APP_ID</code> for embedded Sui wallets, or check
-                  “browser wallet” above.
-                </p>
-              )}
+              {privyConfigured ? (
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-white/45">
+                  <input
+                    type="checkbox"
+                    checked={suiUsePrivy}
+                    onChange={(e) => {
+                      setSuiUsePrivy(e.target.checked);
+                      if (e.target.checked) setSuiExternalWallet(false);
+                    }}
+                    disabled={suiExternalWallet}
+                    className="rounded border-white/20"
+                  />
+                  Advanced: separate Privy self-custody wallet
+                </label>
+              ) : null}
             </div>
           ) : (
             <div>

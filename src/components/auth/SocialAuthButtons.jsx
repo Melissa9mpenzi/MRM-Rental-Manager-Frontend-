@@ -14,7 +14,7 @@ import { AppleBrandIcon, GoogleBrandIcon } from "./BrandSignInIcons";
 
 /**
  * Social sign-in for login/register — Firebase only.
- * Privy is reserved for Sui payments (see PrivySuiWalletPanel on the pay page).
+ * Sui wallet is provisioned in the background after login — no separate blockchain sign-in.
  */
 export default function SocialAuthButtons({ disabled = false, hint }) {
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ export default function SocialAuthButtons({ disabled = false, hint }) {
       ) : null}
       {!configured ? (
         <p className="mt-1.5 text-center text-[10px] text-white/35">
-          Use email and password below to sign in. Privy is only used when you pay with Sui.
+          Use email and password below to sign in. Your Sui payment wallet is created automatically in the background.
         </p>
       ) : null}
     </div>

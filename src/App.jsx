@@ -329,20 +329,8 @@ export default function App() {
                 </Route>
               </Route>
 
-              {/* Sui blockchain portal — tenant, landlord, agent, system admin */}
-              <Route
-                element={
-                  <RoleGuard
-                    allowed={[
-                      API_ROLES.tenant,
-                      API_ROLES.landlord,
-                      API_ROLES.staff,
-                      API_ROLES.agent,
-                      API_ROLES.system_admin,
-                    ]}
-                  />
-                }
-              >
+              {/* Sui console — system administrators only */}
+              <Route element={<RoleGuard allowed={[API_ROLES.system_admin]} />}>
                 <Route element={<KycOnboardingGuard />}>
                 <Route element={<SuiPortalLayout />}>
                   <Route path="/sui" element={<Navigate to="/sui/dashboard" replace />} />

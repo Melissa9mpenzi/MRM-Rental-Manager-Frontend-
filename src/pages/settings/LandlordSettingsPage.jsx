@@ -200,7 +200,7 @@ export default function LandlordSettingsPage() {
                   { label: "Reports", description: "Arrears and exports", to: "/landlord/reports" },
                   { label: "Analytics", description: "Occupancy and revenue", to: "/landlord/analytics" },
                   { label: "Notifications", description: "In-app alerts", to: "/landlord/notifications" },
-                  { label: "Sui portal", description: "On-chain receipts & escrow", to: "/sui/dashboard" },
+                  { label: "Wallet", description: "Receipts & escrow", to: "/landlord/wallet" },
                 ]}
               />
             </SettingsSection>

@@ -51,7 +51,7 @@ export default function SuiSidebar({ onNavigate, wallet }) {
         <Link to="/" className="sui-sidebar__brand block" onClick={onNavigate}>
           <BrandMark imgClassName="h-9 w-auto max-w-[160px] object-contain" />
         </Link>
-        <p className="mt-1 text-[11px] text-white/40">Sui Blockchain Portal</p>
+        <p className="mt-1 text-[11px] text-white/40">Sui console</p>
       </header>
 
       <nav className="sui-sidebar__nav">

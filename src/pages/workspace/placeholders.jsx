@@ -76,7 +76,7 @@ export const AdminPaymentsPage = () => (
       { label: "System payments", description: "Platform payment monitor", to: "/system/payments" },
       { label: "Wallets & settlements", description: "Escrow and disbursements", to: "/system/wallets" },
       { label: "Landlord wallet", description: "Owner collections view", to: "/landlord/wallet" },
-      { label: "Sui receipts", description: "On-chain payment proofs", to: "/sui/receipts" },
+      { label: "On-chain receipts", description: "Payment proofs", to: "/system/receipts" },
     ]}
   />
 );
@@ -90,7 +90,7 @@ export const AdminContractsPage = () => (
       { label: "System contracts", description: "Platform lease registry", to: "/system/contracts" },
       { label: "Landlord contracts", description: "Owner tenancy documents", to: "/landlord/contracts" },
       { label: "Tenant lease", description: "Tenant contract portal", to: "/tenant/contract" },
-      { label: "Sui escrow", description: "On-chain escrow holds", to: "/sui/escrow" },
+      { label: "Escrow", description: "On-chain holds", to: "/system/wallets" },
     ]}
   />
 );
@@ -161,7 +161,7 @@ export const AdminAuditLogsPage = () => (
     links={[
       { label: "Government audit", description: "Officer action logs", to: "/government/audit" },
       { label: "Platform activity", description: "Live activity feed API", to: "/system/dashboard" },
-      { label: "Walrus inventory", description: "Anchored artifact counts", to: "/sui/settings" },
+      { label: "Walrus inventory", description: "Anchored artifacts", to: "/sui/settings" },
       { label: "Immutable log stream", description: "Centralized SIEM export", soon: true },
     ]}
   />
@@ -174,7 +174,7 @@ export const AdminSystemSettingsPage = () => (
     subtitle="Feature flags, fee tables, maintenance windows, and integration keys."
     links={[
       { label: "Platform settings", description: "Readiness & policies", to: "/system/settings" },
-      { label: "Sui configuration", description: "Network & treasury", to: "/sui/settings" },
+      { label: "Sui console", description: "Network & treasury", to: "/sui/dashboard" },
       { label: "Government settings", description: "Officer portal policies", to: "/government/settings" },
       { label: "Feature flags UI", description: "Runtime toggles", soon: true },
     ]}

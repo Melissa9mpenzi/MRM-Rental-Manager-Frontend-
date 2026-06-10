@@ -16,6 +16,7 @@ import PaymentMethodIcon from "../../components/payments/PaymentMethodIcon";
 import EscrowStatusPanel from "../../components/blockchain/EscrowStatusPanel";
 import { paymentsApi } from "../../api/paymentsApi";
 import { blockchainApi } from "../../api/blockchainApi";
+import WalletReputationCard from "../../components/sui/WalletReputationCard";
 import { apiErrorMessage } from "../../lib/apiError";
 import { PLATFORM_API_URL } from "../../api/config";
 import { ErrorPanel, LoadingPanel } from "../../components/ui/StatePanel";
@@ -54,6 +55,13 @@ export default function LandlordWalletPage() {
     retry: false,
   });
 
+  const myWalletQuery = useQuery({
+    queryKey: ["blockchain-wallet-me", "landlord"],
+    queryFn: () => blockchainApi.myWallet(),
+    staleTime: 30_000,
+    retry: false,
+  });
+
   const w = walletQuery.data || {};
   const recent = useMemo(
     () => (Array.isArray(w.recent_payments) ? w.recent_payments : []),
@@ -68,7 +76,7 @@ export default function LandlordWalletPage() {
       variant="ledger"
       icon={Wallet}
       title="Wallet"
-      description="Rent collected on your ledger — MTN MoMo, Airtel, Pesapal, bank transfer, and Sui"
+      description="Collections, payouts, and on-chain receipts."
       actions={
         <div className="flex flex-wrap gap-2">
           <Link to="/landlord/payments/new" className="btn-primary inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold">
@@ -99,6 +107,11 @@ export default function LandlordWalletPage() {
         />
       ) : (
         <div className="space-y-6">
+          <WalletReputationCard
+            reputation={myWalletQuery.data?.reputation}
+            suiAddress={myWalletQuery.data?.sui_address}
+          />
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="card-glass relative overflow-hidden p-5 sm:col-span-2">
               <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#00C896]/20 blur-2xl" />
@@ -189,8 +202,8 @@ export default function LandlordWalletPage() {
           {(escrowsQuery.data?.length > 0 || (w.escrow_active_count ?? 0) > 0) && (
             <div className="card-glass p-5">
               <EscrowStatusPanel escrows={Array.isArray(escrowsQuery.data) ? escrowsQuery.data : []} />
-              <Link to="/sui/dashboard" className="mt-3 inline-block text-xs font-bold text-violet-300 hover:underline">
-                Open Sui dashboard →
+              <Link to="/landlord/receipts" className="mt-3 inline-block text-xs font-bold text-violet-300 hover:underline">
+                View receipts →
               </Link>
             </div>
           )}

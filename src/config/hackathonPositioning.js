@@ -111,7 +111,7 @@ export const SUI_BLOCKCHAIN_VALUE = {
     {
       key: "payments",
       title: "Payments",
-      body: "Future versions will support rental payments through Sui-based transactions.",
+      body: "Rent is settled natively on Sui — transaction digests, on-chain receipts, and explorer-verifiable settlement.",
     },
     {
       key: "ownership",

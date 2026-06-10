@@ -129,28 +129,13 @@ export function pathAllowedForRole(pathname, role) {
   if (pathname.startsWith("/browse-properties") || pathname.startsWith("/property/")) return true;
 
   if (role === API_ROLES.tenant) {
-    return (
-      pathname === PREFIX.tenant ||
-      pathname.startsWith(`${PREFIX.tenant}/`) ||
-      pathname === PREFIX.sui ||
-      pathname.startsWith(`${PREFIX.sui}/`)
-    );
+    return pathname === PREFIX.tenant || pathname.startsWith(`${PREFIX.tenant}/`);
   }
   if (role === API_ROLES.landlord) {
-    return (
-      pathname === PREFIX.landlord ||
-      pathname.startsWith(`${PREFIX.landlord}/`) ||
-      pathname === PREFIX.sui ||
-      pathname.startsWith(`${PREFIX.sui}/`)
-    );
+    return pathname === PREFIX.landlord || pathname.startsWith(`${PREFIX.landlord}/`);
   }
   if (role === API_ROLES.staff || role === API_ROLES.agent) {
-    return (
-      pathname === PREFIX.agent ||
-      pathname.startsWith(`${PREFIX.agent}/`) ||
-      pathname === PREFIX.sui ||
-      pathname.startsWith(`${PREFIX.sui}/`)
-    );
+    return pathname === PREFIX.agent || pathname.startsWith(`${PREFIX.agent}/`);
   }
   if (isSystemAdministrator(role)) {
     return (

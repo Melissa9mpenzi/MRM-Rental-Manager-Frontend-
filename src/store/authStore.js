@@ -2,7 +2,12 @@ import { create } from "zustand";
 import { authApi } from "../api/authApi";
 import { governmentAuthApi } from "../api/governmentAuthApi";
 import { usersApi } from "../api/usersApi";
+import { blockchainApi } from "../api/blockchainApi";
 import { apiErrorMessage } from "../lib/apiError";
+
+function provisionPlatformWalletInBackground() {
+  blockchainApi.ensureWallet().catch(() => {});
+}
 
 const useAuthStore = create((set, get) => ({
   // ── State ──────────────────────────────────────────────────────
@@ -26,6 +31,7 @@ const useAuthStore = create((set, get) => ({
       sessionStorage.removeItem("rd_admin_2fa_verified");
     }
     set({ user: data.user, isAuthenticated: true, error: null });
+    provisionPlatformWalletInBackground();
   },
 
   /**

@@ -16,15 +16,19 @@ import { useSuiDashboard, fmtSui, shortHash } from "../../lib/useSuiDashboard";
 import SuiStatusBadge from "../../components/sui/SuiStatusBadge";
 import WalrusUseCasesPanel from "../../components/sui/WalrusUseCasesPanel";
 import SuiFirstDemoPanel from "../../components/sui/SuiFirstDemoPanel";
+import WalletReputationCard from "../../components/sui/WalletReputationCard";
 import { blockchainApi } from "../../api/blockchainApi";
-import { HACKATHON_TRACKS, SUI_NATIVE_TAGLINE } from "../../config/hackathonPositioning";
-
 export default function SuiDashboardPage() {
   const { data, isLoading } = useSuiDashboard();
   const { data: chainStatus } = useQuery({
     queryKey: ["blockchain-status"],
     queryFn: () => blockchainApi.status(),
     staleTime: 60_000,
+  });
+  const { data: myWallet } = useQuery({
+    queryKey: ["blockchain-wallet-me"],
+    queryFn: () => blockchainApi.myWallet(),
+    staleTime: 30_000,
   });
   const totals = data?.totals || {};
   const net = data?.network_status || {};
@@ -51,14 +55,9 @@ export default function SuiDashboardPage() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-violet-500/25 bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-4 py-3">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-violet-300/90">
-          {HACKATHON_TRACKS.primary.badge} — {HACKATHON_TRACKS.primary.label}
-        </p>
-        <p className="mt-1 text-sm text-white/70">{SUI_NATIVE_TAGLINE}</p>
-      </div>
-
       <SuiFirstDemoPanel />
+
+      <WalletReputationCard reputation={myWallet?.reputation} suiAddress={myWallet?.sui_address} />
 
       <WalrusUseCasesPanel
         walrusConfigured={Boolean(chainStatus?.walrus_configured ?? chainStatus?.supports?.walrus_publisher_live)}

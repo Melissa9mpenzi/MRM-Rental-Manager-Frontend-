@@ -64,21 +64,21 @@ const BREADCRUMBS = {
   "/agent/workspace/support": ["Agent", "Operations", "Support"],
   "/agent/workspace/audit": ["Agent", "Operations", "Audit"],
   "/agent/workspace/system": ["Agent", "Operations", "Settings"],
-  "/sui/dashboard": ["Blockchain", "Overview"],
-  "/sui/transactions": ["Blockchain", "Transactions"],
-  "/sui/escrow": ["Blockchain", "Escrow"],
-  "/sui/contracts": ["Blockchain", "Smart contracts"],
-  "/sui/wallets": ["Blockchain", "Wallets"],
-  "/sui/receipts": ["Blockchain", "Receipts"],
-  "/sui/analytics": ["Blockchain", "Analytics"],
-  "/sui/settings": ["Blockchain", "Settings"],
+  "/sui/dashboard": ["Sui", "Overview"],
+  "/sui/transactions": ["Sui", "Transactions"],
+  "/sui/escrow": ["Sui", "Escrow"],
+  "/sui/contracts": ["Sui", "Contracts"],
+  "/sui/wallets": ["Sui", "Wallets"],
+  "/sui/receipts": ["Sui", "Receipts"],
+  "/sui/analytics": ["Sui", "Analytics"],
+  "/sui/settings": ["Sui", "Settings"],
 };
 
 const SUI_CRUMB_LABELS = {
   dashboard: "Overview",
   transactions: "Transactions",
   escrow: "Escrow",
-  contracts: "Smart contracts",
+  contracts: "Contracts",
   wallets: "Wallets",
   receipts: "Receipts",
   analytics: "Analytics",
@@ -87,10 +87,10 @@ const SUI_CRUMB_LABELS = {
 
 function getcrumbs(pathname, role) {
   if (BREADCRUMBS[pathname]) return BREADCRUMBS[pathname];
-  if (pathname.startsWith("/sui/receipts/")) return ["Blockchain", "Receipts", "Detail"];
+  if (pathname.startsWith("/sui/receipts/")) return ["Sui", "Receipts", "Detail"];
   if (pathname.startsWith("/sui/")) {
     const segment = pathname.split("/")[2] || "dashboard";
-    return ["Blockchain", SUI_CRUMB_LABELS[segment] || segment];
+    return ["Sui", SUI_CRUMB_LABELS[segment] || segment];
   }
   if (pathname.startsWith("/landlord/properties/")) return ["Landlord", "Properties", "Details"];
   if (pathname.startsWith("/landlord/tenants/") && pathname !== "/landlord/tenants/new")

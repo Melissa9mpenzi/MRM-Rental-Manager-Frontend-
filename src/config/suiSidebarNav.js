@@ -9,24 +9,34 @@ import {
   Settings,
   ExternalLink,
 } from "lucide-react";
+import { API_ROLES } from "./access";
 
-/** Blockchain section in the main app sidebar (no nested Sui portal). */
-export const SUI_SIDEBAR_ITEMS = [
-  { to: "/sui/dashboard", icon: LayoutDashboard, label: "Blockchain overview", end: true },
+/** Full Sui console — system administrators only. */
+export const SUI_ADMIN_SIDEBAR_ITEMS = [
+  { to: "/sui/dashboard", icon: LayoutDashboard, label: "Overview", end: true },
   { to: "/sui/transactions", icon: ArrowLeftRight, label: "Transactions" },
   { to: "/sui/escrow", icon: Shield, label: "Escrow" },
-  { to: "/sui/contracts", icon: FileCode2, label: "Smart contracts" },
+  { to: "/sui/contracts", icon: FileCode2, label: "Contracts" },
   { to: "/sui/wallets", icon: Wallet, label: "Wallets" },
-  { to: "/sui/receipts", icon: Receipt, label: "On-chain receipts" },
-  { to: "/sui/analytics", icon: BarChart3, label: "Chain analytics" },
-  { to: "/sui/settings", icon: Settings, label: "Sui settings" },
+  { to: "/sui/receipts", icon: Receipt, label: "Receipts" },
+  { to: "/sui/analytics", icon: BarChart3, label: "Analytics" },
+  { to: "/sui/settings", icon: Settings, label: "Settings" },
 ];
 
 export const SUI_SIDEBAR_EXTERNAL = {
   href: "https://suiscan.xyz/testnet",
   icon: ExternalLink,
-  label: "Sui Explorer",
+  label: "Explorer",
 };
+
+export function getSuiSidebarItems(role) {
+  if (role === API_ROLES.system_admin) return SUI_ADMIN_SIDEBAR_ITEMS;
+  return [];
+}
+
+export function canAccessSuiPortal(role) {
+  return role === API_ROLES.system_admin;
+}
 
 export function isSuiRoute(pathname) {
   return pathname === "/sui" || pathname.startsWith("/sui/");

@@ -31,7 +31,7 @@ export const SYSTEM_NAV_SECTIONS = [
     items: [
       { id: "settings", label: "Platform Settings", path: "/system/settings", icon: "settings" },
       { id: "fraud", label: "AI & Fraud Detection", path: "/government/fraud", icon: "fraud", badge: "AI" },
-      { id: "blockchain", label: "Blockchain & Storage", path: "/sui/dashboard", icon: "blockchain" },
+      { id: "blockchain", label: "Sui console", path: "/sui/dashboard", icon: "blockchain" },
       { id: "audit", label: "Audit Logs", path: "/government/audit", icon: "audit" },
       { id: "reports", label: "Reports & Analytics", path: "/system/dashboards", icon: "reports" },
     ],

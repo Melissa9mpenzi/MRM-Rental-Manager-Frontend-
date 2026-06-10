@@ -67,8 +67,8 @@ export default function PlatformSuiWallet({ compact = false, className = "" }) {
       </div>
       <p className="mt-2 break-all font-mono text-[11px] text-white/80">{address}</p>
       <p className="mt-1.5 text-[10px] leading-snug text-white/45">
-        Created when you signed up — no separate “connect wallet” step. Pay rent on-chain from this address
-        (testnet gas via faucet when needed).
+        Linked to your RentDirect login — no extra sign-in and no browser extension. Tap Pay to settle rent on
+        Sui; testnet gas is requested automatically when needed.
       </p>
       <button
         type="button"

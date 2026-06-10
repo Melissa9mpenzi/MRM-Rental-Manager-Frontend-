@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import {
-  SUI_DEMO_FLOW,
   SUI_NATIVE_TAGLINE,
   WHY_NOT_WITHOUT_SUI,
   HACKATHON_TRACKS,
 } from "../../config/hackathonPositioning";
+import { SUI_TRUST_FLOW, SUI_TRUST_NARRATIVE } from "../../config/suiTrustLayer";
 
 /** Judge-facing demo script + Sui-native positioning */
 export default function SuiFirstDemoPanel() {
@@ -17,7 +17,7 @@ export default function SuiFirstDemoPanel() {
           {primary.badge} · {primary.label}
         </p>
         <h2 className="mt-2 text-lg font-extrabold leading-snug text-white">{SUI_NATIVE_TAGLINE}</h2>
-        <p className="mt-2 text-xs leading-relaxed text-white/60">{primary.summary}</p>
+        <p className="mt-2 text-xs leading-relaxed text-white/60">{SUI_TRUST_NARRATIVE}</p>
       </div>
 
       <div className="sui-panel border-amber-500/25 bg-amber-500/5">
@@ -34,12 +34,12 @@ export default function SuiFirstDemoPanel() {
       </div>
 
       <div className="sui-panel">
-        <p className="sui-panel__title">5-minute judge demo</p>
+        <p className="sui-panel__title">Sui trust flow</p>
         <ol className="mt-3 space-y-2">
-          {SUI_DEMO_FLOW.map((s) => (
-            <li key={s.step} className="flex gap-3 rounded-lg border border-white/8 px-3 py-2.5">
+          {SUI_TRUST_FLOW.map((s, idx) => (
+            <li key={s.id} className="flex gap-3 rounded-lg border border-white/8 px-3 py-2.5">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-500/25 text-xs font-black text-violet-200">
-                {s.step}
+                {idx + 1}
               </span>
               <div>
                 <p className="text-xs font-bold text-white">{s.title}</p>

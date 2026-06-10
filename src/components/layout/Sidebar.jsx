@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Building2,
@@ -27,9 +27,12 @@ import {
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import BrandMark from "../brand/BrandMark";
-import { SUI_SIDEBAR_ITEMS, SUI_SIDEBAR_EXTERNAL } from "../../config/suiSidebarNav";
-
-const SUI_ROLES = new Set(["tenant", "landlord", "staff", "agent", "system_admin"]);
+import {
+  getSuiSidebarItems,
+  SUI_SIDEBAR_EXTERNAL,
+  isSuiRoute,
+} from "../../config/suiSidebarNav";
+import { API_ROLES } from "../../config/access";
 
 const LANDLORD_NAV = [
   { to: "/landlord/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -80,7 +83,16 @@ const AGENT_NAV = [
   { to: "/agent/settings", icon: Settings, label: "Settings" },
 ];
 
-function navForRole(role) {
+const ADMIN_CONSOLE_LINK = {
+  to: "/system/dashboard",
+  icon: LayoutDashboard,
+  label: "Admin console",
+};
+
+function navForRole(role, pathname) {
+  if (role === API_ROLES.system_admin && isSuiRoute(pathname)) {
+    return [ADMIN_CONSOLE_LINK];
+  }
   if (role === "tenant") return TENANT_NAV;
   if (role === "staff" || role === "agent") return AGENT_NAV;
   return LANDLORD_NAV;
@@ -104,9 +116,11 @@ function navLinkClass(isActive, variant = "default") {
 export default function Sidebar({ open, onClose }) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const role = user?.role ?? "landlord";
-  const items = navForRole(role);
-  const showBlockchain = SUI_ROLES.has(role);
+  const items = navForRole(role, location.pathname);
+  const suiItems = getSuiSidebarItems(role);
+  const showBlockchain = suiItems.length > 0;
 
   const handleLogout = () => {
     logout();
@@ -183,9 +197,9 @@ export default function Sidebar({ open, onClose }) {
             <>
               <div className="mx-1 my-3 border-t border-white/[0.08]" />
               <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-violet-300/50">
-                Blockchain (Sui)
+                Sui
               </div>
-              {SUI_SIDEBAR_ITEMS.map(({ to, icon: Icon, label, end }) => (
+              {suiItems.map(({ to, icon: Icon, label, end }) => (
                 <NavLink
                   key={to}
                   to={to}
