@@ -1,0 +1,889 @@
+1.1  Logo
+The RentalMGR logo consists of two elements: the house glyph (⌂) and the wordmark. These must always appear together in approved configurations. The glyph symbolises a simplified, digital home — approachable yet professional.
+1.2  Color Palette
+Every color has a defined role. Never substitute or use off-palette colors in the product UI.
+1.3  Typography
+1.4  Component Design Principles
+Buttons: two variants only — filled (teal bg, white text) and outlined (teal border, teal text). No ghost buttons.
+Cards: white background, 8px radius, 1px border #d4e8e5, subtle shadow (0 2px 8px rgba(22,29,35,0.08)).
+Inputs: white bg, 1px border #576e6a at 40% opacity, focus ring 2px teal. Always show label above input.
+Badges: status indicators use small pill shapes. Paid = teal, Arrears = amber, Vacant = mid-gray, Maintenance = red.
+Tables: alternating rows using #f4f7f7 and white. Header row uses Deep Charcoal (#161d23) with Forest Teal text.
+Sidebar: Deep Charcoal background, Quicksand Medium 14px nav items. Active item: left 3px teal border + teal text.
+Icons: use Lucide React icon set only. Size 18px in tables/lists, 24px in page headers, 16px in buttons.
+Spacing scale: 4px base unit. Components use 4/8/12/16/24/32/48px only.
+1.5  Tone of Voice
+RentalMGR speaks directly, simply, and with confidence. The product is used by busy Ugandan landlords and property managers — not tech people. Language must be crystal clear.
+2.1  Problem Statement
+Thousands of Kampala landlords manage their properties with notebooks, WhatsApp messages, and memory. They lose track of who paid, who owes, and which units are vacant. There is no affordable, locally-built digital tool designed for this exact context.
+RentalMGR replaces the notebook with a clean, fast, mobile-friendly system that a landlord can start using on day one with zero training.
+2.2  Target Users
+2.3  Detailed Feature Set — MVP Phase 1 (Web)
+4.1  Setting Up XAMPP & phpMyAdmin
+Start XAMPP Control Panel — click Start next to both Apache and MySQL
+Open your browser and go to: http://localhost/phpmyadmin
+Click 'New' in the left sidebar to create a new database
+Database name: rental_manager_db — Collation: utf8mb4_unicode_ci — Click Create
+Click your new database in the left sidebar, then click the 'SQL' tab
+Paste the entire schema below into the SQL box and click 'Go'
+Verify all 6 tables appear in the left sidebar under rental_manager_db
+4.2  Full SQL Schema
+5.1  Monorepo Root
+5.2  Backend — Full Structure
+5.3  Frontend — Full Structure
+6.1  Install & Run
+6.2  app/main.py — Application Entry
+6.3  services/arrears_service.py — Core Business Logic
+7.1  Scaffold & Install
+7.2  tailwind.config.js — Brand Theme
+7.3  src/styles/index.css — Font + Base Styles
+8.1  Naming Conventions
+8.2  Backend Rules
+Routers handle HTTP only: validate request, call a service, return a response. Nothing else.
+Services contain all business logic. They accept DB sessions and Pydantic data. They return ORM objects or dicts.
+Never return ORM model instances from router endpoints. Always serialize with a Pydantic schema.
+Every route that modifies data must check ownership: user can only edit their own tenants/properties.
+All DELETE operations are soft deletes (is_active=False or is_deleted=True). Never hard-delete user data.
+Use Depends() for all shared concerns: auth, DB session, pagination.
+Log every write operation to audit_logs via audit_service.log_action().
+All monetary values in DECIMAL(12,2) — never float. Format as UGX strings at the API boundary.
+8.3  Frontend Rules
+One component per file. If a component exceeds 100 lines of JSX, split it.
+Never call fetch() or axios directly inside a component. All API calls go through src/api/*.
+Use React Query for all server state. Use Zustand only for true global UI state (auth, sidebar).
+Every data component must handle three states: loading (show Spinner), error (show message), empty (show EmptyState).
+Forms use React Hook Form + Zod schema validation. Never manage form state with useState.
+UGX amounts are stored as numbers, formatted with formatCurrency() only at render time.
+Brand colors must come from Tailwind tokens (bg-brand-teal) — never raw hex strings in JSX.
+All icon usage must use Lucide React. Never use emojis as icons in the main UI.
+9.1  Backend Testing (Pytest)
+9.2  Test Coverage Targets
+Phase 1 — Localhost (Days 1–5)
+Start XAMPP → Start Apache and MySQL
+Go to http://localhost/phpmyadmin — create database rental_manager_db
+Paste schema.sql in SQL tab → click Go → verify 8 tables created
+Backend: activate venv → uvicorn app.main:app --reload --port 8000
+Frontend: npm run dev (port 5173)
+Verify Swagger UI at http://localhost:8000/docs
+Test full flow: register → add property → add tenant → record payment → check dashboard
+Phase 2 — Staging Server (Week 2)
+Buy VPS (Hetzner, DigitalOcean, or Uganda-based host)
+Install: sudo apt install python3.11 nodejs npm nginx mysql-server
+Clone repo: git clone your-repo && cd rental-manager
+Backend: pip install -r requirements.txt, set .env production values, run with Gunicorn
+Frontend: npm run build — point Nginx to dist/ folder
+Configure Nginx as reverse proxy: / → dist/, /api/ → localhost:8000
+SSL: sudo certbot --nginx -d staging.yourdomain.com
+Run pytest on the server to verify everything works in production environment
+Phase 3 — Production (Week 4+)
+Set up automated MySQL backups: daily cron job → compress → upload to Google Drive or S3
+Add Sentry (free tier) for error tracking: pip install sentry-sdk
+Set up UptimeRobot (free) to ping /api/v1/health every 5 minutes
+Integrate MTN MoMo API for automated payment collection
+Integrate Africa's Talking for SMS rent reminders
+Set up GitHub Actions CI/CD: test on every push, deploy to staging on merge to develop
+Publish Flutter APK on Google Play (Android first, then iOS)
+Set up first paid subscription: UGX 50,000/month via MoMo
+12.1  Branch Strategy
+12.2  Commit Message Format
+12.3  Quick Reference Cheatsheet
+
+[TABLE 1]
+⌂ RENTALMGR Property. Simplified.
+
+[TABLE 2]
+Complete Build Plan  •  Brand Guidelines  •  Developer Handbook
+
+[TABLE 3]
+Stack: React + Vite  •  Python FastAPI  •  MySQL (phpMyAdmin/XAMPP)  •  Flutter Target: Kampala, Uganda  •  MVP in 40 hours  •  Version 1.0
+
+[TABLE 4]
+01 — Brand Guidelines Identity, colors, typography, logo usage, and UI tone of voice
+
+[TABLE 5]
+⌂ RENTALMGR Primary (Dark BG) | ⌂ RENTALMGR Reverse (Light BG) | ⌂ RENTALMGR Accent (Teal BG) | Logo Rules ✓  Always include glyph + wordmark ✓  Minimum size: 24px height ✓  Clear space = 1x glyph size ✗  Never stretch or skew ✗  Never recolor glyph alone ✗  Never use on busy photos
+
+[TABLE 6]
+Swatch | Name | Hex / RGB | Usage
+ | Deep Charcoal | #161d23  rgb(22,29,35) | Primary background, navbars, sidebars, dark cards, footer
+ | Sage Slate | #576e6a  rgb(87,110,106) | Body text on white, secondary labels, muted UI elements, captions
+ | Forest Teal | #5e8d83  rgb(94,141,131) | Primary actions, CTAs, links, highlights, active states, borders
+#ffffff | Pure White | #ffffff  rgb(255,255,255) | Page backgrounds, cards, modals, text on dark surfaces, input fields
+
+[TABLE 7]
+Derived palette: use #d4e8e5 (teal at 15% opacity) for hover states and light panel backgrounds. Use #f4f7f7 for page background. Never introduce new colors — extend the palette using opacity only.
+
+[TABLE 8]
+Role | Style | Tailwind / CSS
+Display / Hero | Quicksand Bold 36–48px | font-bold text-4xl font-[Quicksand]
+Page Title (H1) | Quicksand Bold 28px | font-bold text-2xl
+Section Heading (H2) | Quicksand SemiBold 22px | font-semibold text-xl
+Card Label (H3) | Quicksand SemiBold 16px | font-semibold text-base
+Body Text | Quicksand Regular 14px | text-sm text-[#576e6a]
+Caption / Meta | Quicksand Regular 12px | text-xs text-[#576e6a]
+Button Text | Quicksand Bold 14px | font-bold text-sm uppercase tracking-wide
+Code / Mono | Courier New Regular 13px | font-mono text-xs
+Input Placeholder | Quicksand Regular 14px italic | italic text-sm text-[#576e6a]/60
+
+[TABLE 9]
+✓  Write this | ✗  Not this
+'Add Tenant' | 'Initiate Tenant Onboarding Process'
+'Payment received on 4 Jan' | 'Transaction successfully processed'
+'John owes UGX 150,000' | 'Outstanding balance of UGX 150,000 detected'
+'Unit 3A is empty' | 'Occupancy status: Vacant'
+'Send reminder to all' | 'Dispatch notification batch'
+
+[TABLE 10]
+02 — Project Overview & Features What RentalMGR does, for whom, and the full MVP feature set
+
+[TABLE 11]
+User Type | Profile | Primary Need
+Landlord | Owns 1–30 rental units in Kampala | See who paid, who owes, add payments fast
+Property Agent | Manages units for multiple landlords | Multi-property dashboard + reports
+Tenant (Phase 2) | Renting a unit | View own balance, payment history, receipts
+Admin | System operator / support | Manage all landlord accounts
+
+[TABLE 12]
+🔐 | Authentication & Accounts  —  Secure multi-tenant access with role-based permissions Email + password registration with email verification flow JWT access tokens (15 min) + refresh tokens (7 days) stored in httpOnly cookies Role-based access: admin, landlord — middleware enforces per-route Password reset via 6-digit OTP sent to email or SMS Profile settings: update name, phone, notification preferences Account activity log: last login, IP address, device
+
+[TABLE 13]
+🏗 | Property Management  —  Create and organise all properties and their individual units Add unlimited properties with name, full address, parish, district Each property shows occupancy rate, total expected rent, collected, arrears Archive/unarchive a property (soft delete — data retained) Add individual units: number/name, floor, rent amount, type (bedsitter/1BR/2BR/etc) Bulk-import units via CSV (e.g. upload 20 units in one go) Unit status: Vacant, Occupied, Under Maintenance — auto-updates on tenant actions Photo upload per property (thumbnail visible on cards) Amenities tags per unit: parking, water included, generator, security
+
+[TABLE 14]
+👤 | Tenant Management  —  Complete lifecycle from onboarding to move-out Add tenant: full name, phone (MTN/Airtel), email, national ID, emergency contact Assign tenant to a specific unit — unit auto-updates to 'Occupied' Lease details: start date, end date, rent amount override (if different from unit default) Security deposit: amount, date paid, receipt number — shown separately from rent Upload tenant documents: ID scan, signed lease PDF (stored locally on server) Edit tenant details without losing payment history Move-out flow: set vacate date, record deposit refund/deductions, mark unit Vacant Tenant history: view all previous tenants per unit Search tenants by name, phone, unit, or property across all your properties Filter by: active, vacated, lease expiring within 30/60 days, arrears status
+
+[TABLE 15]
+💳 | Payment Recording  —  Track every payment with method, reference, and period allocation Record payment: amount, date, month/year it covers, method, reference code Payment methods: MTN MoMo, Airtel Money, Cash, Bank Transfer, Other MoMo reference code field (for reconciliation with mobile money statements) Partial payment support: record UGX 80,000 against a UGX 150,000 rent — balance shown Over-payment handling: excess applied to next month automatically Bulk payment entry: quickly log payments for multiple tenants in sequence Edit/delete payment with audit trail (who changed what and when) Auto-generate printable receipt as PDF — landlord name, tenant name, amount, period Share receipt via WhatsApp Web link (one-click from the record) Payment history per tenant: sortable, filterable, with running balance
+
+[TABLE 16]
+📊 | Arrears & Financial Reports  —  Automatic debt tracking and monthly performance visibility Arrears auto-calculated: for each tenant, rent due minus payments made per month Arrears aging: 1 month, 2 months, 3+ months — colour-coded severity Dashboard KPIs: total rent expected, total collected, total arrears, occupancy % Monthly income report: per property, per unit, exportable to CSV Year-to-date collection report with month-by-month bar chart Outstanding arrears report: all tenants with debt, sortable by amount owed Lease expiry report: tenants whose leases end within 30/60/90 days Vacancy report: all empty units with days vacant and estimated lost revenue
+
+[TABLE 17]
+🔧 | Maintenance Requests  —  Log and track repair issues per unit Log issue: title, description, priority (Low/Medium/High/Urgent), unit Assign status: Open → In Progress → Resolved Record resolution notes and cost incurred History of all maintenance per unit — useful when reviewing tenant deposit deductions Photo attachment per maintenance request Filter by: open items, by property, by priority
+
+[TABLE 18]
+🔔 | Notifications (Phase 1: In-App)  —  Alerts that keep the landlord informed In-app notification bell: new payments, upcoming lease expiries, overdue arrears alerts Rent due reminders: configurable — e.g. 3 days before the 1st of each month Lease expiry alerts: 30-day warning per expiring tenant System notifications: new tenant added, unit status changed Phase 2: push via Africa's Talking SMS, WhatsApp Business API
+
+[TABLE 19]
+📱 | Mobile App — Flutter (Phase 2)  —  Native Android/iOS companion after web is stable Same JWT API — no separate backend needed Quick actions: record payment, view arrears list, check occupancy in under 5 taps Offline mode: cache tenant list and last 30 days of payments (sync on reconnect) Push notifications via Firebase Cloud Messaging Biometric login (fingerprint/face ID) on Android QR code scan: scan a unit's QR to go directly to its page Receipt sharing directly from phone to WhatsApp
+
+[TABLE 20]
+03 — Technology Stack Every tool, why it was chosen, and where it fits
+
+[TABLE 21]
+Layer | Technology | Version | Reason
+Web UI | React + Vite | 18 / 5.x | Fast HMR, JSX, component reuse, huge ecosystem
+Styling | Tailwind CSS | 3.x | Utility-first, zero CSS files, easy custom theme
+Component lib | Lucide React + custom | — | Clean icons + brand-matched UI primitives
+Server state | TanStack Query v5 | 5.x | API caching, refetch, loading/error states
+Global state | Zustand | 4.x | Lightweight, no boilerplate, replaces Redux
+Forms | React Hook Form | 7.x | Performant, uncontrolled, easy validation
+Validation | Zod | 3.x | Schema validation shared between frontend/API
+Charts | Recharts | 2.x | React-native chart library, easy to theme
+HTTP client | Axios | 1.x | Interceptors for auth, base URL, error handling
+Date handling | date-fns | 3.x | Lightweight, tree-shakeable, locale support
+Toasts | react-hot-toast | 2.x | Minimal, styleable, easy to use
+Routing | React Router v6 | 6.x | Standard SPA routing with protected routes
+Backend | FastAPI | 0.111+ | Async Python, auto Swagger docs, Pydantic typing
+ORM | SQLAlchemy | 2.x | Clean models, relationships, transactions
+Migrations | Alembic | 1.x | Version-controlled DB changes
+Auth | python-jose + passlib | — | JWT tokens + bcrypt password hashing
+Database | MySQL 8 via XAMPP | 8.0 | Free, local dev via phpMyAdmin, easy export
+File storage | Local filesystem (MVP) | — | Uploads saved to /uploads/, upgrade to S3 later
+Mobile | Flutter 3 | 3.x | Single codebase Android + iOS, Dart
+SMS/Push | Africa's Talking (Ph2) | — | Uganda-based, MTN/Airtel SMS, cheap
+Payments (Ph2) | MTN MoMo API | — | Most widely used mobile money in Uganda
+
+[TABLE 22]
+04 — Database Setup (phpMyAdmin + XAMPP) Step-by-step local MySQL setup — no DBeaver required
+
+[TABLE 23]
+Use phpMyAdmin (built into XAMPP) instead of DBeaver — it runs in your browser at http://localhost/phpmyadmin No installation needed. Once XAMPP is running, phpMyAdmin is always available.
+
+[TABLE 24]
+Copy this entire block into phpMyAdmin → SQL tab → click Go. Run once on a fresh database.
+
+[TABLE 25]
+-- ================================================
+-- RENTAL MANAGER DATABASE SCHEMA v1.0
+-- Run in phpMyAdmin: http://localhost/phpmyadmin
+-- ================================================
+CREATE DATABASE IF NOT EXISTS rental_manager_db
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE rental_manager_db;
+-- ── USERS ──────────────────────────────────────
+CREATE TABLE users (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+email           VARCHAR(255) UNIQUE NOT NULL,
+password_hash   VARCHAR(255) NOT NULL,
+full_name       VARCHAR(150) NOT NULL,
+phone           VARCHAR(20),
+role            ENUM('admin','landlord') DEFAULT 'landlord',
+is_active       BOOLEAN DEFAULT TRUE,
+email_verified  BOOLEAN DEFAULT FALSE,
+last_login      DATETIME,
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP
+);
+-- ── PROPERTIES ─────────────────────────────────
+CREATE TABLE properties (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+owner_id        INT NOT NULL,
+name            VARCHAR(200) NOT NULL,
+address         TEXT NOT NULL,
+parish          VARCHAR(100),
+district        VARCHAR(100) DEFAULT 'Kampala',
+description     TEXT,
+photo_path      VARCHAR(500),
+total_units     INT DEFAULT 0,
+is_active       BOOLEAN DEFAULT TRUE,
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP,
+FOREIGN KEY (owner_id) REFERENCES users(id)
+ON DELETE CASCADE
+);
+-- ── UNITS ──────────────────────────────────────
+CREATE TABLE units (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+property_id     INT NOT NULL,
+unit_number     VARCHAR(50) NOT NULL,
+floor_number    INT DEFAULT 0,
+unit_type       ENUM('bedsitter','one_bedroom','two_bedroom',
+'three_bedroom','studio','shop','office','other')
+DEFAULT 'one_bedroom',
+rent_amount     DECIMAL(12,2) NOT NULL,
+status          ENUM('vacant','occupied','maintenance')
+DEFAULT 'vacant',
+amenities       JSON,
+description     TEXT,
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP,
+FOREIGN KEY (property_id) REFERENCES properties(id)
+ON DELETE CASCADE,
+UNIQUE KEY uq_unit_in_property (property_id, unit_number)
+);
+-- ── TENANTS ─────────────────────────────────────
+CREATE TABLE tenants (
+id                INT AUTO_INCREMENT PRIMARY KEY,
+unit_id           INT NOT NULL,
+owner_id          INT NOT NULL,
+full_name         VARCHAR(200) NOT NULL,
+phone             VARCHAR(20) NOT NULL,
+email             VARCHAR(255),
+national_id       VARCHAR(50),
+emergency_name    VARCHAR(200),
+emergency_phone   VARCHAR(20),
+lease_start       DATE NOT NULL,
+lease_end         DATE,
+rent_override     DECIMAL(12,2),
+deposit_amount    DECIMAL(12,2) DEFAULT 0,
+deposit_paid      BOOLEAN DEFAULT FALSE,
+deposit_paid_date DATE,
+move_out_date     DATE,
+is_active         BOOLEAN DEFAULT TRUE,
+notes             TEXT,
+created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at        DATETIME DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP,
+FOREIGN KEY (unit_id)  REFERENCES units(id),
+FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+-- ── PAYMENTS ────────────────────────────────────
+CREATE TABLE payments (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+tenant_id       INT NOT NULL,
+unit_id         INT NOT NULL,
+amount          DECIMAL(12,2) NOT NULL,
+payment_date    DATE NOT NULL,
+period_month    TINYINT NOT NULL COMMENT '1=Jan, 12=Dec',
+period_year     SMALLINT NOT NULL,
+payment_method  ENUM('momo_mtn','momo_airtel','cash',
+'bank_transfer','cheque','other')
+DEFAULT 'cash',
+reference_code  VARCHAR(100) COMMENT 'MoMo transaction ID',
+receipt_number  VARCHAR(50),
+notes           TEXT,
+recorded_by     INT NOT NULL,
+is_deleted      BOOLEAN DEFAULT FALSE,
+deleted_at      DATETIME,
+deleted_by      INT,
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (tenant_id)   REFERENCES tenants(id),
+FOREIGN KEY (unit_id)     REFERENCES units(id),
+FOREIGN KEY (recorded_by) REFERENCES users(id),
+INDEX idx_period (period_year, period_month),
+INDEX idx_tenant_period (tenant_id, period_year, period_month)
+);
+-- ── MAINTENANCE REQUESTS ─────────────────────────
+CREATE TABLE maintenance_requests (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+unit_id         INT NOT NULL,
+reported_by     INT COMMENT 'user_id or NULL if tenant reported',
+title           VARCHAR(200) NOT NULL,
+description     TEXT,
+priority        ENUM('low','medium','high','urgent') DEFAULT 'medium',
+status          ENUM('open','in_progress','resolved') DEFAULT 'open',
+cost_incurred   DECIMAL(12,2) DEFAULT 0,
+resolution_note TEXT,
+photo_path      VARCHAR(500),
+resolved_at     DATETIME,
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP,
+FOREIGN KEY (unit_id)     REFERENCES units(id),
+FOREIGN KEY (reported_by) REFERENCES users(id)
+);
+-- ── NOTIFICATIONS ───────────────────────────────
+CREATE TABLE notifications (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+user_id         INT NOT NULL,
+type            ENUM('payment_received','lease_expiry',
+'arrears_alert','maintenance_update','system') NOT NULL,
+title           VARCHAR(200) NOT NULL,
+message         TEXT NOT NULL,
+is_read         BOOLEAN DEFAULT FALSE,
+related_id      INT COMMENT 'e.g. tenant_id or payment_id',
+related_type    VARCHAR(50) COMMENT 'e.g. tenant or payment',
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-- ── AUDIT LOG ───────────────────────────────────
+CREATE TABLE audit_logs (
+id              INT AUTO_INCREMENT PRIMARY KEY,
+user_id         INT,
+action          VARCHAR(100) NOT NULL,
+table_name      VARCHAR(50),
+record_id       INT,
+old_value       JSON,
+new_value       JSON,
+ip_address      VARCHAR(45),
+created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+[TABLE 26]
+05 — Full Folder Structure Every file, every directory — explained
+
+[TABLE 27]
+rental-manager/
+├── backend/               # FastAPI Python application
+├── frontend/              # React + Vite web application
+├── mobile/                # Flutter mobile application
+├── database/
+│   ├── schema.sql         # Full CREATE TABLE script (this doc §4)
+│   ├── seeds.sql          # Sample data for local development
+│   └── migrations/        # Alembic migration files
+├── docs/
+│   ├── build_plan.docx    # This document
+│   ├── api.md             # Auto-generated from FastAPI /docs
+│   └── wireframes/        # UI sketches (PNG/Figma links)
+├── .gitignore
+└── README.md              # Setup instructions for new devs
+
+[TABLE 28]
+backend/
+├── app/
+│   ├── __init__.py
+│   ├── main.py            # FastAPI app, CORS, router registration
+│   ├── config.py          # Pydantic Settings — reads from .env
+│   ├── database.py        # Engine, SessionLocal, Base, get_db()
+│   ├── dependencies.py    # get_current_user(), pagination params
+│   │
+│   ├── models/            # SQLAlchemy ORM table definitions
+│   │   ├── __init__.py    # Exports all models (important for Alembic)
+│   │   ├── user.py        # User model
+│   │   ├── property.py    # Property + Unit models
+│   │   ├── tenant.py      # Tenant model
+│   │   ├── payment.py     # Payment model
+│   │   ├── maintenance.py # MaintenanceRequest model
+│   │   ├── notification.py# Notification model
+│   │   └── audit.py       # AuditLog model
+│   │
+│   ├── schemas/           # Pydantic I/O contracts (never ORM objects)
+│   │   ├── __init__.py
+│   │   ├── auth.py        # LoginRequest, TokenResponse, RegisterRequest
+│   │   ├── user.py        # UserCreate, UserOut, UserUpdate
+│   │   ├── property.py    # PropertyCreate, PropertyOut, UnitCreate, UnitOut
+│   │   ├── tenant.py      # TenantCreate, TenantOut, TenantUpdate, TenantDetail
+│   │   ├── payment.py     # PaymentCreate, PaymentOut, PaymentSummary
+│   │   ├── maintenance.py # MaintenanceCreate, MaintenanceOut
+│   │   ├── dashboard.py   # DashboardStats, ArrearsReport, OccupancyReport
+│   │   └── notification.py# NotificationOut
+│   │
+│   ├── routers/           # HTTP route handlers (thin — delegate to services)
+│   │   ├── __init__.py
+│   │   ├── auth.py        # POST /auth/register, /auth/login, /auth/refresh
+│   │   ├── users.py       # GET/PUT /users/me, GET /users (admin)
+│   │   ├── properties.py  # CRUD /properties/, /properties/{id}/units
+│   │   ├── units.py       # CRUD /units/, status change, bulk import
+│   │   ├── tenants.py     # CRUD /tenants/, move-out, search, filter
+│   │   ├── payments.py    # CRUD /payments/, receipt PDF generation
+│   │   ├── maintenance.py # CRUD /maintenance/, status update
+│   │   ├── dashboard.py   # GET /dashboard/stats, /reports/arrears, /reports/income
+│   │   └── notifications.py# GET /notifications/, PUT /notifications/{id}/read
+│   │
+│   ├── services/          # Business logic — pure Python, no HTTP concerns
+│   │   ├── __init__.py
+│   │   ├── auth_service.py      # hash_password, verify_password, create_tokens
+│   │   ├── property_service.py  # create, update, get_with_stats, archive
+│   │   ├── tenant_service.py    # create, update, move_out, get_with_balance
+│   │   ├── payment_service.py   # record, delete, get_history, generate_receipt
+│   │   ├── arrears_service.py   # calculate_balance, get_arrears_report, aging
+│   │   ├── dashboard_service.py # aggregate stats for dashboard KPIs
+│   │   ├── notification_service.py # create notifications, batch dispatch
+│   │   └── audit_service.py     # log_action helper used across services
+│   │
+│   └── utils/             # Shared helpers — no business logic
+│       ├── __init__.py
+│       ├── security.py    # JWT encode/decode, password hashing
+│       ├── formatting.py  # Format UGX currency, dates in Uganda locale
+│       ├── pdf.py         # Receipt PDF generation (reportlab or weasyprint)
+│       ├── sms.py         # Africa's Talking SMS wrapper (Phase 2)
+│       ├── validators.py  # Ugandan phone number, national ID format checks
+│       └── pagination.py  # Reusable paginated response schema
+│
+├── tests/
+│   ├── conftest.py        # Pytest fixtures: test DB, test client, auth headers
+│   ├── test_auth.py       # Register, login, token refresh, invalid creds
+│   ├── test_properties.py # CRUD, archive, ownership enforcement
+│   ├── test_tenants.py    # CRUD, move-out, search, filter
+│   ├── test_payments.py   # Record, edit, delete, arrears recalculation
+│   ├── test_arrears.py    # Arrears calc: full/partial/over-payments, aging
+│   └── test_dashboard.py  # Stats aggregation correctness
+│
+├── alembic/
+│   ├── env.py             # Alembic config — points to app models
+│   ├── script.py.mako
+│   └── versions/          # One file per migration
+│
+├── uploads/               # Tenant docs, property photos (gitignored)
+│   ├── properties/
+│   ├── tenants/
+│   └── receipts/
+│
+├── .env                   # Local secrets (NEVER commit)
+├── .env.example           # Template with placeholder values (DO commit)
+├── requirements.txt       # Python dependencies pinned to exact versions
+├── Dockerfile             # For staging/production container
+└── pytest.ini             # Pytest config: test paths, markers
+
+[TABLE 29]
+frontend/
+├── src/
+│   ├── main.jsx                  # Vite entry: React render, QueryClient, Router
+│   ├── App.jsx                   # Route definitions, layout wrapper
+│   │
+│   ├── api/                      # All API communication (never fetch in components)
+│   │   ├── client.js             # Axios instance, JWT interceptor, 401 handler
+│   │   ├── authApi.js            # login(), register(), refreshToken()
+│   │   ├── propertiesApi.js      # getAll(), getById(), create(), update(), archive()
+│   │   ├── unitsApi.js           # getByProperty(), create(), updateStatus()
+│   │   ├── tenantsApi.js         # getAll(), getById(), create(), update(), moveOut()
+│   │   ├── paymentsApi.js        # create(), delete(), getHistory(), getReceipt()
+│   │   ├── dashboardApi.js       # getStats(), getArrearsReport(), getIncomeReport()
+│   │   └── notificationsApi.js   # getAll(), markRead(), markAllRead()
+│   │
+│   ├── components/
+│   │   ├── ui/                   # Pure presentational primitives
+│   │   │   ├── Button.jsx        # Variants: filled, outlined, ghost, danger
+│   │   │   ├── Input.jsx         # Labelled input, error state, helper text
+│   │   │   ├── Select.jsx        # Styled dropdown with label
+│   │   │   ├── Modal.jsx         # Accessible dialog with backdrop
+│   │   │   ├── Badge.jsx         # Status pills: Paid, Arrears, Vacant, etc.
+│   │   │   ├── Card.jsx          # White card with shadow and optional header
+│   │   │   ├── Table.jsx         # Sortable, paginated table with empty state
+│   │   │   ├── Spinner.jsx       # Teal loading spinner, sizes: sm/md/lg
+│   │   │   ├── EmptyState.jsx    # Icon + message + optional CTA button
+│   │   │   ├── ConfirmDialog.jsx # 'Are you sure?' modal for delete actions
+│   │   │   ├── Tooltip.jsx       # Hover tooltip for icon buttons
+│   │   │   └── PageHeader.jsx    # Title + subtitle + optional right-side actions
+│   │   │
+│   │   ├── layout/
+│   │   │   ├── AppLayout.jsx     # Sidebar + main content wrapper
+│   │   │   ├── Sidebar.jsx       # Nav links, logo, user info, logout
+│   │   │   ├── Topbar.jsx        # Page title, notifications bell, user avatar
+│   │   │   ├── ProtectedRoute.jsx# Redirect to /login if no token
+│   │   │   └── AuthLayout.jsx    # Centered card layout for login/register
+│   │   │
+│   │   └── domain/              # Feature-specific reusable components
+│   │       ├── TenantCard.jsx    # Compact tenant info card
+│   │       ├── PaymentForm.jsx   # Reusable payment recording form
+│   │       ├── ArrearsBadge.jsx  # Colored badge with arrears amount
+│   │       ├── UnitStatusBadge.jsx
+│   │       ├── PropertySummary.jsx
+│   │       ├── ReceiptButton.jsx # Download/share receipt
+│   │       └── StatCard.jsx      # KPI card: icon + number + label + trend
+│   │
+│   ├── pages/
+│   │   ├── auth/
+│   │   │   ├── LoginPage.jsx
+│   │   │   └── RegisterPage.jsx
+│   │   ├── dashboard/
+│   │   │   └── DashboardPage.jsx  # KPIs, charts, quick-action buttons
+│   │   ├── properties/
+│   │   │   ├── PropertiesPage.jsx # List all properties with search
+│   │   │   ├── PropertyDetail.jsx # Units grid, tenants list, stats
+│   │   │   └── AddPropertyModal.jsx
+│   │   ├── units/
+│   │   │   ├── UnitsPage.jsx
+│   │   │   └── UnitDetail.jsx     # Tenant history, maintenance log
+│   │   ├── tenants/
+│   │   │   ├── TenantsPage.jsx    # Full tenant list with filters
+│   │   │   ├── TenantDetail.jsx   # Balance, payments, lease, documents
+│   │   │   ├── AddTenantPage.jsx
+│   │   │   └── MoveOutModal.jsx
+│   │   ├── payments/
+│   │   │   ├── PaymentsPage.jsx   # All payments, filter by month
+│   │   │   └── RecordPaymentPage.jsx
+│   │   ├── maintenance/
+│   │   │   ├── MaintenancePage.jsx
+│   │   │   └── MaintenanceDetail.jsx
+│   │   ├── reports/
+│   │   │   ├── ArrearsReport.jsx
+│   │   │   ├── IncomeReport.jsx
+│   │   │   └── LeaseExpiryReport.jsx
+│   │   ├── notifications/
+│   │   │   └── NotificationsPage.jsx
+│   │   └── settings/
+│   │       └── SettingsPage.jsx   # Profile, password, notification prefs
+│   │
+│   ├── hooks/                    # Custom React hooks (encapsulate logic)
+│   │   ├── useAuth.js            # Login, logout, token state
+│   │   ├── useProperties.js      # useProperties(), useCreateProperty()
+│   │   ├── useTenants.js         # useTenants(), useCreateTenant(), etc.
+│   │   ├── usePayments.js        # usePayments(), useCreatePayment()
+│   │   ├── useDashboard.js       # useDashboardStats(), useArrearsReport()
+│   │   ├── useDebounce.js        # Debounce search input
+│   │   └── usePagination.js      # Page/limit state management
+│   │
+│   ├── store/                   # Zustand global state (UI only)
+│   │   ├── authStore.js          # currentUser, token, isAuthenticated
+│   │   └── uiStore.js            # sidebarOpen, activeModal, globalLoading
+│   │
+│   ├── utils/
+│   │   ├── formatCurrency.js     # UGX formatting: 150000 → 'UGX 150,000'
+│   │   ├── formatDate.js         # Uganda date format: '04 Jan 2025'
+│   │   ├── validators.js         # Phone regex (UG), required fields
+│   │   └── constants.js          # PAYMENT_METHODS, UNIT_TYPES, STATUS_COLORS
+│   │
+│   └── styles/
+│       ├── index.css             # Tailwind directives + custom font import
+│       └── theme.js             # Brand color tokens for Tailwind config
+│
+├── public/
+│   ├── favicon.ico
+│   └── logo.png               # RentalMGR logo file
+│
+├── index.html
+├── vite.config.js
+├── tailwind.config.js
+└── package.json
+
+[TABLE 30]
+06 — Backend Setup (FastAPI + Python) Installation, key files, and patterns
+
+[TABLE 31]
+# 1. Create virtual environment
+python -m venv venv
+venv\Scripts\activate           # Windows
+source venv/bin/activate         # Mac/Linux
+# 2. Install all dependencies
+pip install fastapi uvicorn[standard] sqlalchemy alembic
+pip install pymysql python-jose[cryptography] passlib[bcrypt]
+pip install python-dotenv pydantic-settings python-multipart
+pip install reportlab pytest pytest-asyncio httpx
+# 3. Create .env in backend/ directory
+DATABASE_URL=mysql+pymysql://root:@localhost/rental_manager_db
+SECRET_KEY=generate-a-long-random-string-here-256bit
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+REFRESH_TOKEN_EXPIRE_DAYS=7
+ENVIRONMENT=development
+UPLOAD_DIR=./uploads
+# 4. Run migrations (once schema.sql is already in phpMyAdmin)
+alembic upgrade head
+# 5. Start development server
+uvicorn app.main:app --reload --port 8000
+# Visit: http://localhost:8000/docs  (Swagger UI)
+
+[TABLE 32]
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from app.config import settings
+from app.routers import (auth, users, properties,
+units, tenants, payments, dashboard,
+maintenance, notifications)
+app = FastAPI(
+title='RentalMGR API',
+description='Property management for Uganda',
+version='1.0.0',
+docs_url='/docs' if settings.environment == 'development' else None
+)
+app.add_middleware(
+CORSMiddleware,
+allow_origins=settings.allowed_origins,
+allow_credentials=True,
+allow_methods=['*'],
+allow_headers=['*'],
+)
+# Serve uploaded files as static
+app.mount('/uploads', StaticFiles(directory='uploads'), name='uploads')
+# Register all routers with /api/v1 prefix
+PREFIX = '/api/v1'
+app.include_router(auth.router,          prefix=PREFIX)
+app.include_router(users.router,         prefix=PREFIX)
+app.include_router(properties.router,    prefix=PREFIX)
+app.include_router(units.router,         prefix=PREFIX)
+app.include_router(tenants.router,       prefix=PREFIX)
+app.include_router(payments.router,      prefix=PREFIX)
+app.include_router(dashboard.router,     prefix=PREFIX)
+app.include_router(maintenance.router,   prefix=PREFIX)
+app.include_router(notifications.router, prefix=PREFIX)
+
+[TABLE 33]
+from sqlalchemy.orm import Session
+from app.models.payment import Payment
+from app.models.tenant import Tenant
+from decimal import Decimal
+from datetime import date
+def calculate_tenant_balance(
+db: Session, tenant_id: int, up_to_month: int, up_to_year: int
+) -> dict:
+tenant = db.query(Tenant).filter(
+Tenant.id == tenant_id,
+Tenant.is_active == True
+).first()
+if not tenant:
+return {'error': 'Tenant not found'}
+rent = tenant.rent_override or tenant.unit.rent_amount
+months_active = _count_months(
+tenant.lease_start,
+date(up_to_year, up_to_month, 1)
+)
+total_due = rent * months_active
+total_paid = db.query(
+func.sum(Payment.amount)
+).filter(
+Payment.tenant_id == tenant_id,
+Payment.is_deleted == False
+).scalar() or Decimal('0')
+balance = total_due - total_paid
+return {
+'tenant_id': tenant_id,
+'total_due': total_due,
+'total_paid': total_paid,
+'balance': balance,
+'is_arrears': balance > 0,
+'months_in_arrears': int(balance / rent) if rent > 0 else 0
+}
+
+[TABLE 34]
+07 — Frontend Setup (React + Vite) Scaffold, Tailwind brand theme, and key patterns
+
+[TABLE 35]
+npm create vite@latest frontend -- --template react
+cd frontend
+npm install
+# Core dependencies
+npm install axios react-router-dom@6 zustand
+npm install @tanstack/react-query react-hook-form zod
+npm install @hookform/resolvers react-hot-toast
+npm install lucide-react date-fns recharts
+# Dev dependencies
+npm install -D tailwindcss postcss autoprefixer
+npm install -D vitest @testing-library/react
+npm install -D @testing-library/jest-dom jsdom
+npx tailwindcss init -p
+
+[TABLE 36]
+/** @type {import('tailwindcss').Config} */
+export default {
+content: ['./index.html', './src/**/*.{js,jsx}'],
+theme: {
+extend: {
+colors: {
+brand: {
+dark:    '#161d23',  // Deep Charcoal
+mid:     '#576e6a',  // Sage Slate
+teal:    '#5e8d83',  // Forest Teal
+tealLt:  '#d4e8e5',  // Light teal (hover/bg)
+bg:      '#f4f7f7',  // Page background
+}
+},
+fontFamily: {
+sans: ['Quicksand', 'ui-sans-serif', 'system-ui'],
+},
+borderRadius: {
+DEFAULT: '8px',
+},
+}
+},
+plugins: [],
+}
+
+[TABLE 37]
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+body {
+@apply bg-brand-bg text-brand-dark font-sans;
+}
+h1 { @apply text-2xl font-bold text-brand-dark; }
+h2 { @apply text-xl font-semibold text-brand-dark; }
+h3 { @apply text-base font-semibold text-brand-mid; }
+}
+@layer components {
+.btn-primary {
+@apply bg-brand-teal text-white font-bold text-sm px-4 py-2
+rounded-lg hover:bg-[#4a7269] transition-colors;
+}
+.btn-outline {
+@apply border-2 border-brand-teal text-brand-teal font-bold
+text-sm px-4 py-2 rounded-lg hover:bg-brand-tealLt transition-colors;
+}
+.card {
+@apply bg-white rounded-lg border border-brand-tealLt
+shadow-[0_2px_8px_rgba(22,29,35,0.08)] p-4;
+}
+.input-field {
+@apply w-full border border-[#576e6a]/40 rounded-lg px-3 py-2
+text-sm text-brand-dark focus:outline-none
+focus:ring-2 focus:ring-brand-teal;
+}
+}
+
+[TABLE 38]
+08 — Coding Standards & Guidelines Rules every developer on this project must follow
+
+[TABLE 39]
+Context | Convention | Example
+Python files/vars | snake_case | payment_service.py, lease_start
+Python classes | PascalCase | TenantService, PaymentRouter
+React components | PascalCase.jsx | TenantCard.jsx, PaymentModal.jsx
+React hooks | use + camelCase | useTenants.js, usePayments.js
+JS variables | camelCase | isLoading, currentTenant, totalArrears
+DB tables/columns | snake_case | tenants, payment_date, is_active
+API endpoints | kebab-case | /api/v1/lease-expiry-report
+Env variables | SCREAMING_SNAKE_CASE | DATABASE_URL, SECRET_KEY
+Tailwind classes | utility-only, no custom class names | bg-brand-teal not .primary-button
+
+[TABLE 40]
+Golden Rule: If you find yourself writing the same 10 lines in two places, extract it. A service function, a custom hook, or a shared component — pick the right abstraction.
+
+[TABLE 41]
+09 — Testing Strategy What to test, how to test it, and when
+
+[TABLE 42]
+# tests/conftest.py — shared fixtures
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.main import app
+from app.database import Base, get_db
+SQLALCHEMY_TEST_URL = 'sqlite:///./test.db'
+engine = create_engine(SQLALCHEMY_TEST_URL,
+connect_args={'check_same_thread': False})
+TestSession = sessionmaker(bind=engine)
+@pytest.fixture(scope='session')
+def client():
+Base.metadata.create_all(bind=engine)
+def override():
+db = TestSession()
+try: yield db
+finally: db.close()
+app.dependency_overrides[get_db] = override
+yield TestClient(app)
+Base.metadata.drop_all(bind=engine)
+@pytest.fixture
+def auth_headers(client):
+client.post('/api/v1/auth/register', json={
+'email': 'test@rentalmgr.ug',
+'password': 'Secure1234!',
+'full_name': 'Test Landlord'
+})
+res = client.post('/api/v1/auth/login', data={
+'username': 'test@rentalmgr.ug',
+'password': 'Secure1234!'
+})
+token = res.json()['access_token']
+return {'Authorization': f'Bearer {token}'}
+
+[TABLE 43]
+Run all tests: pytest tests/ -v Run one file:  pytest tests/test_arrears.py -v Coverage:      pytest --cov=app tests/ --cov-report=term-missing
+
+[TABLE 44]
+Module | Target Coverage | Priority
+arrears_service.py | 100% | Critical
+payment_service.py | 100% | Critical
+auth_service.py | 95% | High
+tenant_service.py | 90% | High
+property_service.py | 85% | Medium
+dashboard_service.py | 80% | Medium
+All routers | 70% | Standard
+
+[TABLE 45]
+10 — Deployment Phases Localhost → Staging → Production
+
+[TABLE 46]
+This is your only environment for the first 40 hours. Build everything here. Do not deploy until all tests pass.
+
+[TABLE 47]
+Hetzner CX11 (~$4/month) or DigitalOcean Droplet ($5/month) running Ubuntu 22.04. Set up staging.yourdomain.com for landlord beta testers to access.
+
+[TABLE 48]
+Only go live after 2+ real landlords have tested staging, given feedback, and you have fixed bugs.
+
+[TABLE 49]
+11 — 40-Hour Build Sprint What to build each day to hit a working MVP in 5 days
+
+[TABLE 50]
+Day | Hours | Goal & Deliverables
+1 | 8 hours | Foundation: DB + Auth + Project Setup Create rental_manager_db in phpMyAdmin, run full schema.sql Scaffold FastAPI project with full folder structure Auth endpoints: POST /register, /login, /refresh JWT middleware protecting all non-auth routes Scaffold React + Vite with Tailwind brand theme Login page + protected route working end-to-end
+2 | 8 hours | Properties + Units: API + UI Properties API: CRUD + archive + list with stats Units API: CRUD + status update + list by property AppLayout: sidebar with nav, Topbar, ProtectedRoute PropertiesPage: list, search, add property modal PropertyDetail: units grid with status badges
+3 | 8 hours | Tenants + Payments: Core Revenue Feature Tenants API: CRUD, search, filter by status/property Payments API: record, edit, delete, history per tenant arrears_service: calculate balance per tenant TenantsPage: list with search, filters, ArrearsBadge TenantDetail: balance card, PaymentForm, history table
+4 | 8 hours | Dashboard + Reports + PDF Receipts dashboard_service: aggregate KPIs — total due, collected, arrears, occupancy DashboardPage: StatCards, income bar chart (Recharts), arrears list PDF receipt generation via reportlab (backend) ArrearsReport page with export to CSV In-app notifications: bell icon, unread count, notification list
+5 | 8 hours | Polish, Testing & First Demo Run full pytest suite — fix all failing tests Loading states, error states, empty states on all pages Mobile responsive check (all pages work on 375px) README.md setup guide for a new developer Demo to 1–2 real Kampala landlords and write down feedback
+
+[TABLE 51]
+12 — Git Workflow & Quick Reference Branching strategy, commit messages, and command cheatsheet
+
+[TABLE 52]
+Branch | Purpose
+main | Production-ready only. Never push directly. Merge from develop after testing.
+develop | Integration branch. All features merge here first.
+feature/tenant-mgmt | One branch per feature. Branch from develop, merge back to develop.
+fix/arrears-calc | One branch per bug fix.
+hotfix/critical-bug | Emergency fix — branch from main, merge to both main and develop.
+
+[TABLE 53]
+feat(tenants): add tenant move-out flow with deposit refund
+fix(payments): correct arrears for partial payment in first month
+feat(auth): add OTP-based password reset via SMS
+chore(db): add index on payments.tenant_id and period columns
+test(arrears): add edge cases for over-payment and lease mid-month
+style(ui): update sidebar active state to brand teal border
+docs: update API endpoint list in README
+
+[TABLE 54]
+Action | Command
+Start XAMPP MySQL + Apache | Open XAMPP Control Panel → Start both
+Open phpMyAdmin | http://localhost/phpmyadmin
+Start backend | cd backend && uvicorn app.main:app --reload --port 8000
+Start frontend | cd frontend && npm run dev
+View API docs | http://localhost:8000/docs
+Run all tests | cd backend && pytest tests/ -v
+Run with coverage | pytest --cov=app tests/ --cov-report=term-missing
+New migration | alembic revision --autogenerate -m 'description'
+Apply migrations | alembic upgrade head
+Build frontend | cd frontend && npm run build
+Run frontend tests | cd frontend && npm run test
+Flutter run (Phase 2) | cd mobile && flutter run
+Check .env is set | cd backend && python -c 'from app.config import settings; print(settings)'
+
+[TABLE 55]
+⌂  RENTALMGR Property. Simplified.  |  Built for Uganda.
