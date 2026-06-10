@@ -143,7 +143,8 @@ export default function SuiTrustLayerSection({ id = "trust-layer", embedded = fa
   return (
     <section
       id={id}
-      className="scroll-mt-24 border-t border-gray-100 bg-white py-16 lg:py-24"
+      className="scroll-mt-24 py-16 lg:py-24"
+      style={{ background: "linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 40%, #f5f3ff 100%)" }}
     >
       <div className="mx-auto max-w-6xl px-4 lg:px-6">{content}</div>
     </section>
