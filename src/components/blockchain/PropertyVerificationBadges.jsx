@@ -66,11 +66,11 @@ function suiBadge(property) {
     };
   }
   return {
-    label: "Sui not registered yet",
+    label: "Sui required for marketplace",
     detail: null,
     title:
-      "Listing identity registers automatically when the property is saved. Refresh after backend deploy, or open the property once to backfill.",
-    className: "border-white/15 bg-white/5 text-white/45",
+      "This property is hidden from tenant search until Sui listing identity is registered. Open the property once to backfill, or re-save after deploy.",
+    className: "border-amber-500/35 bg-amber-500/10 text-amber-200",
   };
 }
 
@@ -144,4 +144,7 @@ export default function PropertyVerificationBadges({
 }
 
 export const PROPERTY_LISTING_IDENTITY_TAGLINE =
-  "Every property listing receives a verifiable on-chain identity on Sui, alongside KCCA government compliance review.";
+  "Every property listing receives a verifiable on-chain identity on Sui, helping reduce fraud and duplicate listings.";
+
+export const PROPERTY_VERIFICATION_NOTE =
+  "Sui proves who listed the property and when — not that the building physically exists. KCCA officer review covers existence and compliance. Marketplace search requires Sui identity.";

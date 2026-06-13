@@ -15,7 +15,9 @@ import UnitCard from "../../components/domain/UnitCard";
 const STATUS_FILTERS = ["all", "occupied", "vacant", "maintenance"];
 import { needsPhotoReupload, propertyPhotoUrl, uploadMediaUrl } from "../../lib/mediaUrl";
 import PropertyPhotoUpload from "../../components/domain/PropertyPhotoUpload";
-import PropertyVerificationBadges from "../../components/blockchain/PropertyVerificationBadges";
+import PropertyVerificationBadges, {
+  PROPERTY_VERIFICATION_NOTE,
+} from "../../components/blockchain/PropertyVerificationBadges";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -149,11 +151,12 @@ export default function PropertyDetailPage() {
 
       <div className="card border border-white/10 bg-white/[0.03] p-4">
         <PropertyVerificationBadges property={property} />
-        <p className="mt-3 text-xs leading-relaxed text-brand-mid">
-          <strong className="text-brand-dark">Sui listing identity</strong> is created automatically when you save the
-          property. <strong className="text-brand-dark">KCCA verification</strong> is a separate government review by a
-          compliance officer — both appear on the listing.
-        </p>
+        {!property?.sui_listing_verified ? (
+          <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+            Hidden from marketplace — Sui listing identity is required before tenants can find this property, even if KCCA approves it.
+          </p>
+        ) : null}
+        <p className="mt-3 text-xs leading-relaxed text-brand-mid">{PROPERTY_VERIFICATION_NOTE}</p>
       </div>
 
       {/* Description */}
