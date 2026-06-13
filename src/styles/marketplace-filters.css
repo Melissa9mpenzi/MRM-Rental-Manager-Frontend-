@@ -25,12 +25,12 @@
 }
 
 .marketplace-filters-panel__body::-webkit-scrollbar-thumb {
-  background: rgba(0, 200, 150, 0.35);
+  background: rgba(13, 148, 136, 0.3);
   border-radius: 999px;
 }
 
 .marketplace-filters-panel__body::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
+  background: #f3f4f6;
 }
 
 .marketplace-filters-types {
@@ -45,6 +45,6 @@
 }
 
 .marketplace-filters-types::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: #d1d5db;
   border-radius: 999px;
 }

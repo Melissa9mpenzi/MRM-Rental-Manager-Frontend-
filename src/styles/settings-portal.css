@@ -1,10 +1,10 @@
-/* RentDirect UG — Industrial settings / configuration panels */
+/* RentDirect UG — Settings / configuration panels (light theme) */
 .settings-portal {
-  --st-bg: rgba(12, 16, 22, 0.92);
-  --st-border: rgba(148, 163, 184, 0.14);
-  --st-accent: #00c896;
-  --st-muted: rgba(226, 232, 240, 0.48);
-  --st-label: rgba(148, 163, 184, 0.85);
+  --st-bg: #ffffff;
+  --st-border: #e5e7eb;
+  --st-accent: #0D9488;
+  --st-muted: #6b7280;
+  --st-label: #374151;
 }
 
 .settings-portal__shell {
@@ -28,7 +28,6 @@
   background: var(--st-bg);
   border: 1px solid var(--st-border);
   border-radius: 14px;
-  backdrop-filter: blur(14px);
 }
 
 @media (min-width: 1024px) {
@@ -58,17 +57,18 @@
   padding: 0.65rem 0.75rem;
   text-align: left;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  color: #374151;
 }
 
 .settings-portal__tab:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: #f8fafc;
+  background: #f9fafb;
+  color: #111827;
 }
 
 .settings-portal__tab--active {
-  background: rgba(0, 200, 150, 0.1);
-  border-color: rgba(0, 200, 150, 0.22);
-  color: #6ee7b7;
+  background: #f0fdfa;
+  border-color: rgba(13, 148, 136, 0.22);
+  color: #0D9488;
 }
 
 .settings-portal__tab-icon {
@@ -93,7 +93,7 @@
 }
 
 .settings-portal__tab--active .settings-portal__tab-desc {
-  color: rgba(110, 231, 183, 0.65);
+  color: rgba(13, 148, 136, 0.7);
 }
 
 .settings-portal__main {
@@ -105,14 +105,13 @@
   background: var(--st-bg);
   border: 1px solid var(--st-border);
   border-radius: 14px;
-  backdrop-filter: blur(14px);
   overflow: hidden;
 }
 
 .settings-portal__panel-head {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--st-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+  background: #f9fafb;
 }
 
 .settings-portal__panel-kicker {
@@ -128,7 +127,7 @@
   font-size: 1.125rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #f8fafc;
+  color: #111827;
 }
 
 .settings-portal__panel-desc {
@@ -145,17 +144,17 @@
 
 .settings-portal__section {
   border: 1px solid var(--st-border);
-  border-left: 3px solid rgba(0, 200, 150, 0.45);
+  border-left: 3px solid rgba(13, 148, 136, 0.45);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.015);
+  background: #ffffff;
 }
 
-.settings-portal__section + .settings-portal__section {
+.settings-portal__section+.settings-portal__section {
   margin-top: 1rem;
 }
 
 .settings-portal__section--violet {
-  border-left-color: rgba(167, 139, 250, 0.55);
+  border-left-color: rgba(139, 92, 246, 0.55);
 }
 
 .settings-portal__section--amber {
@@ -163,11 +162,11 @@
 }
 
 .settings-portal__section--cyan {
-  border-left-color: rgba(34, 211, 238, 0.55);
+  border-left-color: rgba(6, 182, 212, 0.55);
 }
 
 .settings-portal__section--red {
-  border-left-color: rgba(248, 113, 113, 0.55);
+  border-left-color: rgba(239, 68, 68, 0.55);
 }
 
 .settings-portal__section-head {
@@ -177,13 +176,13 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .settings-portal__section-title {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #111827;
 }
 
 .settings-portal__section-sub {
@@ -204,7 +203,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.7rem 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .settings-portal__row:last-child {
@@ -223,7 +222,7 @@
 .settings-portal__row-value {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: #111827;
   text-align: right;
 }
 
@@ -253,43 +252,43 @@
 }
 
 .settings-portal__badge--ok {
-  border-color: rgba(52, 211, 153, 0.35);
-  background: rgba(16, 185, 129, 0.12);
-  color: #6ee7b7;
+  border-color: rgba(13, 148, 136, 0.3);
+  background: rgba(13, 148, 136, 0.08);
+  color: #0D9488;
 }
 
 .settings-portal__badge--ok .settings-portal__badge-dot {
-  background: #34d399;
+  background: #0D9488;
 }
 
 .settings-portal__badge--warn {
-  border-color: rgba(251, 191, 36, 0.35);
-  background: rgba(245, 158, 11, 0.12);
-  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+  color: #d97706;
 }
 
 .settings-portal__badge--warn .settings-portal__badge-dot {
-  background: #fbbf24;
+  background: #f59e0b;
 }
 
 .settings-portal__badge--err {
-  border-color: rgba(248, 113, 113, 0.35);
-  background: rgba(239, 68, 68, 0.12);
-  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
 }
 
 .settings-portal__badge--err .settings-portal__badge-dot {
-  background: #f87171;
+  background: #ef4444;
 }
 
 .settings-portal__badge--neutral {
-  border-color: rgba(148, 163, 184, 0.25);
-  background: rgba(148, 163, 184, 0.08);
-  color: #cbd5e1;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
 }
 
 .settings-portal__badge--neutral .settings-portal__badge-dot {
-  background: #94a3b8;
+  background: #9ca3af;
 }
 
 .settings-portal__metrics {
@@ -308,7 +307,7 @@
   border: 1px solid var(--st-border);
   border-radius: 10px;
   padding: 0.85rem 0.9rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: #f9fafb;
 }
 
 .settings-portal__metric-label {
@@ -323,7 +322,7 @@
   margin-top: 0.35rem;
   font-size: 0.9375rem;
   font-weight: 800;
-  color: #f8fafc;
+  color: #111827;
 }
 
 .settings-portal__policy-grid {
@@ -341,7 +340,7 @@
   border: 1px solid var(--st-border);
   border-radius: 12px;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.015);
+  background: #f9fafb;
 }
 
 .settings-portal__policy-icon {
@@ -351,15 +350,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
 }
 
 .settings-portal__policy-title {
   margin-top: 0.65rem;
   font-size: 0.875rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #111827;
 }
 
 .settings-portal__policy-list {
@@ -375,7 +374,7 @@
   gap: 0.45rem;
   font-size: 0.8125rem;
   line-height: 1.45;
-  color: rgba(226, 232, 240, 0.72);
+  color: #374151;
 }
 
 .settings-portal__actions {
@@ -387,11 +386,11 @@
 
 .settings-portal__btn-primary {
   border-radius: 10px;
-  background: #00c896;
+  background: #0D9488;
   padding: 0.6rem 1rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #041208;
+  color: #ffffff;
   transition: opacity 0.15s ease;
 }
 
@@ -401,31 +400,31 @@
 
 .settings-portal__btn-secondary {
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
   padding: 0.6rem 1rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #374151;
   transition: background 0.15s ease;
 }
 
 .settings-portal__btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
+  background: #f9fafb;
 }
 
 .settings-portal__btn-danger {
   border-radius: 10px;
-  border: 1px solid rgba(248, 113, 113, 0.35);
-  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: #fef2f2;
   padding: 0.6rem 1rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #fca5a5;
+  color: #dc2626;
 }
 
 .settings-portal__empty {
-  border: 1px dashed rgba(148, 163, 184, 0.22);
+  border: 1px dashed #e5e7eb;
   border-radius: 10px;
   padding: 2rem 1rem;
   text-align: center;
@@ -445,7 +444,7 @@
   border-collapse: collapse;
   font-size: 0.8125rem;
   text-align: left;
-  color: rgba(226, 232, 240, 0.88);
+  color: #374151;
 }
 
 .settings-portal__table thead {
@@ -463,7 +462,7 @@
 }
 
 .settings-portal__table tbody tr {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .settings-portal__table tbody tr:last-child {
@@ -488,14 +487,14 @@
   border: 1px solid var(--st-border);
   border-radius: 10px;
   padding: 0.85rem 1rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: #ffffff;
   text-decoration: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .settings-portal__link-card:hover:not(.settings-portal__link-card--soon) {
-  border-color: rgba(0, 200, 150, 0.35);
-  background: rgba(0, 200, 150, 0.06);
+  border-color: rgba(13, 148, 136, 0.35);
+  background: #f0fdfa;
 }
 
 .settings-portal__link-card--soon {
@@ -506,7 +505,7 @@
 .settings-portal__link-label {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #111827;
 }
 
 .settings-portal__link-desc {
@@ -521,7 +520,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #fbbf24;
+  color: #d97706;
 }
 
 .settings-portal__avatar {
@@ -531,8 +530,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  border: 1px dashed rgba(148, 163, 184, 0.28);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed #d1d5db;
+  background: #f9fafb;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -541,13 +540,13 @@
 }
 
 .settings-portal--gov .settings-portal__section {
-  border-left-color: rgba(34, 211, 238, 0.45);
+  border-left-color: rgba(6, 182, 212, 0.45);
 }
 
 .settings-portal--command .settings-portal__section {
-  border-left-color: rgba(248, 113, 113, 0.45);
+  border-left-color: rgba(239, 68, 68, 0.45);
 }
 
 .settings-portal--sui .settings-portal__section {
-  border-left-color: rgba(167, 139, 250, 0.55);
+  border-left-color: rgba(139, 92, 246, 0.55);
 }

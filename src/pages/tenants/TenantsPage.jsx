@@ -89,8 +89,8 @@ export default function TenantsPage() {
               onClick={() => setStatus(o.value)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition ${
                 status === o.value
-                  ? "border-brand-teal/40 bg-brand-teal/15 text-[#00C896]"
-                  : "border-white/10 bg-white/[0.04] text-white/50 hover:border-white/20 hover:text-white/70"
+                  ? "border-teal-300 bg-teal-50 text-teal-700"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
             >
               {o.label}
@@ -125,7 +125,7 @@ export default function TenantsPage() {
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-xs text-white/50">
+              <tr className="border-b border-gray-100 text-left text-xs text-gray-400">
                 <th className="pb-3 pr-4 font-semibold">Tenant</th>
                 <th className="pb-3 pr-4 font-semibold">Property / unit</th>
                 <th className="pb-3 pr-4 text-right font-semibold">Rent</th>
@@ -133,28 +133,28 @@ export default function TenantsPage() {
                 <th className="pb-3 font-semibold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.08]">
+            <tbody className="divide-y divide-gray-50">
               {rows.map((t) => (
-                <tr key={t.id} className="transition-colors hover:bg-white/[0.04]">
+                <tr key={t.id} className="transition-colors hover:bg-gray-50">
                   <td className="py-3 pr-4">
                     <Link
                       to={`/landlord/tenants/${t.id}`}
-                      className="font-semibold text-white hover:text-[#00C896]"
+                      className="font-semibold text-gray-800 hover:text-teal-600"
                     >
                       {t.full_name}
                     </Link>
-                    <div className="text-xs text-brand-mid">{t.phone || "—"}</div>
+                    <div className="text-xs text-gray-400">{t.phone || "—"}</div>
                   </td>
-                  <td className="py-3 pr-4 text-brand-mid">
+                  <td className="py-3 pr-4 text-gray-500">
                     {t.property_name || "—"}
                     {t.unit_number ? ` · ${t.unit_number}` : ""}
                   </td>
-                  <td className="py-3 pr-4 text-right text-brand-dark">{fmtMoney(t.monthly_rent)}</td>
-                  <td className="py-3 pr-4 text-right font-medium text-brand-dark">
+                  <td className="py-3 pr-4 text-right text-gray-700">{fmtMoney(t.monthly_rent)}</td>
+                  <td className="py-3 pr-4 text-right font-medium text-gray-700">
                     {parseFloat(t.balance_due || 0) > 0 ? (
-                      <span className="text-red-500">{fmtMoney(t.balance_due)}</span>
+                      <span className="text-red-600">{fmtMoney(t.balance_due)}</span>
                     ) : (
-                      <span className="text-emerald-600">Paid up</span>
+                      <span className="text-teal-600">Paid up</span>
                     )}
                   </td>
                   <td className="py-3">
@@ -162,8 +162,8 @@ export default function TenantsPage() {
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
                           t.status === "active"
-                            ? "bg-emerald-500/15 text-emerald-700"
-                            : "bg-slate-400/15 text-brand-mid"
+                            ? "bg-teal-50 text-teal-700"
+                            : "bg-gray-100 text-gray-500"
                         }`}
                       >
                         {t.status || "—"}

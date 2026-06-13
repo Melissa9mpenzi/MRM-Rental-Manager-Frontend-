@@ -3,7 +3,6 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      /* Mockup uses fractional borders (e.g. 12%); default Tailwind opacity skips these keys. */
       opacity: {
         6: "0.06",
         7: "0.07",
@@ -12,24 +11,32 @@ export default {
         28: "0.28",
       },
       colors: {
-        rd: {
-          base: "#060a0e",
-          surface: "#0f141c",
-          elevated: "#121a22",
-          stroke: "rgba(255,255,255,0.1)",
-          muted: "#8b9db0",
-          ink: "#f4f4f5",
-          green: "#00C076",
-          greenDim: "rgba(0,192,118,0.14)",
-          glow: "rgba(0,192,118,0.35)",
-        },
-        /* Semantic tokens used across existing components */
         brand: {
-          dark: "#f1f5f9",
-          mid: "#8b9db0",
-          teal: "#00C076",
-          tealLt: "rgba(0,192,118,0.16)",
-          bg: "#080d12",
+          dark: "#111827",
+          mid: "#6B7280",
+          teal: "#0D9488",
+          tealMid: "#14B8A6",
+          tealLt: "rgba(20,184,166,0.10)",
+          tealBorder: "rgba(20,184,166,0.25)",
+          bg: "#F8FAFB",
+          surface: "#FFFFFF",
+          border: "#E5E7EB",
+        },
+        rd: {
+          base: "#F8FAFB",
+          surface: "#FFFFFF",
+          elevated: "#FFFFFF",
+          stroke: "rgba(0,0,0,0.07)",
+          muted: "#6B7280",
+          ink: "#111827",
+          green: "#0D9488",
+          greenDim: "rgba(13,148,136,0.10)",
+          glow: "rgba(13,148,136,0.20)",
+          sidebar: "#FFFFFF",
+          sidebarHover: "#F0FDFA",
+          sidebarActive: "#CCFBF1",
+          sidebarText: "#374151",
+          sidebarBorder: "#E5E7EB",
         },
       },
       fontFamily: {
@@ -43,15 +50,16 @@ export default {
         "3xl": "28px",
       },
       boxShadow: {
-        card: "0 4px 24px rgba(0,0,0,0.35)",
-        modal: "0 24px 48px rgba(0,0,0,0.55)",
-        glow: "0 0 40px rgba(0,192,118,0.12)",
+        card: "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
+        modal: "0 20px 60px rgba(0,0,0,0.12)",
+        glow: "0 0 32px rgba(13,148,136,0.15)",
+        "card-hover": "0 4px 20px rgba(0,0,0,0.08)",
+        sidebar: "2px 0 8px rgba(0,0,0,0.05)",
       },
       backgroundImage: {
-        "rd-gradient":
-          "linear-gradient(155deg, #0a1018 0%, #060a0e 42%, #0d1520 100%)",
-        "rd-mesh":
-          "radial-gradient(ellipse 80% 50% at 15% -5%, rgba(0,192,118,0.14), transparent 52%), radial-gradient(ellipse 55% 45% at 100% 0%, rgba(59,130,246,0.07), transparent 48%)",
+        "rd-gradient": "linear-gradient(160deg, #F8FAFB 0%, #F0FDFA 40%, #F8FAFB 100%)",
+        "rd-mesh": "none",
+        "hero-gradient": "linear-gradient(155deg, #0D9488 0%, #0F766E 50%, #134E4A 100%)",
       },
     },
   },

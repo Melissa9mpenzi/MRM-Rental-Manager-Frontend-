@@ -1,22 +1,19 @@
-/* RentDirect UG — Super Admin / Global Administrator portal (mockup-aligned) */
+/* RentDirect UG — Super Admin / Global Administrator portal (light theme) */
 .sys-portal {
-  --sys-bg: #0b0e14;
-  --sys-panel: rgba(17, 24, 39, 0.92);
-  --sys-border: rgba(148, 163, 184, 0.12);
-  --sys-emerald: #00c896;
-  --sys-cyan: #22d3ee;
-  --sys-purple: #a78bfa;
-  --sys-orange: #f59e0b;
+  --sys-bg: #f8fafb;
+  --sys-panel: #ffffff;
+  --sys-border: #e5e7eb;
+  --sys-emerald: #0D9488;
+  --sys-cyan: #0891b2;
+  --sys-purple: #7c3aed;
+  --sys-orange: #d97706;
   --sys-sidebar-w: 272px;
   display: flex;
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
   background: var(--sys-bg);
-  background-image:
-    radial-gradient(ellipse 70% 50% at 15% -10%, rgba(0, 200, 150, 0.08), transparent),
-    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(124, 58, 237, 0.06), transparent);
-  color: #e2e8f0;
+  color: #111827;
 }
 
 .sys-sidebar-backdrop {
@@ -78,8 +75,8 @@
   width: var(--sys-sidebar-w);
   flex-direction: column;
   border-right: 1px solid var(--sys-border);
-  background: linear-gradient(180deg, #0a0d12 0%, #0b0e14 48%, #0d1118 100%);
-  box-shadow: 4px 0 28px rgba(0, 0, 0, 0.4);
+  background: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
 }
 
 .sys-sidebar__header {
@@ -174,7 +171,7 @@
   background: rgba(0, 200, 150, 0.22);
 }
 
-.sys-sidebar__group + .sys-sidebar__group {
+.sys-sidebar__group+.sys-sidebar__group {
   margin-top: 0.25rem;
 }
 
@@ -309,13 +306,28 @@
 }
 
 .sys-stat-card__icon--purple,
-.gov-stat-card__icon--purple { background: rgba(167, 139, 250, 0.18); color: #c4b5fd; }
+.gov-stat-card__icon--purple {
+  background: rgba(167, 139, 250, 0.18);
+  color: #c4b5fd;
+}
+
 .sys-stat-card__icon--blue,
-.gov-stat-card__icon--blue { background: rgba(59, 130, 246, 0.18); color: #93c5fd; }
+.gov-stat-card__icon--blue {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
 .sys-stat-card__icon--emerald,
-.gov-stat-card__icon--emerald { background: rgba(0, 200, 150, 0.18); color: #00c896; }
+.gov-stat-card__icon--emerald {
+  background: rgba(0, 200, 150, 0.18);
+  color: #00c896;
+}
+
 .sys-stat-card__icon--orange,
-.gov-stat-card__icon--orange { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+.gov-stat-card__icon--orange {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
 
 .sys-panel {
   border-radius: 14px;
@@ -524,11 +536,13 @@
 }
 
 @keyframes sys-map-pulse {
+
   0%,
   100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.55;
     transform: scale(0.85);
@@ -536,20 +550,24 @@
 }
 
 @keyframes sys-map-node-pulse {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.65;
   }
 }
 
 @keyframes sys-map-ring-pulse {
+
   0%,
   100% {
     opacity: 0.35;
   }
+
   50% {
     opacity: 0.75;
   }
@@ -887,10 +905,25 @@
   border-radius: 10px;
 }
 
-.sys-kpi-card__icon--purple { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; }
-.sys-kpi-card__icon--blue { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-.sys-kpi-card__icon--gold { background: rgba(251, 191, 36, 0.2); color: #fcd34d; }
-.sys-kpi-card__icon--emerald { background: rgba(0, 200, 150, 0.2); color: #6ee7b7; }
+.sys-kpi-card__icon--purple {
+  background: rgba(167, 139, 250, 0.2);
+  color: #c4b5fd;
+}
+
+.sys-kpi-card__icon--blue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.sys-kpi-card__icon--gold {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
+}
+
+.sys-kpi-card__icon--emerald {
+  background: rgba(0, 200, 150, 0.2);
+  color: #6ee7b7;
+}
 
 .sys-kpi-card__trend {
   font-size: 0.65rem;
@@ -976,9 +1009,17 @@
   box-shadow: 0 0 20px rgba(0, 200, 150, 0.08);
 }
 
-.sys-gov-integ--nira { border-left: 3px solid #00c896; }
-.sys-gov-integ--kcca { border-left: 3px solid #3b82f6; }
-.sys-gov-integ--ura { border-left: 3px solid #fbbf24; }
+.sys-gov-integ--nira {
+  border-left: 3px solid #00c896;
+}
+
+.sys-gov-integ--kcca {
+  border-left: 3px solid #3b82f6;
+}
+
+.sys-gov-integ--ura {
+  border-left: 3px solid #fbbf24;
+}
 
 /* Bottom strip */
 .sys-bottom-strip {
@@ -1016,13 +1057,33 @@
   border-color: rgba(0, 200, 150, 0.25);
 }
 
-.sys-bottom-card__icon { opacity: 0.85; }
-.sys-bottom-card--purple .sys-bottom-card__icon { color: #c4b5fd; }
-.sys-bottom-card--cyan .sys-bottom-card__icon { color: #67e8f9; }
-.sys-bottom-card--blue .sys-bottom-card__icon { color: #93c5fd; }
-.sys-bottom-card--gold .sys-bottom-card__icon { color: #fcd34d; }
-.sys-bottom-card--red .sys-bottom-card__icon { color: #f87171; }
-.sys-bottom-card--violet .sys-bottom-card__icon { color: #a78bfa; }
+.sys-bottom-card__icon {
+  opacity: 0.85;
+}
+
+.sys-bottom-card--purple .sys-bottom-card__icon {
+  color: #c4b5fd;
+}
+
+.sys-bottom-card--cyan .sys-bottom-card__icon {
+  color: #67e8f9;
+}
+
+.sys-bottom-card--blue .sys-bottom-card__icon {
+  color: #93c5fd;
+}
+
+.sys-bottom-card--gold .sys-bottom-card__icon {
+  color: #fcd34d;
+}
+
+.sys-bottom-card--red .sys-bottom-card__icon {
+  color: #f87171;
+}
+
+.sys-bottom-card--violet .sys-bottom-card__icon {
+  color: #a78bfa;
+}
 
 .sys-bottom-card__label {
   font-size: 0.62rem;
@@ -1120,10 +1181,21 @@
   text-decoration: none;
 }
 
-.sys-alert-list__item--high { color: #fca5a5; }
-.sys-alert-list__item--medium { color: #fcd34d; }
-.sys-alert-list__item--low { color: #94a3b8; }
-.sys-alert-list__item--ok { color: #6ee7b7; }
+.sys-alert-list__item--high {
+  color: #fca5a5;
+}
+
+.sys-alert-list__item--medium {
+  color: #fcd34d;
+}
+
+.sys-alert-list__item--low {
+  color: #94a3b8;
+}
+
+.sys-alert-list__item--ok {
+  color: #6ee7b7;
+}
 
 .sys-activity-timeline {
   margin: 0.5rem 0 0;
@@ -1190,12 +1262,30 @@
   transform: translateY(-1px);
 }
 
-.sys-qa--purple { background: rgba(124, 58, 237, 0.15); border-color: rgba(167, 139, 250, 0.25); }
-.sys-qa--blue { background: rgba(59, 130, 246, 0.12); }
-.sys-qa--cyan { background: rgba(34, 211, 238, 0.1); }
-.sys-qa--green { background: rgba(0, 200, 150, 0.12); }
-.sys-qa--gold { background: rgba(251, 191, 36, 0.12); }
-.sys-qa--violet { background: rgba(139, 92, 246, 0.12); }
+.sys-qa--purple {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(167, 139, 250, 0.25);
+}
+
+.sys-qa--blue {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.sys-qa--cyan {
+  background: rgba(34, 211, 238, 0.1);
+}
+
+.sys-qa--green {
+  background: rgba(0, 200, 150, 0.12);
+}
+
+.sys-qa--gold {
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.sys-qa--violet {
+  background: rgba(139, 92, 246, 0.12);
+}
 
 .sys-rail-card--health {
   text-align: center;

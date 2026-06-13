@@ -49,7 +49,7 @@ function PropertyCard({ property }) {
   });
 
   const occupancyColor =
-    property.occupancy_rate >= 80 ? "text-brand-teal" :
+    property.occupancy_rate >= 80 ? "text-teal-600" :
     property.occupancy_rate >= 50 ? "text-amber-600" : "text-red-500";
 
   return (
@@ -117,12 +117,12 @@ function PropertyCard({ property }) {
       {/* Occupancy bar */}
       <div className="mb-4">
         <div className="flex justify-between text-xs mb-1">
-          <span className="text-brand-mid font-medium">Occupancy</span>
+          <span className="text-gray-500 font-medium">Occupancy</span>
           <span className={`font-bold ${occupancyColor}`}>{property.occupancy_rate}%</span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
+        <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div
-            className="h-full bg-brand-teal rounded-full transition-all duration-500"
+            className="h-full bg-teal-500 rounded-full transition-all duration-500"
             style={{ width: `${property.occupancy_rate}%` }}
           />
         </div>

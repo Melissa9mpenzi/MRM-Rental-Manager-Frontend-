@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, Lock, User, Phone, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { authApi } from "../../api/authApi";
-import { apiErrorMessage } from "../../lib/apiError";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/index.jsx";
 import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
@@ -78,10 +77,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="card-glass rounded-2xl border border-white/[0.1] p-4 shadow-card sm:p-5">
-      <div className="mb-3">
-        <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">Create your account</h1>
-        <p className="mt-0.5 text-xs text-white/55">RentDirect UG · quick signup</p>
+    <div className="card rounded-2xl p-6 shadow-card sm:p-8">
+      <div className="mb-5">
+        <h1 className="text-lg font-bold tracking-tight text-gray-900 sm:text-xl">Create your account</h1>
+        <p className="mt-0.5 text-xs text-gray-500">RentDirect UG · quick signup</p>
       </div>
 
       <SocialAuthButtons
@@ -89,13 +88,13 @@ export default function RegisterPage() {
         hint="Google or Apple — quick sign-in with your existing account."
       />
 
-      <div className="my-3 flex items-center gap-2">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[10px] font-medium text-white/45">or register with email</span>
-        <div className="h-px flex-1 bg-white/10" />
+      <div className="my-4 flex items-center gap-2">
+        <div className="h-px flex-1 bg-gray-100" />
+        <span className="text-[11px] font-medium text-gray-400">or register with email</span>
+        <div className="h-px flex-1 bg-gray-100" />
       </div>
 
-      <form onSubmit={handleRegister} className="grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-x-3 md:gap-y-2.5">
+      <form onSubmit={handleRegister} className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-x-3 md:gap-y-3">
         <Input
           required
           icon={User}
@@ -155,7 +154,11 @@ export default function RegisterPage() {
         />
 
         <div className="md:col-span-2">
-          <button type="submit" disabled={loading} className="btn-primary mt-1 w-full rounded-xl py-2.5 text-sm font-bold shadow-md sm:py-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary mt-1 w-full py-3 text-sm font-bold"
+          >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -170,9 +173,9 @@ export default function RegisterPage() {
         </div>
       </form>
 
-      <p className="mt-3 text-center text-[10px] text-white/50 sm:text-xs">
+      <p className="mt-4 text-center text-[11px] text-gray-400">
         Have an account?{" "}
-        <Link to="/login" className="font-semibold text-brand-teal hover:underline">
+        <Link to="/login" className="font-semibold text-teal-600 hover:underline">
           Sign in
         </Link>
       </p>

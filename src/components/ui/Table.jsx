@@ -3,9 +3,9 @@ export function Table({ columns = [], rows = [] }) {
     <div className="overflow-x-auto card p-0">
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="border-b border-white/10 bg-white/[0.06] text-[11px] font-semibold uppercase tracking-wide text-white/55">
+          <tr className="border-b border-gray-100 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
             {columns.map((c) => (
-              <th key={c.key} className="px-3 py-2 text-left">
+              <th key={c.key} className="px-3 py-2.5 text-left">
                 {c.header}
               </th>
             ))}
@@ -13,10 +13,10 @@ export function Table({ columns = [], rows = [] }) {
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={r.id ?? i} className={i % 2 === 0 ? "bg-white/[0.03]" : "bg-transparent"}>
+            <tr key={r.id ?? i} className={`transition-colors hover:bg-gray-50 ${i % 2 === 0 ? "" : "bg-gray-50/50"}`}>
               {columns.map((c) => (
-                <td key={c.key} className="px-3 py-2 text-white/75">
-                  {typeof c.cell === 'function' ? c.cell(r) : r[c.key]}
+                <td key={c.key} className="px-3 py-2.5 text-gray-700">
+                  {typeof c.cell === "function" ? c.cell(r) : r[c.key]}
                 </td>
               ))}
             </tr>
@@ -24,6 +24,5 @@ export function Table({ columns = [], rows = [] }) {
         </tbody>
       </table>
     </div>
-  )
+  );
 }
-
